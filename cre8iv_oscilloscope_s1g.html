@@ -1,0 +1,1009 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>CRE8TIV OSCILLOscOPE — KAIJU FRUIT LABS</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=VT323&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    font-family: 'Share Tech Mono', monospace;
+    overflow: hidden;
+    user-select: none;
+  }
+
+  .chassis {
+    background: linear-gradient(145deg, #2a2a2a, #111, #1a1a1a);
+    border-radius: 18px;
+    padding: 20px 20px 14px;
+    box-shadow:
+      0 0 0 2px #444,
+      0 0 0 4px #222,
+      0 8px 40px rgba(0,0,0,0.9),
+      inset 0 1px 0 #555;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    max-width: 680px;
+    width: 95vw;
+    transition: all 0.3s ease;
+  }
+
+  body.fullscreen {
+    background: #000;
+    justify-content: flex-start;
+  }
+
+  body.fullscreen .chassis {
+    background: transparent;
+    border-radius: 0;
+    padding: 0;
+    box-shadow: none;
+    max-width: 100vw;
+    width: 100vw;
+    gap: 0;
+  }
+
+  body.fullscreen .brand-bar,
+  body.fullscreen .controls,
+  body.fullscreen .mode-section,
+  body.fullscreen .footer-text { display: none; }
+
+  body.fullscreen .bezel {
+    border-radius: 0; padding: 0; box-shadow: none;
+  }
+
+  body.fullscreen .screen {
+    border-radius: 0;
+    aspect-ratio: unset;
+    height: 100vh;
+    width: 100vw;
+  }
+
+  body.fullscreen .screen::before,
+  body.fullscreen .screen::after { display: none; }
+  body.fullscreen canvas { border-radius: 0; }
+
+  .brand-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    padding: 0 4px;
+  }
+
+  .brand-name {
+    font-family: 'VT323', monospace;
+    color: #39ff14;
+    font-size: 20px;
+    letter-spacing: 3px;
+    text-shadow: 0 0 8px #39ff14, 0 0 20px #39ff14aa;
+  }
+
+  .brand-right {
+    display: flex; align-items: center; gap: 10px;
+  }
+
+  .model-tag { font-size: 9px; color: #555; letter-spacing: 2px; }
+
+  .fs-btn {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 9px; letter-spacing: 1px;
+    padding: 3px 8px; border-radius: 4px;
+    border: 1px solid #39ff1455;
+    background: #001400; color: #39ff1499;
+    cursor: pointer; transition: all 0.2s;
+  }
+
+  .fs-btn:hover { border-color: #39ff14; color: #39ff14; }
+
+  .bezel {
+    background: #0a0a0a;
+    border-radius: 10px;
+    padding: 10px;
+    box-shadow: inset 0 0 20px rgba(0,0,0,0.8),
+      0 0 0 2px #333, 0 0 0 4px #1a1a1a;
+    width: 100%;
+  }
+
+  .screen {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 4/3;
+    background: #000;
+    border-radius: 6px;
+    overflow: hidden;
+  }
+
+  .screen::before {
+    content: '';
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(0,255,0,0.02) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,255,0,0.02) 1px, transparent 1px);
+    background-size: 20px 20px;
+    z-index: 2; pointer-events: none;
+  }
+
+  .screen::after {
+    content: '';
+    position: absolute; inset: 0;
+    background: repeating-linear-gradient(
+      0deg, transparent, transparent 2px,
+      rgba(0,0,0,0.1) 2px, rgba(0,0,0,0.1) 4px
+    );
+    z-index: 3; pointer-events: none; border-radius: 6px;
+  }
+
+  canvas { display: block; width: 100%; height: 100%; border-radius: 6px; }
+
+  .vignette {
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,0.75) 100%);
+    z-index: 4; pointer-events: none; border-radius: 6px;
+  }
+
+  .status-wrap {
+    position: absolute; top: 8px; right: 10px;
+    z-index: 6;
+    display: flex; align-items: center; gap: 5px;
+  }
+
+  .status-label {
+    font-size: 8px; color: rgba(57,255,20,0.35);
+    letter-spacing: 1px;
+  }
+
+  .status-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%; background: #333; transition: all 0.3s;
+  }
+
+  .status-dot.active {
+    background: #39ff14;
+    box-shadow: 0 0 5px #39ff14, 0 0 10px #39ff14;
+    animation: blink 1.2s ease-in-out infinite;
+  }
+
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+  /* Crosshair button — no glow, clean toggle */
+  .cross-btn {
+    position: absolute; bottom: 8px; right: 10px;
+    z-index: 6;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 9px; padding: 2px 5px; border-radius: 3px;
+    border: 1px solid #222; background: transparent;
+    color: #333; cursor: pointer; transition: color 0.2s, border-color 0.2s;
+  }
+
+  .cross-btn.on {
+    border-color: #39ff1444;
+    color: #39ff1466;
+    /* NO glow — clean when on, invisible when off */
+  }
+
+  .exit-fs-btn {
+    position: absolute; top: 10px; right: 12px;
+    z-index: 10;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 9px; letter-spacing: 1px;
+    padding: 4px 8px; border-radius: 4px;
+    border: 1px solid #39ff1455;
+    background: rgba(0,0,0,0.6); color: #39ff1488;
+    cursor: pointer; transition: all 0.2s;
+    display: none;
+  }
+
+  body.fullscreen .exit-fs-btn { display: block; }
+
+  /* ── MODE SECTION ── */
+  .mode-section {
+    display: flex; flex-direction: column;
+    align-items: center; gap: 5px;
+    width: 100%;
+  }
+
+  .mode-btns { display: flex; gap: 4px; flex-wrap: wrap; justify-content: center; }
+
+  .mode-btn {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 7px; letter-spacing: 1px;
+    padding: 4px 7px; border-radius: 4px;
+    border: 1px solid #333; background: #111;
+    color: #fff; cursor: pointer; transition: all 0.2s;
+  }
+
+  .mode-btn.active {
+    border-color: #39ff14; color: #39ff14;
+    background: #001400; box-shadow: 0 0 6px #39ff1444;
+  }
+
+  .sub-btns {
+    display: flex; gap: 4px;
+    justify-content: center; min-height: 20px;
+    transition: opacity 0.2s;
+  }
+
+  .sub-btn {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 7px; letter-spacing: 1px;
+    padding: 3px 7px; border-radius: 4px;
+    border: 1px solid #333; background: #0a0a0a;
+    color: #fff; cursor: pointer; transition: all 0.2s;
+  }
+
+  .sub-btn.active { border-color: #39ff14; color: #39ff14; background: #001a00; }
+
+  .hud-bar {
+    display: flex; gap: 16px;
+    justify-content: center; padding: 2px 0;
+  }
+
+  .hud-item {
+    font-size: 9px; color: rgba(57,255,20,0.45);
+    letter-spacing: 1px; text-shadow: 0 0 4px #39ff14;
+  }
+
+  .hud-item span { color: rgba(57,255,20,0.85); }
+
+  /* ── CONTROLS ── */
+  .controls {
+    display: flex; align-items: center;
+    justify-content: space-between;
+    width: 100%; padding: 0 2px;
+    gap: 8px; flex-wrap: wrap;
+  }
+
+  .knob-group { display: flex; align-items: center; gap: 8px; }
+  .knob-wrap { display: flex; flex-direction: column; align-items: center; gap: 3px; }
+
+  input[type=range] {
+    -webkit-appearance: none;
+    width: 60px; height: 6px;
+    background: #111; border-radius: 3px;
+    outline: none; border: 1px solid #333; cursor: pointer;
+  }
+
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 13px; height: 13px; border-radius: 50%;
+    background: radial-gradient(circle at 40% 35%, #5f5, #1a1a1a);
+    border: 1px solid #39ff14;
+    box-shadow: 0 0 4px #39ff14aa;
+    cursor: pointer;
+  }
+
+  #colorCtrl {
+    background: linear-gradient(to right,
+      hsl(120,100%,45%), hsl(180,100%,45%), hsl(240,100%,55%),
+      hsl(300,100%,55%), hsl(0,100%,50%), hsl(60,100%,45%), hsl(120,100%,45%)
+    );
+    border: 1px solid #444;
+  }
+
+  #colorCtrl::-webkit-slider-thumb {
+    background: #ddd; border: 2px solid #222;
+  }
+
+  .knob-label { font-size: 7px; color: #555; letter-spacing: 1px; text-align: center; }
+
+  .right-controls {
+    display: flex; flex-direction: column;
+    align-items: center; gap: 6px;
+  }
+
+  .start-btn {
+    font-family: 'VT323', monospace;
+    font-size: 17px; letter-spacing: 2px; padding: 6px 14px;
+    background: #001a00; color: #39ff14;
+    border: 1px solid #39ff14; border-radius: 6px; cursor: pointer;
+    box-shadow: 0 0 8px #39ff1422, inset 0 0 10px #39ff1411;
+    transition: all 0.2s; white-space: nowrap;
+  }
+
+  .start-btn:active { transform: scale(0.96); }
+
+  .bpm-row { display: flex; align-items: center; gap: 6px; }
+
+  .tap-btn {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 8px; letter-spacing: 1px; padding: 4px 9px; border-radius: 4px;
+    border: 1px solid #39ff1455; background: #001400;
+    color: #fff; cursor: pointer; transition: all 0.1s;
+  }
+
+  .tap-btn:active {
+    background: #003300; border-color: #39ff14; color: #39ff14;
+    box-shadow: 0 0 8px #39ff1466; transform: scale(0.94);
+  }
+
+  .bpm-display {
+    font-size: 9px; color: rgba(57,255,20,0.7);
+    letter-spacing: 1px; min-width: 52px; text-align: center;
+  }
+
+  .footer-text { font-size: 9px; color: #222; letter-spacing: 3px; padding-top: 2px; }
+</style>
+</head>
+<body>
+
+<div class="chassis">
+  <div class="brand-bar">
+    <div class="brand-name">CRE8TIV OSCILLOscOPE</div>
+    <div class="brand-right">
+      <div class="model-tag">KAIJU FRUIT LABS / SC-02</div>
+      <button class="fs-btn" id="fsBtn">[ EXPAND ]</button>
+    </div>
+  </div>
+
+  <div class="bezel">
+    <div class="screen">
+      <canvas id="scope"></canvas>
+      <div class="vignette"></div>
+      <div class="status-wrap">
+        <span class="status-label" id="statusLabel">STANDBY</span>
+        <div class="status-dot" id="statusDot"></div>
+      </div>
+      <button class="cross-btn on" id="crossBtn">⊕</button>
+      <button class="exit-fs-btn" id="exitFsBtn">[ EXIT ]</button>
+    </div>
+  </div>
+
+  <div class="mode-section">
+    <div class="mode-btns">
+      <button class="mode-btn active" data-mode="wave">WAVE</button>
+      <button class="mode-btn" data-mode="circle">CIRCLE</button>
+      <button class="mode-btn" data-mode="bars">BARS</button>
+      <button class="mode-btn" data-mode="lissajous">LISSAJOUS</button>
+      <button class="mode-btn" data-mode="cymatics">CYMATICS</button>
+      <button class="mode-btn" data-mode="ferrofluid">FERROFLUID</button>
+    </div>
+    <div class="sub-btns" id="subBtns" style="opacity:0; pointer-events:none;"></div>
+    <div class="hud-bar">
+      <div class="hud-item">FREQ <span id="freqRead">---</span> Hz</div>
+      <div class="hud-item">AMP <span id="ampRead">---</span></div>
+      <div class="hud-item">BPM <span id="bpmHud">---</span></div>
+    </div>
+  </div>
+
+  <div class="controls">
+    <div class="knob-group">
+      <div class="knob-wrap">
+        <input type="range" id="gainCtrl" min="1" max="5" step="0.1" value="2">
+        <div class="knob-label">GAIN</div>
+      </div>
+      <div class="knob-wrap">
+        <input type="range" id="speedCtrl" min="0.2" max="3" step="0.1" value="1">
+        <div class="knob-label">SPEED</div>
+      </div>
+      <div class="knob-wrap">
+        <input type="range" id="thickCtrl" min="1" max="5" step="0.5" value="2">
+        <div class="knob-label">THICK</div>
+      </div>
+      <div class="knob-wrap">
+        <input type="range" id="colorCtrl" min="0" max="360" step="1" value="120">
+        <div class="knob-label">COLOR</div>
+      </div>
+    </div>
+
+    <div class="right-controls">
+      <button class="start-btn" id="startBtn">[ ACTIV8 ]</button>
+      <div class="bpm-row">
+        <button class="tap-btn" id="tapBtn">TAP</button>
+        <div class="bpm-display" id="bpmDisplay">--- BPM</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer-text">SPAZECRAFT — BRONX NYC</div>
+</div>
+
+<script>
+// ── COLOR — canvas only ───────────────────────────────
+const colorCtrl = document.getElementById('colorCtrl');
+let sigR=57, sigG=255, sigB=20;
+
+function hslToRgb(h,s,l){
+  s/=100; l/=100;
+  const k=n=>(n+h/30)%12, a=s*Math.min(l,1-l);
+  const f=n=>l-a*Math.max(-1,Math.min(k(n)-3,Math.min(9-k(n),1)));
+  return [Math.round(f(0)*255),Math.round(f(8)*255),Math.round(f(4)*255)];
+}
+function updateColor(){ [sigR,sigG,sigB]=hslToRgb(parseInt(colorCtrl.value),100,58); }
+colorCtrl.addEventListener('input', updateColor);
+updateColor();
+function sigColor(a=1){ return `rgba(${sigR},${sigG},${sigB},${a})`; }
+
+// ── REFS ──────────────────────────────────────────────
+const canvas     = document.getElementById('scope');
+const ctx        = canvas.getContext('2d');
+const startBtn   = document.getElementById('startBtn');
+const statusDot  = document.getElementById('statusDot');
+const statusLabel= document.getElementById('statusLabel');
+const freqRead   = document.getElementById('freqRead');
+const ampRead    = document.getElementById('ampRead');
+const bpmHud     = document.getElementById('bpmHud');
+const bpmDisplay = document.getElementById('bpmDisplay');
+const gainCtrl   = document.getElementById('gainCtrl');
+const speedCtrl  = document.getElementById('speedCtrl');
+const thickCtrl  = document.getElementById('thickCtrl');
+const tapBtn     = document.getElementById('tapBtn');
+const modeBtns   = document.querySelectorAll('.mode-btn');
+const subBtnsEl  = document.getElementById('subBtns');
+const crossBtn   = document.getElementById('crossBtn');
+const fsBtn      = document.getElementById('fsBtn');
+const exitFsBtn  = document.getElementById('exitFsBtn');
+
+let audioCtx, analyser, source, dataArray, freqData, bufferLength;
+let running=false, mode='wave';
+let animId, frameCount=0;
+let showCrosshair=true;
+
+// Cymatics state
+let cymaticsPlate='square', cymaticsFluid='dry';
+let chladniRotation=Math.PI/4;
+const PARTICLE_COUNT=2400;
+let particles=[];
+let silenceTimer=0;
+
+// Lissajous
+let lissPhase=0;
+
+// Ferrofluid state
+const FERRO_SPIKES=64;
+let ferroSpikes=[];
+let ferroBase=[];
+
+// Tap tempo
+let tapTimes=[], bpm=null;
+
+// ── FULLSCREEN ────────────────────────────────────────
+fsBtn.addEventListener('click',()=>{ document.body.classList.add('fullscreen'); resizeCanvas(); });
+exitFsBtn.addEventListener('click',()=>{ document.body.classList.remove('fullscreen'); resizeCanvas(); });
+
+// ── CROSSHAIR — no glow ───────────────────────────────
+crossBtn.addEventListener('click',()=>{
+  showCrosshair=!showCrosshair;
+  crossBtn.classList.toggle('on',showCrosshair);
+});
+
+// ── RESIZE ────────────────────────────────────────────
+function resizeCanvas(){
+  const rect=canvas.parentElement.getBoundingClientRect();
+  canvas.width=rect.width; canvas.height=rect.height;
+  initParticles(canvas.width,canvas.height);
+  initFerro(canvas.width,canvas.height);
+}
+resizeCanvas();
+window.addEventListener('resize',resizeCanvas);
+
+// ── CYMATICS PARTICLES ────────────────────────────────
+function initParticles(W,H){
+  particles=[];
+  const cx=W/2,cy=H/2,radius=Math.min(W,H)*0.44;
+  for(let i=0;i<PARTICLE_COUNT;i++){
+    let rx,ry;
+    if(cymaticsPlate==='circle'){
+      const r=Math.random()*radius*0.2, a=Math.random()*Math.PI*2;
+      rx=cx+Math.cos(a)*r; ry=cy+Math.sin(a)*r;
+    } else {
+      rx=cx+(Math.random()-0.5)*W*0.80;
+      ry=cy+(Math.random()-0.5)*H*0.80;
+    }
+    const restA=Math.random()*Math.PI*2;
+    const restR=Math.sqrt(Math.random())*radius*0.88;
+    particles.push({
+      x:rx,y:ry,
+      vx:(Math.random()-0.5)*2,vy:(Math.random()-0.5)*2,
+      size:Math.random()*1.5+0.5,
+      restX:cx+Math.cos(restA)*restR,
+      restY:cy+Math.sin(restA)*restR,
+      phase:Math.random()*Math.PI*2
+    });
+  }
+}
+
+// ── FERROFLUID SPIKES ─────────────────────────────────
+function initFerro(W,H){
+  ferroSpikes=[];
+  ferroBase=[];
+  const cx=W/2, cy=H/2;
+  const baseR=Math.min(W,H)*0.18; // pool radius
+  for(let i=0;i<FERRO_SPIKES;i++){
+    const angle=(i/FERRO_SPIKES)*Math.PI*2;
+    ferroBase.push({ angle, baseR });
+    ferroSpikes.push({
+      angle,
+      currentH: 0,
+      targetH: 0,
+      wobble: Math.random()*Math.PI*2,
+      wobbleSpeed: 0.5+Math.random()*1.5
+    });
+  }
+}
+
+// ── SUB BUTTONS ───────────────────────────────────────
+const subModeConfig={
+  cymatics:[
+    {label:'SQUARE',key:'plate',val:'square'},
+    {label:'CIRCLE',key:'plate',val:'circle'},
+    {label:'DRY',   key:'fluid',val:'dry'},
+    {label:'WET',   key:'fluid',val:'wet'},
+  ]
+};
+
+function buildSubBtns(m){
+  subBtnsEl.innerHTML='';
+  const cfg=subModeConfig[m];
+  if(!cfg){ subBtnsEl.style.opacity='0'; subBtnsEl.style.pointerEvents='none'; return; }
+  subBtnsEl.style.opacity='1'; subBtnsEl.style.pointerEvents='auto';
+  cfg.forEach(item=>{
+    const btn=document.createElement('button');
+    btn.className='sub-btn'; btn.textContent=item.label;
+    const cur=item.key==='plate'?cymaticsPlate:cymaticsFluid;
+    if(item.val===cur) btn.classList.add('active');
+    btn.addEventListener('click',()=>{
+      if(item.key==='plate') cymaticsPlate=item.val;
+      else cymaticsFluid=item.val;
+      initParticles(canvas.width,canvas.height);
+      buildSubBtns(mode);
+    });
+    subBtnsEl.appendChild(btn);
+  });
+}
+
+modeBtns.forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    modeBtns.forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    mode=btn.dataset.mode;
+    buildSubBtns(mode);
+  });
+});
+
+// ── TAP TEMPO ─────────────────────────────────────────
+tapBtn.addEventListener('click',()=>{
+  const now=Date.now();
+  if(tapTimes.length>0&&now-tapTimes[tapTimes.length-1]>3000) tapTimes=[];
+  tapTimes.push(now);
+  if(tapTimes.length>8) tapTimes.shift();
+  if(tapTimes.length<2){ bpmDisplay.textContent='TAP...'; bpmHud.textContent='---'; return; }
+  let total=0;
+  for(let i=1;i<tapTimes.length;i++) total+=tapTimes[i]-tapTimes[i-1];
+  bpm=Math.round(60000/(total/(tapTimes.length-1)));
+  bpm=Math.max(20,Math.min(300,bpm));
+  bpmDisplay.textContent=bpm+' BPM';
+  bpmHud.textContent=bpm;
+});
+
+// ── ACTIV8 ────────────────────────────────────────────
+startBtn.addEventListener('click',async()=>{
+  if(!running){
+    try{
+      audioCtx=new(window.AudioContext||window.webkitAudioContext)();
+      const stream=await navigator.mediaDevices.getUserMedia({audio:true,video:false});
+      source=audioCtx.createMediaStreamSource(stream);
+      analyser=audioCtx.createAnalyser();
+      analyser.fftSize=2048;
+      analyser.smoothingTimeConstant=0.80;
+      bufferLength=analyser.frequencyBinCount;
+      dataArray=new Uint8Array(bufferLength);
+      freqData =new Uint8Array(bufferLength);
+      source.connect(analyser);
+      running=true;
+      statusDot.classList.add('active');
+      statusLabel.textContent='LIVE';
+      startBtn.textContent='[ STOP ]';
+      draw();
+    }catch(e){ startBtn.textContent='[ DENIED ]'; }
+  } else {
+    running=false;
+    cancelAnimationFrame(animId);
+    audioCtx.close();
+    statusDot.classList.remove('active');
+    statusLabel.textContent='STANDBY';
+    startBtn.textContent='[ ACTIV8 ]';
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    freqRead.textContent='---'; ampRead.textContent='---';
+  }
+});
+
+// ── FREQUENCY DETECTION — improved ───────────────────
+// Uses autocorrelation for more accurate fundamental detection
+function getDomFreq(){
+  // Primary: find peak in lower frequency bins (80Hz-4kHz sweet spot)
+  // Bin resolution = sampleRate / fftSize
+  const binHz = audioCtx.sampleRate / analyser.fftSize;
+  const loIdx = Math.floor(80  / binHz);
+  const hiIdx = Math.floor(4000/ binHz);
+  let maxVal=0, maxIdx=loIdx;
+  for(let i=loIdx;i<Math.min(hiIdx,bufferLength);i++){
+    if(freqData[i]>maxVal){ maxVal=freqData[i]; maxIdx=i; }
+  }
+  // Parabolic interpolation for sub-bin accuracy
+  const prev=freqData[maxIdx-1]||0;
+  const next=freqData[maxIdx+1]||0;
+  const denom=(prev-2*maxVal+next);
+  const delta= denom!==0 ? 0.5*(prev-next)/denom : 0;
+  return Math.round((maxIdx+delta)*binHz);
+}
+
+function getAvgAmp(){
+  let sum=0;
+  for(let i=0;i<bufferLength;i++) sum+=Math.abs(dataArray[i]-128);
+  return sum/bufferLength;
+}
+
+// ── DRAW LOOP ─────────────────────────────────────────
+function draw(){
+  animId=requestAnimationFrame(draw);
+  const W=canvas.width, H=canvas.height;
+  const gain =parseFloat(gainCtrl.value);
+  const thick=parseFloat(thickCtrl.value);
+  const speed=parseFloat(speedCtrl.value);
+
+  analyser.getByteTimeDomainData(dataArray);
+  analyser.getByteFrequencyData(freqData);
+
+  const avgAmp =getAvgAmp();
+  const normAmp=Math.min(1,avgAmp/35);
+
+  frameCount++;
+  if(frameCount%12===0){
+    freqRead.textContent=getDomFreq();
+    ampRead.textContent =avgAmp.toFixed(1);
+  }
+
+  const fadeAmt = (mode==='cymatics'||mode==='ferrofluid')
+    ? `rgba(0,0,0,${0.08+(1-normAmp)*0.12})`
+    : 'rgba(0,0,0,0.22)';
+  ctx.fillStyle=fadeAmt;
+  ctx.fillRect(0,0,W,H);
+
+  ctx.shadowBlur =6+normAmp*18;
+  ctx.shadowColor=sigColor(0.4+normAmp*0.5);
+  ctx.strokeStyle=sigColor(0.65+normAmp*0.35);
+  ctx.lineWidth  =thick+normAmp*1.2;
+  ctx.lineCap='round'; ctx.lineJoin='round';
+
+  if     (mode==='wave')       drawWave(W,H,gain);
+  else if(mode==='circle')     drawCircle(W,H,gain);
+  else if(mode==='bars')       drawBars(W,H,gain,normAmp);
+  else if(mode==='lissajous')  drawLissajous(W,H,gain,normAmp,speed);
+  else if(mode==='cymatics')   drawCymatics(W,H,gain,normAmp,speed,avgAmp);
+  else if(mode==='ferrofluid') drawFerrofluid(W,H,normAmp,speed,thick);
+
+  if(showCrosshair){
+    ctx.shadowBlur=0;
+    ctx.strokeStyle='rgba(57,255,20,0.05)';
+    ctx.lineWidth=0.5;
+    ctx.beginPath();
+    ctx.moveTo(W/2,0); ctx.lineTo(W/2,H);
+    ctx.moveTo(0,H/2); ctx.lineTo(W,H/2);
+    ctx.stroke();
+  }
+}
+
+// ── WAVE ──────────────────────────────────────────────
+function drawWave(W,H,gain){
+  const slice=W/bufferLength;
+  ctx.beginPath();
+  for(let i=0;i<bufferLength;i++){
+    const v=((dataArray[i]/128.0)-1)*gain;
+    i===0?ctx.moveTo(i*slice,H/2+v*(H/2-10)):ctx.lineTo(i*slice,H/2+v*(H/2-10));
+  }
+  ctx.stroke();
+}
+
+// ── CIRCLE ────────────────────────────────────────────
+function drawCircle(W,H,gain){
+  const cx=W/2,cy=H/2,baseR=Math.min(W,H)*0.3;
+  ctx.beginPath();
+  for(let i=0;i<bufferLength;i++){
+    const v=((dataArray[i]/128.0)-1)*gain;
+    const angle=(i/bufferLength)*Math.PI*2-Math.PI/2;
+    const r=baseR+v*baseR*0.6;
+    i===0?ctx.moveTo(cx+Math.cos(angle)*r,cy+Math.sin(angle)*r)
+         :ctx.lineTo(cx+Math.cos(angle)*r,cy+Math.sin(angle)*r);
+  }
+  ctx.closePath(); ctx.stroke();
+}
+
+// ── BARS — VU meter colors ────────────────────────────
+function drawBars(W,H,gain,normAmp){
+  const barCount=64;
+  const barW=(W/barCount)*0.7, gap=(W/barCount)*0.3;
+
+  for(let i=0;i<barCount;i++){
+    const val=freqData[Math.floor(i*freqData.length/barCount)]/255;
+    const barH=val*(H-20)*gain*0.5;
+    const x=i*(barW+gap)+gap/2;
+
+    // VU color: green → yellow → red by amplitude of this bar
+    let barColor;
+    if(val < 0.5)      barColor=`rgba(57,255,20,${0.6+val*0.4})`;      // green
+    else if(val < 0.75) barColor=`rgba(255,220,0,${0.7+val*0.3})`;     // yellow
+    else                barColor=`rgba(255,${Math.floor(255*(1-val)*4)},0,0.9)`; // red
+
+    ctx.shadowBlur=4+val*10;
+    ctx.shadowColor=barColor;
+    ctx.strokeStyle=barColor;
+    ctx.lineWidth=barW;
+    ctx.beginPath();
+    ctx.moveTo(x+barW/2,H);
+    ctx.lineTo(x+barW/2,H-barH);
+    ctx.stroke();
+  }
+
+  // Peak line across top — classic VU meter reference
+  ctx.shadowBlur=0;
+  ctx.strokeStyle='rgba(255,50,50,0.25)';
+  ctx.lineWidth=0.5;
+  ctx.beginPath();
+  ctx.moveTo(0,H*0.12); ctx.lineTo(W,H*0.12); // 0dB clip line
+  ctx.stroke();
+}
+
+// ── LISSAJOUS ─────────────────────────────────────────
+function drawLissajous(W,H,gain,amp,speed){
+  const cx=W/2,cy=H/2,scaleX=W*0.42,scaleY=H*0.42;
+  lissPhase+=bpm?(bpm/60)*0.008*speed:0.006*speed;
+  const domFreq=getDomFreq();
+  const ratios=[1,1.333,1.5,2,2.5,3,4];
+  const freqRatio=ratios[Math.min(ratios.length-1,Math.floor(domFreq/400))];
+  ctx.beginPath();
+  for(let i=0;i<512;i++){
+    const t=(i/512)*Math.PI*2;
+    const idxX=Math.floor((i/512)*(bufferLength/2));
+    const idxY=Math.floor((i/512)*(bufferLength/2))+Math.floor(bufferLength/2);
+    const aX=((dataArray[idxX]/128.0)-1)*gain;
+    const aY=((dataArray[idxY]/128.0)-1)*gain;
+    const x=cx+(Math.sin(t*freqRatio+lissPhase)+aX*0.25)*scaleX*(0.7+amp*0.3);
+    const y=cy+(Math.sin(t)+aY*0.25)*scaleY*(0.7+amp*0.3);
+    i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+  }
+  ctx.stroke();
+}
+
+// ── CYMATICS ──────────────────────────────────────────
+function drawCymatics(W,H,gain,normAmp,speed,rawAmp){
+  const cx=W/2,cy=H/2;
+  const isSilent=rawAmp<2.5;
+  if(isSilent) silenceTimer=Math.min(1,silenceTimer+0.015);
+  else         silenceTimer=Math.max(0,silenceTimer-0.07);
+
+  const domFreq =getDomFreq();
+  const freqNorm=Math.min(1,Math.max(0,(domFreq-80)/3920));
+  const modeBase=1+freqNorm*7;
+  const modeN   =Math.max(1,Math.round(modeBase));
+  const modeM   =Math.max(1,modeN+Math.round(freqNorm*3)+1);
+
+  chladniRotation+=0.0004*speed;
+
+  const isCircle=cymaticsPlate==='circle';
+  const isWet   =cymaticsFluid==='wet';
+  const forceStr=(1.2+normAmp*5.0*gain*0.4)*speed;
+  const damping =isWet?0.85:0.74;
+  const jitter  =isWet?normAmp*1.4+(isSilent?0:0.10):normAmp*0.8+(isSilent?0:0.04);
+  const radius  =Math.min(W,H)*0.44;
+  const now     =frameCount*0.016;
+
+  for(let p of particles){
+    if(silenceTimer>0.25){
+      const snapStr=(silenceTimer-0.25)*0.09;
+      p.vx+=(p.restX-p.x)*snapStr;
+      p.vy+=(p.restY-p.y)*snapStr;
+      p.vx+=(Math.random()-0.5)*0.5;
+      p.vy+=(Math.random()-0.5)*0.5;
+    } else {
+      let wave,gradX,gradY;
+      if(isCircle){
+        const dx=p.x-cx,dy=p.y-cy;
+        const r=Math.sqrt(dx*dx+dy*dy)/radius;
+        const theta=Math.atan2(dy,dx);
+        if(r>1.0){ p.vx+=(cx-p.x)*0.1; p.vy+=(cy-p.y)*0.1; }
+        else {
+          const outward=Math.max(0,(1-r*1.5))*normAmp*1.5;
+          const dirX=r>0.01?dx/(radius*r):(Math.random()-0.5);
+          const dirY=r>0.01?dy/(radius*r):(Math.random()-0.5);
+          p.vx+=dirX*outward; p.vy+=dirY*outward;
+          const rad1=Math.sin(r*Math.PI*modeN);
+          const rad2=Math.sin(r*Math.PI*(modeN+1)*0.65);
+          const ang =Math.cos(modeM*theta+chladniRotation);
+          wave=(rad1+rad2*0.45)*ang;
+          gradX=wave*(dx/(radius*r+0.01))*modeN;
+          gradY=wave*(dy/(radius*r+0.01))*modeN;
+          p.vx-=wave*gradX*forceStr;
+          p.vy-=wave*gradY*forceStr;
+        }
+      } else {
+        const dx=p.x-cx,dy=p.y-cy;
+        const cosR=Math.cos(chladniRotation),sinR=Math.sin(chladniRotation);
+        const rx=dx*cosR-dy*sinR, ry=dx*sinR+dy*cosR;
+        const nx =(rx/(W*0.44))*Math.PI*modeN, ny =(ry/(H*0.44))*Math.PI*modeM;
+        const nx2=(rx/(W*0.44))*Math.PI*modeM, ny2=(ry/(H*0.44))*Math.PI*modeN;
+        const nx3=((rx+ry)/(W*0.62))*Math.PI*modeN;
+        const ny3=((rx-ry)/(H*0.62))*Math.PI*modeM;
+        wave =Math.sin(nx)*Math.sin(ny)+Math.sin(nx2)*Math.sin(ny2)+Math.sin(nx3)*Math.sin(ny3)*0.5;
+        const gRx=modeN*Math.cos(nx)*Math.sin(ny)+modeM*Math.cos(nx2)*Math.sin(ny2)+modeN*Math.cos(nx3)*Math.sin(ny3)*0.5;
+        const gRy=modeM*Math.sin(nx)*Math.cos(ny)+modeN*Math.sin(nx2)*Math.cos(ny2)+modeM*Math.sin(nx3)*Math.cos(ny3)*0.5;
+        gradX=gRx*cosR+gRy*sinR;
+        gradY=-gRx*sinR+gRy*cosR;
+        p.vx-=wave*gradX*forceStr;
+        p.vy-=wave*gradY*forceStr;
+      }
+      if(isWet){
+        const ripple=Math.sin(now*3+p.phase)*normAmp*0.7;
+        p.vx+=(Math.random()-0.5)*jitter+ripple*0.3;
+        p.vy+=(Math.random()-0.5)*jitter+ripple*0.3;
+      } else {
+        p.vx+=(Math.random()-0.5)*jitter;
+        p.vy+=(Math.random()-0.5)*jitter;
+      }
+    }
+    p.vx*=damping; p.vy*=damping;
+    p.x+=p.vx; p.y+=p.vy;
+    if(isCircle){
+      const dx=p.x-cx,dy=p.y-cy,dist=Math.sqrt(dx*dx+dy*dy);
+      if(dist>radius){
+        const nx=dx/dist,ny=dy/dist;
+        p.x=cx+nx*radius*0.97; p.y=cy+ny*radius*0.97;
+        p.vx-=nx*Math.abs(p.vx)*1.0; p.vy-=ny*Math.abs(p.vy)*1.0;
+      }
+    } else {
+      const bx=W*0.47,by=H*0.47;
+      if(p.x<cx-bx){p.x=cx-bx;p.vx*=-0.3;} if(p.x>cx+bx){p.x=cx+bx;p.vx*=-0.3;}
+      if(p.y<cy-by){p.y=cy-by;p.vy*=-0.3;} if(p.y>cy+by){p.y=cy+by;p.vy*=-0.3;}
+    }
+  }
+
+  ctx.shadowBlur =isWet?5+normAmp*10:2+normAmp*6;
+  ctx.shadowColor=sigColor(0.3+normAmp*0.5);
+  for(let p of particles){
+    const silFade=silenceTimer*0.3;
+    const alpha=Math.max(0.04,isWet?0.28+normAmp*0.62-silFade:0.6+normAmp*0.4-silFade);
+    const size =Math.max(0.3,isWet?(p.size+normAmp*0.9)*(1+silenceTimer*0.2):p.size*0.85+normAmp*0.4);
+    ctx.fillStyle=sigColor(alpha);
+    ctx.beginPath();
+    ctx.arc(p.x,p.y,size,0,Math.PI*2);
+    ctx.fill();
+  }
+}
+
+// ── FERROFLUID ────────────────────────────────────────
+// Simulates ferrofluid spike behavior:
+// - Liquid pool at center responds to amplitude (swells)
+// - Spikes rise from pool surface, height driven by frequency bands
+// - Spikes have surface tension — they taper to points
+// - Individual spike wobble creates organic variation
+function drawFerrofluid(W,H,normAmp,speed,thick){
+  const cx=W/2, cy=H/2;
+  const basePoolR=Math.min(W,H)*0.14;
+  const maxSpikeH=Math.min(W,H)*0.32;
+
+  // Pool swells with amplitude
+  const poolR=basePoolR*(1+normAmp*0.4);
+
+  // Update spike targets from frequency data
+  for(let i=0;i<FERRO_SPIKES;i++){
+    const s=ferroSpikes[i];
+    // Map each spike to a frequency band
+    const freqIdx=Math.floor((i/FERRO_SPIKES)*bufferLength*0.6)+2;
+    const freqVal=freqData[freqIdx]/255;
+    // Target height from frequency + amplitude envelope
+    s.targetH=freqVal*maxSpikeH*normAmp*2.5*(parseFloat(gainCtrl.value)*0.5);
+    // Wobble for organic feel
+    s.wobble+=s.wobbleSpeed*0.04*speed;
+    const wobbleAmt=s.targetH*0.08*Math.sin(s.wobble);
+    // Lerp toward target — fast rise, slow fall (surface tension)
+    const lerpUp=0.18*speed, lerpDown=0.06*speed;
+    s.currentH+=(s.targetH+wobbleAmt-s.currentH)*(s.currentH<s.targetH?lerpUp:lerpDown);
+    s.currentH=Math.max(0,s.currentH);
+  }
+
+  // ── Draw pool ──
+  ctx.shadowBlur =8+normAmp*20;
+  ctx.shadowColor=sigColor(0.5+normAmp*0.5);
+
+  // Pool base — filled ellipse
+  ctx.fillStyle=sigColor(0.7+normAmp*0.3);
+  ctx.beginPath();
+  ctx.ellipse(cx,cy,poolR,poolR*0.55,0,0,Math.PI*2);
+  ctx.fill();
+
+  // Pool rim highlight
+  ctx.strokeStyle=sigColor(0.9+normAmp*0.1);
+  ctx.lineWidth=thick*0.5+1;
+  ctx.beginPath();
+  ctx.ellipse(cx,cy,poolR,poolR*0.55,0,0,Math.PI*2);
+  ctx.stroke();
+
+  // ── Draw spikes ──
+  for(let i=0;i<FERRO_SPIKES;i++){
+    const s=ferroSpikes[i];
+    if(s.currentH<1) continue;
+
+    const angle=s.angle;
+    // Spike base on pool ellipse surface
+    const baseX=cx+Math.cos(angle)*poolR;
+    const baseY=cy+Math.sin(angle)*poolR*0.55;
+
+    // Spike tip — extends outward from pool center
+    const tipX=cx+Math.cos(angle)*(poolR+s.currentH);
+    const tipY=cy+Math.sin(angle)*(poolR*0.55+s.currentH*0.7);
+
+    // Width of spike base — tapers to point (surface tension)
+    const baseWidth=Math.max(0.5,(thick*0.8)*(1-s.currentH/(maxSpikeH*1.5))*3+1);
+
+    // Draw spike as tapered shape
+    const perpX=-Math.sin(angle)*baseWidth;
+    const perpY= Math.cos(angle)*baseWidth;
+
+    ctx.fillStyle=sigColor(0.6+normAmp*0.35);
+    ctx.shadowBlur=4+s.currentH/maxSpikeH*12;
+    ctx.shadowColor=sigColor(0.4+normAmp*0.4);
+
+    ctx.beginPath();
+    ctx.moveTo(baseX+perpX, baseY+perpY);  // base left
+    ctx.quadraticCurveTo(                  // left edge curves to tip
+      (baseX+tipX)*0.5+perpX*0.3,
+      (baseY+tipY)*0.5+perpY*0.3,
+      tipX, tipY
+    );
+    ctx.quadraticCurveTo(                  // right edge
+      (baseX+tipX)*0.5-perpX*0.3,
+      (baseY+tipY)*0.5-perpY*0.3,
+      baseX-perpX, baseY-perpY
+    );
+    ctx.closePath();
+    ctx.fill();
+
+    // Highlight edge on spike
+    ctx.strokeStyle=sigColor(0.5+normAmp*0.4);
+    ctx.lineWidth=0.5;
+    ctx.stroke();
+  }
+
+  // Pool surface detail — small ripples at spike bases
+  if(normAmp>0.1){
+    ctx.strokeStyle=sigColor(normAmp*0.3);
+    ctx.lineWidth=0.5;
+    ctx.shadowBlur=2;
+    ctx.beginPath();
+    ctx.ellipse(cx,cy,poolR*1.08,poolR*0.55*1.08,0,0,Math.PI*2);
+    ctx.stroke();
+  }
+}
+
+// ── IDLE ──────────────────────────────────────────────
+function idleDraw(){
+  if(running) return;
+  const W=canvas.width,H=canvas.height;
+  ctx.fillStyle='rgba(0,0,0,0.1)';
+  ctx.fillRect(0,0,W,H);
+  ctx.shadowBlur=5; ctx.shadowColor=sigColor(0.2);
+  ctx.strokeStyle=sigColor(0.18); ctx.lineWidth=1.5;
+  ctx.beginPath();
+  const t=Date.now()/1000;
+  for(let x=0;x<W;x++){
+    const y=H/2+Math.sin((x/W)*Math.PI*4+t*2)*4;
+    x===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+  }
+  ctx.stroke();
+  requestAnimationFrame(idleDraw);
+}
+idleDraw();
+</script>
+</body>
+</html>
