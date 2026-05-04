@@ -102,8 +102,8 @@
   /* LIGHTBOX */
   .lightbox{position:fixed;inset:0;z-index:999;background:rgba(7,7,15,0.95);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity 0.3s ease;}
   .lightbox.open{opacity:1;pointer-events:all;}
-  .lightbox-inner{position:relative;width:min(500px,90vw);border-radius:20px;overflow:hidden;border:1px solid rgba(255,20,147,0.3);box-shadow:0 0 80px rgba(255,20,147,0.2);}
-  .lightbox-inner video{width:100%;display:block;aspect-ratio:9/16;object-fit:cover;}
+  .lightbox-inner{position:relative;width:min(900px,90vw);border-radius:20px;overflow:hidden;border:1px solid rgba(255,20,147,0.3);box-shadow:0 0 80px rgba(255,20,147,0.2);}
+.lightbox-inner video{width:100%;display:block;aspect-ratio:16/9;object-fit:contain;}
   .lightbox-inner img{width:100%;display:block;}
   .lightbox-close{position:absolute;top:16px;right:16px;background:rgba(255,20,147,0.9);color:white;font-family:'Space Mono',monospace;font-size:12px;font-weight:700;border:none;cursor:pointer;padding:8px 16px;border-radius:100px;transition:all 0.2s ease;}
   .lightbox-close:hover{background:var(--pink);transform:scale(1.05);}
