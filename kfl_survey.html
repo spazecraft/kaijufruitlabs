@@ -524,7 +524,25 @@ function collectAnswers() {
     timestamp: new Date().toISOString()
   };
 }
-
+function checkAdmin() {
+  if(window.location.hash === '#admin') {
+    const btn = document.createElement('button');
+    btn.textContent = 'EXPORT CSV';
+    btn.style.cssText = 'position:fixed;top:20px;right:20px;z-index:99999;padding:16px;background:red;color:white;font-size:18px;font-weight:900;border:none;border-radius:8px;cursor:pointer;';
+    btn.onclick = function() {
+      const rows = JSON.parse(localStorage.getItem('kfl_responses') || '[]');
+      if(!rows.length){alert('No responses saved locally.');return;}
+      const headers = Object.keys(rows[0]);
+      const csv = [headers.join(','),...rows.map(r=>headers.map(h=>JSON.stringify(r[h]??'')).join(','))].join('\n');
+      const a = document.createElement('a');
+      a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+      a.download = 'kfl_backup.csv';
+      a.click();
+    };
+    document.body.appendChild(btn);
+  }
+}
+window.addEventListener('load', checkAdmin);
 function saveToStorage(data) {
   try {
     const existing = JSON.parse(localStorage.getItem('kfl_responses') || '[]');
