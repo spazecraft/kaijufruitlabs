@@ -531,6 +531,12 @@ function saveToStorage(data) {
     existing.push(data);
     localStorage.setItem('kfl_responses', JSON.stringify(existing));
   } catch(e) {}
+  try {
+    fetch('https://script.google.com/macros/s/AKfycbxdnAdAz1u1HfIgVMDGFdegU5uznmfmeCjVHa9k6C9678qyR7jZ0T-TGambPc0o6Ops/exec', {
+      method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify(data)
+    }).catch(function(){});
+  } catch(e) {}
 }
 
 function submitSurvey() {
