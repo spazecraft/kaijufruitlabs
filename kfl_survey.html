@@ -569,4 +569,21 @@ function resetForm() {
   window.scrollTo(0,0);
 }
 </script>
+<div id="admin-btn" style="position:fixed;bottom:20px;right:20px;width:40px;height:40px;opacity:0;z-index:9999;" onmousedown="startAdmin()" onmouseup="cancelAdmin()" ontouchstart="startAdmin()" ontouchend="cancelAdmin()"></div>
+
+<script>
+let adminTimer;
+function startAdmin(){adminTimer=setTimeout(exportCSV,3000);}
+function cancelAdmin(){clearTimeout(adminTimer);}
+function exportCSV(){
+  const rows=JSON.parse(localStorage.getItem('kfl_responses')||'[]');
+  if(!rows.length){alert('No responses yet.');return;}
+  const headers=Object.keys(rows[0]);
+  const csv=[headers.join(','),...rows.map(r=>headers.map(h=>JSON.stringify(r[h]??'')).join(','))].join('\n');
+  const a=document.createElement('a');
+  a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);
+  a.download='kfl_responses.csv';
+  a.click();
+}
+</script>
 </body></html>
