@@ -73,7 +73,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
 .ihead:active{cursor:grabbing;}
 .grip{display:flex;flex-direction:column;gap:2.5px;opacity:.22;flex-shrink:0;}
 .grip span{display:block;width:14px;height:1.5px;background:var(--text);border-radius:1px;}
-.ititle{font-size:8.5px;letter-spacing:.22em;text-transform:uppercase;color:#ffffff;flex:1;}
+.ititle{font-size:9px;letter-spacing:.22em;text-transform:uppercase;color:#ffffff;flex:1;}
 .iclose{width:16px;height:16px;border-radius:50%;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:9px;color:var(--dim);flex-shrink:0;transition:all .15s;}
 .iclose:hover{border-color:var(--lav);color:var(--lav);}
 .ibody{padding:9px 11px 11px;touch-action:pan-y;overflow-y:auto;}
@@ -168,7 +168,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;heigh
 .oseg{flex:1;padding:5px 3px;text-align:center;font-size:10px;color:#ffffff;cursor:pointer;transition:all .15s;background:transparent;}
 .oseg.on{background:rgba(158,232,255,.1);color:var(--sky);}
 .recacts{display:flex;gap:5px;}
-.ract{flex:1;padding:7px 4px;border-radius:9px;border:1px solid var(--border);font-size:8px;text-align:center;cursor:pointer;transition:all .15s;background:rgba(255,255,255,.018);}
+.ract{flex:1;padding:7px 4px;border-radius:9px;border:1px solid var(--border);font-size:9px;text-align:center;cursor:pointer;transition:all .15s;background:rgba(255,255,255,.018);}
 .ract.red{border-color:rgba(255,68,68,.4);color:rgba(255,130,130,.9);}
 #phud{position:absolute;bottom:18px;left:50%;transform:translateX(-50%);z-index:180;display:none;background:rgba(4,3,16,.9);border:1px solid rgba(255,179,217,.22);border-radius:50px;padding:9px 16px;backdrop-filter:blur(24px);box-shadow:0 8px 48px rgba(0,0,0,.6);align-items:center;gap:12px;min-width:360px;}
 #phud.on{display:flex;}
@@ -182,7 +182,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;heigh
 .hpal{width:18px;height:18px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:all .14s;}
 .hpal:hover{transform:scale(1.2);}
 .hpal.on{border-color:rgba(255,255,255,.75);}
-#projbar{position:absolute;top:42px;left:50%;transform:translateX(-50%);z-index:190;display:none;background:rgba(158,232,255,.08);border:1px solid rgba(158,232,255,.35);border-radius:20px;padding:3px 14px;font-size:8px;letter-spacing:.2em;color:var(--sky);pointer-events:none;}
+#projbar{position:absolute;top:42px;left:50%;transform:translateX(-50%);z-index:190;display:none;background:rgba(158,232,255,.08);border:1px solid rgba(158,232,255,.35);border-radius:20px;padding:3px 14px;font-size:9px;letter-spacing:.2em;color:var(--sky);pointer-events:none;}
 #projbar.on{display:block;}
 #hidebtn{position:absolute;bottom:16px;right:14px;z-index:160;width:38px;height:38px;border-radius:50%;background:var(--surface);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;backdrop-filter:blur(14px);}
 .ui-hidden .island{opacity:0!important;pointer-events:none!important;transition:opacity .4s;}
@@ -194,7 +194,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;heigh
 .tcbloom{position:absolute;border-radius:50%;pointer-events:none;z-index:49;transform:translate(-50%,-50%);animation:bloom 1.6s ease-out forwards;}
 @keyframes bloom{0%{opacity:.7;transform:translate(-50%,-50%) scale(.4)}60%{opacity:.35;filter:blur(10px)}100%{opacity:0;transform:translate(-50%,-50%) scale(3);filter:blur(24px)}}
 #toasts{position:absolute;top:46px;left:50%;transform:translateX(-50%);z-index:300;display:flex;flex-direction:column;gap:5px;align-items:center;pointer-events:none;}
-.toast{padding:4px 13px;border-radius:20px;font-size:8.5px;letter-spacing:.16em;backdrop-filter:blur(14px);opacity:0;transform:translateY(-6px);transition:all .28s;white-space:nowrap;}
+.toast{padding:4px 13px;border-radius:20px;font-size:9px;letter-spacing:.16em;backdrop-filter:blur(14px);opacity:0;transform:translateY(-6px);transition:all .28s;white-space:nowrap;}
 .toast.in{opacity:1;transform:translateY(0);}
 .ti{background:rgba(200,184,255,.1);border:1px solid rgba(200,184,255,.28);color:var(--lav);}
 .tw{background:rgba(255,179,217,.1);border:1px solid rgba(255,179,217,.28);color:var(--pink);}
@@ -203,11 +203,11 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;heigh
 #modal.on{display:flex;}
 .mbox{background:rgba(10,9,26,.98);border:1px solid var(--border-hi);border-radius:22px;padding:28px;max-width:500px;width:92%;box-shadow:0 40px 90px rgba(0,0,0,.75);max-height:90vh;overflow-y:auto;}
 .mtitle{font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:.12em;background:linear-gradient(90deg,var(--sky),var(--mint));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:6px;}
-.msub{font-size:8.5px;letter-spacing:.18em;color:var(--dim);margin-bottom:18px;}
+.msub{font-size:9px;letter-spacing:.18em;color:var(--dim);margin-bottom:18px;}
 .mflist{display:flex;flex-direction:column;gap:8px;margin-bottom:18px;}
 .mf{display:flex;gap:10px;padding:8px 10px;border-radius:9px;background:rgba(255,255,255,.02);border:1px solid var(--border);}
 .mfico{font-size:14px;flex-shrink:0;}
-.mfbody{font-size:8.5px;color:rgba(200,190,255,.85);line-height:1.65;}
+.mfbody{font-size:9px;color:rgba(200,190,255,.85);line-height:1.65;}
 .mftitle{color:var(--text);font-size:9.5px;display:block;margin-bottom:2px;}
 .mclose{width:100%;padding:9px;border-radius:11px;border:1px solid var(--sky);background:rgba(158,232,255,.08);color:var(--sky);font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.2em;text-transform:uppercase;cursor:pointer;transition:all .18s;margin-top:4px;}
 .mclose:hover{background:rgba(158,232,255,.18);}
@@ -285,7 +285,7 @@ font-family:'DM Mono',monospace;text-transform:uppercase;}
   box-shadow:0 0 20px rgba(255,20,200,0.2);
 ">
   <div style="position:absolute;top:-18px;left:0;right:0;text-align:center;
-    font-size:8px;color:rgba(255,100,255,0.7);letter-spacing:1px;font-family:DM Mono,monospace;">
+    font-size:9px;color:rgba(255,100,255,0.7);letter-spacing:1px;font-family:DM Mono,monospace;">
     DRAG &#8226; DOUBLE-TAP LOCK
   </div>
 </div>
@@ -381,11 +381,11 @@ font-family:'DM Mono',monospace;text-transform:uppercase;}
   <!-- Mode pills -->
   <div style="font-size:9px;color:rgba(255,255,255,0.4);margin-bottom:5px;letter-spacing:1px;">INTERACTION MODE</div>
   <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px;">
-    <button class="char-mode-btn on" data-mode="CANVAS" onclick="setCharMode(this,'CANVAS')" style="font-size:8px;padding:3px 5px;flex:1;min-width:44px;">CANVAS</button>
-    <button class="char-mode-btn" data-mode="MASK" onclick="setCharMode(this,'MASK')" style="font-size:8px;padding:3px 5px;flex:1;min-width:44px;">MASK</button>
-    <button class="char-mode-btn" data-mode="ATTRACT" onclick="setCharMode(this,'ATTRACT')" style="font-size:8px;padding:3px 5px;flex:1;min-width:44px;">ATTRACT</button>
-    <button class="char-mode-btn" data-mode="ALIVE" onclick="setCharMode(this,'ALIVE')" style="font-size:8px;padding:3px 5px;flex:1;min-width:44px;">ALIVE</button>
-    <button class="char-mode-btn" data-mode="BACKDROP" onclick="setCharMode(this,'BACKDROP')" style="font-size:8px;padding:3px 5px;flex:1;min-width:44px;">BACKDROP</button>
+    <button class="char-mode-btn on" data-mode="CANVAS" onclick="setCharMode(this,'CANVAS')" style="font-size:9px;padding:3px 5px;flex:1;min-width:44px;">CANVAS</button>
+    <button class="char-mode-btn" data-mode="MASK" onclick="setCharMode(this,'MASK')" style="font-size:9px;padding:3px 5px;flex:1;min-width:44px;">MASK</button>
+    <button class="char-mode-btn" data-mode="ATTRACT" onclick="setCharMode(this,'ATTRACT')" style="font-size:9px;padding:3px 5px;flex:1;min-width:44px;">ATTRACT</button>
+    <button class="char-mode-btn" data-mode="ALIVE" onclick="setCharMode(this,'ALIVE')" style="font-size:9px;padding:3px 5px;flex:1;min-width:44px;">ALIVE</button>
+    <button class="char-mode-btn" data-mode="BACKDROP" onclick="setCharMode(this,'BACKDROP')" style="font-size:9px;padding:3px 5px;flex:1;min-width:44px;">BACKDROP</button>
   </div>
   <!-- Opacity / pulse -->
   <div class="ctrl"><div class="clabel">Opacity <span class="cval" id="cv-charopacity">0.85</span></div>
@@ -504,7 +504,7 @@ oninput="AR.bassScale=this.value/100;document.getElementById('v-arbass').textCon
 <div class="divider"></div>
 <div class="trow"><div class="tlbl">Mirror X</div><div class="tog on" id="tog-mirrorX" onclick="this.classList.toggle('on');P.mirrorX=this.classList.contains('on')"></div></div>
 <div class="trow"><div class="tlbl">Mirror Y</div><div class="tog" id="tog-mirrorY" onclick="this.classList.toggle('on');P.mirrorY=this.classList.contains('on')"></div></div>
-<div style="font-size:8px;opacity:0.4;padding:2px 4px;letter-spacing:0.5px;">mirror is independent of folds</div>
+<div style="font-size:9px;opacity:0.4;padding:2px 4px;letter-spacing:0.5px;">mirror is independent of folds</div>
 </div>
 </div>
 <div class="island closed" id="isl-shape" style="top:76px;left:744px;width:175px;">
@@ -2083,7 +2083,7 @@ share:{title:'SHARE + HOST',sub:'Options for sharing and web deployment',body:`
 <div class="hcard"><div class="hcardtitle">Itch.io</div><div class="hcarddesc">Host as a browser-playable experience. Great for the creative/art community. Free or pay-what-you-want.</div><div class="hbadge" style="background:rgba(255,214,165,.1);border:1px solid rgba(255,214,165,.3);color:var(--peach)">ART COMMUNITY</div></div>
 <div class="hcard"><div class="hcardtitle">MIT License</div><div class="hcarddesc">Open source lets collaborators fork, suggest features via Pull Requests, and build on top — while you keep attribution as creator.</div><div class="hbadge" style="background:rgba(184,255,217,.1);border:1px solid rgba(184,255,217,.3);color:var(--mint)">COLLABORATIVE</div></div>
 </div>
-<div style="padding:10px;border-radius:10px;border:1px solid var(--border);background:rgba(255,255,255,.02);font-size:8px;color:var(--dim);letter-spacing:.06em;line-height:1.7;margin-top:4px;">
+<div style="padding:10px;border-radius:10px;border:1px solid var(--border);background:rgba(255,255,255,.02);font-size:9px;color:var(--dim);letter-spacing:.06em;line-height:1.7;margin-top:4px;">
 <strong style="color:var(--text)">Recommended:</strong> GitHub repo → GitHub Pages → iframe embed into Cargo. Safari on iPad → Add to Home Screen for PWA. MIDI + microphone require HTTPS — all listed hosts provide it.
 </div>`}
 };
@@ -3155,18 +3155,18 @@ window._refractSmear = function(x, y) {
 ">
   <!-- ENGINE OPACITY -->
   <div style="display:flex;align-items:center;gap:5px;">
-    <span style="font-size:8px;color:rgba(255,255,255,0.4);letter-spacing:1px;">ENG</span>
+    <span style="font-size:9px;color:rgba(255,255,255,0.4);letter-spacing:1px;">ENG</span>
     <input type="range" min="0" max="100" value="100" id="refract-eng-opacity"
       style="width:60px;accent-color:rgba(158,232,255,0.8);"
       oninput="window._refractEngineOpacity=parseInt(this.value)/100;document.getElementById('refract-eng-opval').textContent=this.value">
-    <span id="refract-eng-opval" style="font-size:8px;color:rgba(255,255,255,0.4);min-width:24px;">100</span>
+    <span id="refract-eng-opval" style="font-size:9px;color:rgba(255,255,255,0.4);min-width:24px;">100</span>
   </div>
 
   <div style="width:1px;height:18px;background:rgba(255,255,255,0.1);flex-shrink:0;"></div>
 
   <!-- COLOR PICKER — full spectrum strip + canvas touch sampling -->
   <div style="display:flex;align-items:center;gap:5px;">
-    <span style="font-size:8px;color:rgba(255,255,255,0.4);letter-spacing:1px;">COLOR</span>
+    <span style="font-size:9px;color:rgba(255,255,255,0.4);letter-spacing:1px;">COLOR</span>
     <div style="position:relative;width:90px;height:14px;border-radius:7px;overflow:hidden;background:linear-gradient(to right,hsl(0,90%,55%),hsl(30,90%,55%),hsl(60,90%,55%),hsl(90,90%,55%),hsl(120,90%,55%),hsl(150,90%,55%),hsl(180,90%,55%),hsl(210,90%,55%),hsl(240,90%,55%),hsl(270,90%,55%),hsl(300,90%,55%),hsl(330,90%,55%),hsl(360,90%,55%));cursor:pointer;touch-action:none;"
       id="refract-hue-strip"
       onmousedown="refractHueStripHit(event)"
@@ -3178,7 +3178,7 @@ window._refractSmear = function(x, y) {
 
   <!-- WIDTH SLIDER — thick or go home -->
   <div style="display:flex;align-items:center;gap:5px;">
-    <span style="font-size:8px;color:rgba(255,255,255,0.4);letter-spacing:1px;">WIDTH</span>
+    <span style="font-size:9px;color:rgba(255,255,255,0.4);letter-spacing:1px;">WIDTH</span>
     <input type="range" min="1" max="120" value="8" id="refract-width-picker"
       style="width:70px;accent-color:rgba(200,184,255,0.8);"
       oninput="window._refractBrushWidth=parseInt(this.value)">
