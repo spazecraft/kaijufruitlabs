@@ -1632,16 +1632,10 @@ document.querySelectorAll('.island').forEach(el=>{if(el.classList.contains('clos
 window.toggleKids = toggleKids;
 function toggleHideUI(){
 uiHidden=!uiHidden;
-const app=document.getElementById('app');
-app.classList.toggle('ui-hidden',uiHidden);
+document.getElementById('app').classList.toggle('ui-hidden',uiHidden);
 document.getElementById('hidebtn').classList.toggle('glowing',uiHidden);
-// Hide/show ALL islands and top dock
-document.querySelectorAll('.island').forEach(el=>{
-el.style.visibility=uiHidden?'hidden':'visible';
-});
-document.getElementById('topdock').style.visibility=uiHidden?'hidden':'visible';
-document.getElementById('topbar').style.visibility=uiHidden?'hidden':'visible';
-toast(uiHidden?'PURE CANVAS — tap EYE to restore':'UI RESTORED','ti');
+toast(uiHidden?'UI HIDDEN — tap EYE to restore':'UI VISIBLE','ti');
+}
 }
 }
 window.toggleHideUI = toggleHideUI;
