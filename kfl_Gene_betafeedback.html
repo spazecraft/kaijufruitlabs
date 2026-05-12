@@ -410,6 +410,8 @@ function submitForm() {
   saveToStorage(data);
   fetch('https://script.google.com/macros/s/AKfycbyhqVohqVTCBlpisH0oU3Q04_4koDM1hWA-Y1DthP5W7ldBd_qa3pLfoaj8NBCRG5cR/exec', {
     method:'POST',
+    mode:'no-cors',
+    headers:{'Content-Type':'application/json'},
     body: JSON.stringify(data)
   }).catch(err => console.log('Sheet sync failed:', err));
   document.getElementById('mainForm').style.display = 'none';
