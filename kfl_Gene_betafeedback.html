@@ -408,6 +408,10 @@ function saveToStorage(data) {
 function submitForm() {
   const data = collectAnswers();
   saveToStorage(data);
+  fetch('https://script.google.com/macros/s/AKfycbyhqVohqVTCBlpisH0oU3Q04_4koDM1hWA-Y1DthP5W7ldBd_qa3pLfoaj8NBCRG5cR/exec', {
+    method:'POST',
+    body: JSON.stringify(data)
+  }).catch(err => console.log('Sheet sync failed:', err));
   document.getElementById('mainForm').style.display = 'none';
   const ty = document.getElementById('thankyou');
   ty.classList.add('show');
