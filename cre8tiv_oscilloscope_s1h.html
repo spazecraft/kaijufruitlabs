@@ -146,7 +146,7 @@
     z-index: 3; pointer-events: none; border-radius: 6px;
   }
 
-  canvas { display: block; width: 100%; height: 100%; border-radius: 6px; }
+  canvas { display: block; width: 100%; height: 100%; border-radius: 6px; touch-action: none; }
 
   .vignette {
     position: absolute; inset: 0;
@@ -335,6 +335,78 @@
   }
 
   .footer-text { font-size: 9px; color: #222; letter-spacing: 3px; padding-top: 2px; }
+
+  /* ── RECORD ── */
+  .rec-controls { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+
+  .rec-btn {
+    font-family: 'VT323', monospace;
+    font-size: 17px; letter-spacing: 2px; padding: 6px 14px;
+    background: #001a1a; color: #4ee8e0;
+    border: 1px solid #4ee8e0; border-radius: 6px; cursor: pointer;
+    box-shadow: 0 0 8px #4ee8e022, inset 0 0 10px #4ee8e011;
+    transition: all 0.2s; white-space: nowrap;
+  }
+  .rec-btn.recording {
+    background: #1a0000; color: #ff2020; border-color: #ff2020;
+    box-shadow: 0 0 12px #ff202066, inset 0 0 10px #ff202022;
+    animation: recPulse 1s ease-in-out infinite;
+  }
+  @keyframes recPulse { 0%,100%{opacity:1} 50%{opacity:0.55} }
+  .rec-btn:active { transform: scale(0.96); }
+  .rec-timer { font-size: 9px; color: rgba(255,60,60,0.7); letter-spacing: 1px; min-width: 40px; text-align: center; }
+
+  /* ── LOOP PLAYER (fills canvas when a pill is active) ── */
+  #loopPlayer {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+    object-fit: cover; display: none; z-index: 1; border-radius: 6px;
+    background: #000;
+  }
+
+  /* ── PILL ROW ── */
+  .pill-row { display: flex; gap: 5px; flex-wrap: wrap; justify-content: center; padding: 2px 0; touch-action: none; }
+  .loop-pill {
+    width: 30px; height: 30px; border-radius: 50%;
+    border: 1px solid rgba(255,255,255,0.25); cursor: pointer;
+    transition: box-shadow 0.2s, transform 0.15s;
+    position: relative;
+  }
+  .loop-pill.empty { opacity: 0.28; }
+  .loop-pill.filled { opacity: 1; }
+  .loop-pill.pulsing { animation: pillPulse 1.1s ease-in-out infinite; }
+  @keyframes pillPulse { 0%,100%{box-shadow:0 0 4px currentColor} 50%{box-shadow:0 0 16px currentColor} }
+  .loop-pill.active {
+    background: #39ff14 !important;
+    box-shadow: 0 0 12px #39ff14, 0 0 22px #39ff1488;
+  }
+  .loop-pill:active { transform: scale(0.9); }
+
+  /* ── CONTEXTUAL PILL MENU ── */
+  .pill-menu {
+    display: none; position: fixed; z-index: 50;
+    background: rgba(4,6,4,0.95); border: 1px solid #39ff1455; border-radius: 8px;
+    padding: 10px 12px; box-shadow: 0 4px 24px rgba(0,0,0,0.8);
+    min-width: 190px;
+  }
+  .pill-menu.open { display: block; }
+  .pill-menu-row { display: flex; align-items: center; gap: 8px; margin: 6px 0; }
+  .pill-menu-row label { font-size: 8px; color: #aaa; letter-spacing: 1px; width: 44px; }
+  .pill-menu-row input[type=range] { flex: 1; }
+  .pill-menu-dl {
+    width: 100%; margin-top: 8px; padding: 5px; border-radius: 4px;
+    font-family: 'Share Tech Mono', monospace; font-size: 9px; letter-spacing: 1px;
+    background: #001400; color: #39ff14; border: 1px solid #39ff1455; cursor: pointer;
+  }
+  .pill-menu-close {
+    position: absolute; top: 4px; right: 6px; color: #666; font-size: 12px; cursor: pointer;
+  }
+
+  /* ── GESTURE FEEDBACK RING (canvas + empty pills) ── */
+  .gesture-ring {
+    position: fixed; z-index: 60; pointer-events: none;
+    border-radius: 50%; border: 1px solid rgba(57,255,20,0.5);
+    transform: translate(-50%,-50%);
+  }
 </style>
 </head>
 <body>
@@ -351,6 +423,7 @@
   <div class="bezel">
     <div class="screen">
       <canvas id="scope"></canvas>
+      <video id="loopPlayer" loop playsinline></video>
       <div class="vignette"></div>
       <div class="status-wrap">
         <span class="status-label" id="statusLabel">STANDBY</span>
@@ -405,9 +478,25 @@
         <div class="bpm-display" id="bpmDisplay">--- BPM</div>
       </div>
     </div>
+
+    <div class="rec-controls">
+      <button class="rec-btn" id="recBtn">[ REC ]</button>
+      <div class="rec-timer" id="recTimer">00:00</div>
+    </div>
   </div>
 
+  <div class="pill-row" id="pillRow"></div>
+
   <div class="footer-text">SPAZECRAFT — BRONX NYC</div>
+</div>
+
+<div class="pill-menu" id="pillMenu">
+  <span class="pill-menu-close" id="pillMenuClose">✕</span>
+  <div class="pill-menu-row"><label>VOL</label><input type="range" id="pmVol" min="0" max="1" step="0.01" value="1"></div>
+  <div class="pill-menu-row"><label>PITCH</label><input type="range" id="pmPitch" min="0.5" max="1.8" step="0.01" value="1"></div>
+  <div class="pill-menu-row"><label>REVERB</label><input type="range" id="pmReverb" min="0" max="1" step="0.01" value="0"></div>
+  <div class="pill-menu-row"><label>DELAY</label><input type="range" id="pmDelay" min="0" max="1" step="0.01" value="0"></div>
+  <button class="pill-menu-dl" id="pmDownload">⬇ DOWNLOAD LOOP</button>
 </div>
 
 <script>
@@ -447,6 +536,7 @@ const fsBtn      = document.getElementById('fsBtn');
 const exitFsBtn  = document.getElementById('exitFsBtn');
 
 let audioCtx, analyser, source, dataArray, freqData, bufferLength;
+let micStream=null;
 let running=false, mode='wave';
 let animId, frameCount=0;
 let showCrosshair=true;
@@ -594,6 +684,7 @@ startBtn.addEventListener('click',async()=>{
     try{
       audioCtx=new(window.AudioContext||window.webkitAudioContext)();
       const stream=await navigator.mediaDevices.getUserMedia({audio:true,video:false});
+      micStream=stream;
       source=audioCtx.createMediaStreamSource(stream);
       analyser=audioCtx.createAnalyser();
       analyser.fftSize=2048;
@@ -606,12 +697,17 @@ startBtn.addEventListener('click',async()=>{
       statusDot.classList.add('active');
       statusLabel.textContent='LIVE';
       startBtn.textContent='[ STOP ]';
+      initDisruptEngine();
+      initLoopAudioGraph();
       draw();
     }catch(e){ startBtn.textContent='[ DENIED ]'; }
   } else {
     running=false;
+    if(recActive) stopRecording();
     cancelAnimationFrame(animId);
     audioCtx.close();
+    if(micStream) micStream.getTracks().forEach(t=>t.stop());
+    micStream=null;
     statusDot.classList.remove('active');
     statusLabel.textContent='STANDBY';
     startBtn.textContent='[ ACTIV8 ]';
@@ -678,12 +774,19 @@ function draw(){
   ctx.lineWidth  =thick+normAmp*1.2;
   ctx.lineCap='round'; ctx.lineJoin='round';
 
+  ctx.save();
+  if(disrupt.drone>0.01){
+    ctx.filter=`hue-rotate(${(disrupt.drone*360)|0}deg) blur(${(disrupt.drone*1.4).toFixed(2)}px)`;
+  }
   if     (mode==='wave')       drawWave(W,H,gain);
   else if(mode==='circle')     drawCircle(W,H,gain);
   else if(mode==='bars')       drawBars(W,H,gain,normAmp);
   else if(mode==='lissajous')  drawLissajous(W,H,gain,normAmp,speed);
   else if(mode==='cymatics')   drawCymatics(W,H,gain,normAmp,speed,avgAmp);
   else if(mode==='sonar') drawSonar(W,H,normAmp,speed,thick);
+  ctx.restore();
+
+  applyDisruptors(W,H);
 
   if(showCrosshair){
     ctx.shadowBlur=0;
@@ -1034,6 +1137,448 @@ function idleDraw(){
   requestAnimationFrame(idleDraw);
 }
 idleDraw();
+
+// ══════════════════════════════════════════════════════════════════
+// LOOP RECORDER + PILL DECK + GESTURE DISRUPTORS — Part 1
+// ══════════════════════════════════════════════════════════════════
+
+// ── STATE ──
+let mediaRecorder=null, recChunks=[], recActive=false, recSecs=0, recInterval=null;
+let loopPills=[null,null,null,null,null,null,null,null];
+const pillHues=[350,20,50,90,150,190,230,280];
+let activePillIndex=null, pillMenuIndex=null;
+let disrupt={drone:0,ghost:0,sweep:0,crush:0};
+
+// Shared audio nodes, (re)built each time ACTIV8 starts a session
+let droneInputGain,droneFilter,droneDelay,droneFeedback,droneOutGain;
+let ghostFilter,ghostGain,ghostLFO,ghostLFOGain;
+let sweepFilter,sweepGain;
+let crushShaper,crushGain;
+let reverbBus,delayBus;
+let loopSource,loopGain,loopReverbSend,loopDelaySend;
+
+const recBtn=document.getElementById('recBtn');
+const recTimerEl=document.getElementById('recTimer');
+const loopPlayer=document.getElementById('loopPlayer');
+const pillRow=document.getElementById('pillRow');
+const pillMenu=document.getElementById('pillMenu');
+const pmVol=document.getElementById('pmVol'), pmPitch=document.getElementById('pmPitch'),
+      pmReverb=document.getElementById('pmReverb'), pmDelay=document.getElementById('pmDelay'),
+      pmDownload=document.getElementById('pmDownload'), pillMenuClose=document.getElementById('pillMenuClose');
+
+// ── AUDIO ENGINE INIT (call fresh each ACTIV8 session) ──
+function buildSpaceReverbNetwork(inputBus){
+  const times=[0.029,0.041,0.053,0.067];
+  times.forEach(t=>{
+    const d=audioCtx.createDelay(1); d.delayTime.value=t;
+    const fb=audioCtx.createGain(); fb.gain.value=0.78;
+    const lp=audioCtx.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value=3200;
+    inputBus.connect(d);
+    d.connect(lp); lp.connect(fb); fb.connect(d);
+    lp.connect(audioCtx.destination);
+  });
+}
+
+function initDisruptEngine(){
+  try{
+    // DRONE — feedback delay loop fed by live mic (no-input-mixer style)
+    droneInputGain=audioCtx.createGain(); droneInputGain.gain.value=0;
+    droneFilter=audioCtx.createBiquadFilter(); droneFilter.type='bandpass'; droneFilter.frequency.value=650; droneFilter.Q.value=1.4;
+    droneDelay=audioCtx.createDelay(2.0); droneDelay.delayTime.value=0.28;
+    droneFeedback=audioCtx.createGain(); droneFeedback.gain.value=0;
+    droneOutGain=audioCtx.createGain(); droneOutGain.gain.value=0;
+    source.connect(droneInputGain);
+    droneInputGain.connect(droneDelay);
+    droneDelay.connect(droneFilter);
+    droneFilter.connect(droneFeedback);
+    droneFeedback.connect(droneDelay);
+    droneFilter.connect(droneOutGain);
+    droneOutGain.connect(audioCtx.destination);
+
+    // GHOST CHANNEL — mic through slow LFO-modulated lowpass, short decay tail
+    ghostFilter=audioCtx.createBiquadFilter(); ghostFilter.type='lowpass'; ghostFilter.frequency.value=800; ghostFilter.Q.value=6;
+    ghostGain=audioCtx.createGain(); ghostGain.gain.value=0;
+    ghostLFO=audioCtx.createOscillator(); ghostLFO.frequency.value=0.6; ghostLFO.type='sine';
+    ghostLFOGain=audioCtx.createGain(); ghostLFOGain.gain.value=500;
+    ghostLFO.connect(ghostLFOGain); ghostLFOGain.connect(ghostFilter.frequency);
+    ghostLFO.start();
+    source.connect(ghostFilter); ghostFilter.connect(ghostGain); ghostGain.connect(audioCtx.destination);
+
+    // RESONANT SWEEP — mic through high-Q bandpass, pinch-distance controlled
+    sweepFilter=audioCtx.createBiquadFilter(); sweepFilter.type='bandpass'; sweepFilter.frequency.value=800; sweepFilter.Q.value=4;
+    sweepGain=audioCtx.createGain(); sweepGain.gain.value=0;
+    source.connect(sweepFilter); sweepFilter.connect(sweepGain); sweepGain.connect(audioCtx.destination);
+
+    // BITCRUSH DEGRADE — mic through waveshaper, twist-angle controlled
+    crushShaper=audioCtx.createWaveShaper();
+    crushGain=audioCtx.createGain(); crushGain.gain.value=0;
+    source.connect(crushShaper); crushShaper.connect(crushGain); crushGain.connect(audioCtx.destination);
+    setCrushCurve(0);
+
+    // SPACE REVERB + DUB DELAY — shared sends, used by loop pill playback
+    reverbBus=audioCtx.createGain(); reverbBus.gain.value=1;
+    reverbBus.connect(audioCtx.destination);
+    buildSpaceReverbNetwork(reverbBus);
+
+    delayBus=audioCtx.createGain(); delayBus.gain.value=1;
+    const dubDelayNode=audioCtx.createDelay(1.5); dubDelayNode.delayTime.value=0.375;
+    const dubFeedback=audioCtx.createGain(); dubFeedback.gain.value=0.42;
+    const dubFilter=audioCtx.createBiquadFilter(); dubFilter.type='lowpass'; dubFilter.frequency.value=2200;
+    delayBus.connect(dubDelayNode);
+    dubDelayNode.connect(dubFilter);
+    dubFilter.connect(dubFeedback);
+    dubFeedback.connect(dubDelayNode);
+    dubFilter.connect(audioCtx.destination);
+  }catch(e){ /* effects engine unavailable this session — visualizer still runs fine */ }
+}
+
+function initLoopAudioGraph(){
+  try{
+    loopSource=audioCtx.createMediaElementSource(loopPlayer);
+    loopGain=audioCtx.createGain(); loopGain.gain.value=1;
+    loopReverbSend=audioCtx.createGain(); loopReverbSend.gain.value=0;
+    loopDelaySend=audioCtx.createGain(); loopDelaySend.gain.value=0;
+    loopSource.connect(loopGain);
+    loopGain.connect(audioCtx.destination);
+    loopGain.connect(loopReverbSend); loopReverbSend.connect(reverbBus);
+    loopGain.connect(loopDelaySend); loopDelaySend.connect(delayBus);
+  }catch(e){ /* MediaElementSource can only bind once per element — safe to ignore on repeat sessions */ }
+}
+
+// ── DISRUPTOR TRIGGERS ──
+function setDrone(amt){
+  disrupt.drone=amt;
+  if(!droneInputGain) return;
+  const now=audioCtx.currentTime;
+  droneInputGain.gain.setTargetAtTime(0.9,now,0.05);
+  droneFeedback.gain.setTargetAtTime(0.3+amt*0.62,now,0.08);
+  droneOutGain.gain.setTargetAtTime(0.15+amt*0.75,now,0.08);
+}
+function releaseDrone(){
+  if(droneInputGain){
+    const now=audioCtx.currentTime;
+    droneInputGain.gain.setTargetAtTime(0,now,0.3);
+    droneFeedback.gain.setTargetAtTime(0,now,1.4);
+    droneOutGain.gain.setTargetAtTime(0,now,1.6);
+  }
+  (function decay(){ disrupt.drone*=0.9; if(disrupt.drone>0.01) requestAnimationFrame(decay); else disrupt.drone=0; })();
+}
+
+function triggerGhost(speed){
+  if(!ghostFilter) return;
+  const now=audioCtx.currentTime;
+  const level=Math.min(1,speed*40);
+  disrupt.ghost=level;
+  ghostLFO.frequency.setTargetAtTime(0.3+level*3,now,0.1);
+  ghostGain.gain.setTargetAtTime(level*0.55,now,0.05);
+  ghostGain.gain.setTargetAtTime(0,now+0.15,0.9);
+  (function decay(){ disrupt.ghost*=0.92; if(disrupt.ghost>0.01) requestAnimationFrame(decay); else disrupt.ghost=0; })();
+}
+
+function setSweep(norm){
+  disrupt.sweep=norm;
+  if(!sweepFilter) return;
+  const now=audioCtx.currentTime;
+  const freq=110*Math.pow(36,norm);
+  sweepFilter.frequency.setTargetAtTime(freq,now,0.03);
+  sweepFilter.Q.setTargetAtTime(3+norm*24,now,0.05);
+  sweepGain.gain.setTargetAtTime(0.5+norm*0.4,now,0.05);
+}
+function releaseSweep(){
+  if(sweepGain) sweepGain.gain.setTargetAtTime(0,audioCtx.currentTime,0.5);
+  (function decay(){ disrupt.sweep*=0.9; if(disrupt.sweep>0.01) requestAnimationFrame(decay); else disrupt.sweep=0; })();
+}
+
+function setCrushCurve(amt){
+  if(!crushShaper) return;
+  const steps=Math.max(2,Math.round(32-amt*30));
+  const n=512, curve=new Float32Array(n);
+  for(let i=0;i<n;i++){
+    const x=i/(n-1)*2-1;
+    curve[i]=Math.round(x*steps)/steps;
+  }
+  crushShaper.curve=curve;
+}
+function setCrush(amt){
+  disrupt.crush=amt;
+  setCrushCurve(amt);
+  if(crushGain) crushGain.gain.setTargetAtTime(0.4+amt*0.5,audioCtx.currentTime,0.03);
+}
+function releaseCrush(){
+  if(crushGain) crushGain.gain.setTargetAtTime(0,audioCtx.currentTime,0.4);
+  (function decay(){ disrupt.crush*=0.88; if(disrupt.crush>0.01) requestAnimationFrame(decay); else disrupt.crush=0; })();
+}
+
+// ── VISUAL POST-PROCESS for ghost / sweep / crush (drone handled via ctx.filter in draw()) ──
+const crushCanvas=document.createElement('canvas');
+const crushCtx=crushCanvas.getContext('2d');
+function applyDisruptors(W,H){
+  if(disrupt.ghost>0.01){
+    ctx.save();
+    ctx.globalAlpha=disrupt.ghost*0.35;
+    ctx.fillStyle=sigColor(1);
+    for(let i=0;i<5;i++){
+      const rw=Math.random()*W*0.4, rh=Math.random()*H*0.4;
+      ctx.fillRect(Math.random()*W-rw/2, Math.random()*H-rh/2, rw, rh);
+    }
+    ctx.restore();
+  }
+  if(disrupt.sweep>0.01){
+    ctx.save();
+    ctx.globalAlpha=0.5;
+    ctx.strokeStyle=sigColor(0.8);
+    ctx.lineWidth=2;
+    ctx.shadowBlur=20*disrupt.sweep;
+    ctx.shadowColor=sigColor(1);
+    const r=20+disrupt.sweep*Math.min(W,H)*0.4;
+    ctx.beginPath();
+    ctx.arc(W/2,H/2,r,0,Math.PI*2);
+    ctx.stroke();
+    ctx.restore();
+  }
+  if(disrupt.crush>0.02){
+    const blockSize=Math.max(2,Math.round(disrupt.crush*28));
+    const sw=Math.max(1,Math.floor(W/blockSize)), sh=Math.max(1,Math.floor(H/blockSize));
+    crushCanvas.width=sw; crushCanvas.height=sh;
+    crushCtx.drawImage(canvas,0,0,W,H,0,0,sw,sh);
+    ctx.save();
+    ctx.imageSmoothingEnabled=false;
+    ctx.drawImage(crushCanvas,0,0,sw,sh,0,0,W,H);
+    ctx.restore();
+  }
+}
+
+// ── GESTURE ZONE (shared by canvas, loopPlayer, and every empty pill) ──
+function makeGestureZone(el){
+  const pointers=new Map();
+  let longPressTimer=null, longPressStartTime=0, longPressActive=false;
+  let swipeStartX=0, swipeStartY=0, swipeStartTime=0, swipeFired=false;
+  let pinchActive=false, twistActive=false, twistStartAngle=0;
+
+  function dist(a,b){ return Math.hypot(a.x-b.x,a.y-b.y); }
+  function angle(a,b){ return Math.atan2(b.y-a.y,b.x-a.x); }
+
+  el.addEventListener('pointerdown',e=>{
+    if(!running) return;
+    pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
+    if(pointers.size===1){
+      swipeStartX=e.clientX; swipeStartY=e.clientY; swipeStartTime=Date.now(); swipeFired=false;
+      longPressStartTime=Date.now(); longPressActive=false;
+      clearInterval(longPressTimer);
+      longPressTimer=setInterval(()=>{
+        const held=(Date.now()-longPressStartTime)/1000;
+        if(pointers.size===1){ longPressActive=true; setDrone(Math.min(1,held/2.2)); }
+      },50);
+    } else if(pointers.size===2){
+      clearInterval(longPressTimer);
+      if(longPressActive) releaseDrone();
+      longPressActive=false;
+      const pts=[...pointers.values()];
+      twistStartAngle=angle(pts[0],pts[1]);
+      pinchActive=true; twistActive=true;
+    }
+  });
+
+  el.addEventListener('pointermove',e=>{
+    if(!pointers.has(e.pointerId)) return;
+    pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
+    if(pointers.size===1 && !longPressActive){
+      const dx=e.clientX-swipeStartX, dy=e.clientY-swipeStartY;
+      const d=Math.hypot(dx,dy), dt=(Date.now()-swipeStartTime)||1;
+      if(d>36 && !swipeFired){ swipeFired=true; triggerGhost(d/dt); }
+    } else if(pointers.size===2){
+      const pts=[...pointers.values()];
+      const dNow=dist(pts[0],pts[1]);
+      const aNow=angle(pts[0],pts[1]);
+      setSweep(Math.max(0,Math.min(1,(dNow-40)/300)));
+      let da=aNow-twistStartAngle;
+      while(da>Math.PI) da-=Math.PI*2;
+      while(da<-Math.PI) da+=Math.PI*2;
+      setCrush(Math.max(0,Math.min(1,Math.abs(da)/(Math.PI*0.75))));
+    }
+  });
+
+  function release(e){
+    pointers.delete(e.pointerId);
+    if(pointers.size===0){
+      clearInterval(longPressTimer);
+      if(longPressActive) releaseDrone();
+      longPressActive=false;
+      if(pinchActive) releaseSweep();
+      if(twistActive) releaseCrush();
+      pinchActive=false; twistActive=false;
+    } else if(pointers.size===1){
+      if(pinchActive) releaseSweep();
+      if(twistActive) releaseCrush();
+      pinchActive=false; twistActive=false;
+    }
+  }
+  el.addEventListener('pointerup',release);
+  el.addEventListener('pointercancel',release);
+}
+
+// ── RECORDING ──
+function startRecording(){
+  if(!running || !micStream) return;
+  const canvasStream=canvas.captureStream(30);
+  const combined=new MediaStream([...canvasStream.getVideoTracks(), ...micStream.getAudioTracks()]);
+  const formats=['video/mp4;codecs=avc1','video/mp4','video/webm;codecs=vp9','video/webm;codecs=vp8','video/webm',''];
+  const mimeType=formats.find(f=>f===''||MediaRecorder.isTypeSupported(f))||'';
+  try{ mediaRecorder=new MediaRecorder(combined, mimeType?{mimeType}:{}); }
+  catch(e){ return; }
+  recChunks=[];
+  mediaRecorder.ondataavailable=e=>{ if(e.data.size>0) recChunks.push(e.data); };
+  mediaRecorder.onstop=()=>{
+    const type=mediaRecorder.mimeType||'video/mp4';
+    const ext=type.includes('mp4')?'mp4':type.includes('webm')?'webm':'mp4';
+    const blob=new Blob(recChunks,{type});
+    const filename='cre8tiv_loop_'+Date.now()+'.'+ext;
+    const file=new File([blob],filename,{type});
+    if(navigator.canShare && navigator.canShare({files:[file]})){
+      navigator.share({files:[file],title:'CRE8TIV OSCILLOscOPE Loop'}).catch(()=>{});
+    } else {
+      const url=URL.createObjectURL(blob);
+      const a=document.createElement('a'); a.href=url; a.download=filename; a.click();
+    }
+    loadIntoPill(blob,filename,ext);
+  };
+  mediaRecorder.start();
+  recActive=true; recSecs=0;
+  recBtn.classList.add('recording');
+  recTimerEl.textContent='00:00';
+  clearInterval(recInterval);
+  recInterval=setInterval(()=>{
+    recSecs++;
+    const m=String(Math.floor(recSecs/60)).padStart(2,'0'), s=String(recSecs%60).padStart(2,'0');
+    recTimerEl.textContent=m+':'+s;
+  },1000);
+}
+function stopRecording(){
+  recActive=false;
+  clearInterval(recInterval);
+  recBtn.classList.remove('recording');
+  if(mediaRecorder && mediaRecorder.state!=='inactive') mediaRecorder.stop();
+}
+recBtn.addEventListener('click',()=>{
+  if(!running) return;
+  if(!recActive) startRecording(); else stopRecording();
+});
+
+// ── PILL DECK ──
+function loadIntoPill(blob,filename,ext){
+  const idx=loopPills.findIndex(p=>p===null);
+  if(idx===-1) return;
+  const url=URL.createObjectURL(blob);
+  loopPills[idx]={url,filename,ext,vol:1,pitch:1,reverb:0,delay:0,active:false,discovered:false};
+  renderPills();
+}
+
+function togglePill(i){
+  const p=loopPills[i];
+  if(!p) return;
+  if(activePillIndex===i){
+    loopPlayer.pause();
+    loopPlayer.style.display='none';
+    canvas.style.display='block';
+    p.active=false;
+    activePillIndex=null;
+  } else {
+    if(activePillIndex!==null) loopPills[activePillIndex].active=false;
+    loopPlayer.src=p.url;
+    loopPlayer.playbackRate=p.pitch;
+    if(loopGain) loopGain.gain.value=p.vol;
+    if(loopReverbSend) loopReverbSend.gain.value=p.reverb;
+    if(loopDelaySend) loopDelaySend.gain.value=p.delay;
+    loopPlayer.style.display='block';
+    canvas.style.display='none';
+    loopPlayer.play().catch(()=>{});
+    p.active=true; p.discovered=true;
+    activePillIndex=i;
+  }
+  renderPills();
+}
+
+function openPillMenu(i,x,y){
+  const p=loopPills[i]; if(!p) return;
+  pillMenuIndex=i;
+  pmVol.value=p.vol; pmPitch.value=p.pitch; pmReverb.value=p.reverb; pmDelay.value=p.delay;
+  const mw=200, mh=175;
+  const left=Math.min(Math.max(8,x-mw/2), window.innerWidth-mw-8);
+  const top=Math.min(Math.max(8,y-mh-20), window.innerHeight-mh-8);
+  pillMenu.style.left=left+'px'; pillMenu.style.top=top+'px';
+  pillMenu.classList.add('open');
+}
+function closePillMenu(){ pillMenu.classList.remove('open'); pillMenuIndex=null; }
+pillMenuClose.addEventListener('click',closePillMenu);
+document.addEventListener('pointerdown',e=>{
+  if(pillMenu.classList.contains('open') && !pillMenu.contains(e.target) && !e.target.closest('.loop-pill')){
+    closePillMenu();
+  }
+});
+
+pmVol.addEventListener('input',()=>{
+  const p=loopPills[pillMenuIndex]; if(!p) return;
+  p.vol=parseFloat(pmVol.value);
+  if(p.active && loopGain) loopGain.gain.value=p.vol;
+});
+pmPitch.addEventListener('input',()=>{
+  const p=loopPills[pillMenuIndex]; if(!p) return;
+  p.pitch=parseFloat(pmPitch.value);
+  if(p.active) loopPlayer.playbackRate=p.pitch;
+});
+pmReverb.addEventListener('input',()=>{
+  const p=loopPills[pillMenuIndex]; if(!p) return;
+  p.reverb=parseFloat(pmReverb.value);
+  if(p.active && loopReverbSend) loopReverbSend.gain.value=p.reverb;
+});
+pmDelay.addEventListener('input',()=>{
+  const p=loopPills[pillMenuIndex]; if(!p) return;
+  p.delay=parseFloat(pmDelay.value);
+  if(p.active && loopDelaySend) loopDelaySend.gain.value=p.delay;
+});
+pmDownload.addEventListener('click',()=>{
+  const p=loopPills[pillMenuIndex]; if(!p) return;
+  const a=document.createElement('a'); a.href=p.url; a.download=p.filename;
+  a.click();
+});
+
+function attachPillHandlers(el,i){
+  const p=loopPills[i];
+  if(!p){ makeGestureZone(el); return; }
+  let downTime=0, longPressTimer=null, longPressFired=false, startX=0, startY=0, moved=false;
+  el.addEventListener('pointerdown',e=>{
+    downTime=Date.now(); longPressFired=false; moved=false;
+    startX=e.clientX; startY=e.clientY;
+    longPressTimer=setTimeout(()=>{ longPressFired=true; openPillMenu(i,e.clientX,e.clientY); },500);
+  });
+  el.addEventListener('pointermove',e=>{
+    if(Math.hypot(e.clientX-startX,e.clientY-startY)>10) moved=true;
+  });
+  el.addEventListener('pointerup',()=>{
+    clearTimeout(longPressTimer);
+    if(!longPressFired && !moved) togglePill(i);
+  });
+  el.addEventListener('pointercancel',()=>clearTimeout(longPressTimer));
+}
+
+function renderPills(){
+  pillRow.innerHTML='';
+  loopPills.forEach((p,i)=>{
+    const el=document.createElement('div');
+    let cls='loop-pill '+(p?'filled':'empty');
+    if(p && !p.discovered) cls+=' pulsing';
+    if(p && p.active) cls+=' active';
+    el.className=cls;
+    el.style.background=`hsl(${pillHues[i]},70%,80%)`;
+    el.style.color=`hsl(${pillHues[i]},70%,80%)`;
+    pillRow.appendChild(el);
+    attachPillHandlers(el,i);
+  });
+}
+renderPills();
+makeGestureZone(canvas);
+makeGestureZone(loopPlayer);
+
 </script>
 </body>
 </html>
