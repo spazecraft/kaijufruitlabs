@@ -1,0 +1,2193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>SONIK CRYSTALZ v8.22 — SpazeCraft / Kaiju Fruit Labs</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none;}
+body{background:#000;overflow:hidden;width:100vw;height:100vh;font-family:'Courier New',monospace;touch-action:none;}
+canvas{display:block;position:absolute;top:0;left:0;}
+#play-area{position:fixed;top:46px;left:0;right:0;bottom:82px;overflow:hidden;pointer-events:none;}
+
+#topbar{position:fixed;top:0;left:0;right:0;min-height:46px;z-index:200;background:rgba(0,0,0,0.94);display:flex;align-items:center;padding:0 6px;gap:2px;border-bottom:1px solid rgba(255,255,255,0.08);flex-wrap:wrap;overflow:hidden;}
+@media(max-width:700px){
+  #topbar{height:auto;padding:4px 6px;}
+  #actionbtns{flex-wrap:wrap;row-gap:3px;margin-left:0;width:100%;}
+  .tbtn{font-size:7px;padding:4px 6px;}
+  .tbtn-primary{font-size:7px;padding:5px 9px;}
+}
+#logo{font-size:12px;font-weight:700;letter-spacing:0.18em;color:#fff;white-space:nowrap;margin-right:6px;flex-shrink:0;}
+#toolbtns{display:flex;gap:2px;flex-shrink:0;}
+#actionbtns{display:flex;gap:2px;margin-left:auto;flex-shrink:0;align-items:center;}
+
+/* Standard pill */
+.tbtn{padding:5px 8px;border-radius:5px;border:1px solid rgba(255,255,255,0.5);background:rgba(255,255,255,0.07);color:#fff;font-size:10px;font-family:'Courier New',monospace;letter-spacing:0.07em;text-transform:uppercase;cursor:pointer;white-space:nowrap;line-height:1;}
+.tbtn:active,.tbtn.active{background:rgba(255,255,255,0.22);border-color:rgba(255,255,255,0.9);}
+
+/* PRIMARY BUILDER PILLS — larger, more prominent */
+.tbtn-primary{padding:7px 13px;border-radius:6px;border:2px solid rgba(255,255,255,0.85);background:rgba(255,255,255,0.12);color:#fff;font-size:11px;font-family:'Courier New',monospace;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;white-space:nowrap;line-height:1;font-weight:700;}
+.tbtn-primary:active{background:rgba(255,255,255,0.28);}
+.tbtn-primary.form-btn{background:rgba(255,165,0,0.18);border-color:rgba(255,165,0,0.9);color:#ffb020;}
+.tbtn-primary.mode-fan{background:rgba(0,180,255,0.14);border-color:rgba(0,180,255,0.9);color:#40c8ff;}
+.tbtn-primary.mode-loop{background:rgba(0,255,140,0.12);border-color:rgba(0,255,140,0.9);color:#20ff90;}
+
+.tbtn.rand-btn{background:rgba(160,60,255,0.10);border-color:rgba(160,60,255,0.55);color:#c070ff;}
+.tbtn.clear-btn{background:rgba(255,50,50,0.10);border-color:rgba(255,50,50,0.55);color:#ff6060;}
+.tbtn.audio-on{background:rgba(0,220,100,0.10);border-color:rgba(0,220,100,0.6);color:#20e870;}
+.tbtn.audio-off{background:rgba(255,50,50,0.10);border-color:rgba(255,50,50,0.55);color:#ff6060;}
+.tbtn.trans-on{background:rgba(255,0,180,0.15);border-color:rgba(255,80,200,0.7);color:#ff50e0;}
+.tbtn.bloat-on{background:rgba(255,80,180,0.12);border-color:rgba(255,80,180,0.6);color:#ff80cc;}
+
+#counter{position:fixed;top:50px;right:10px;text-align:right;font-size:12px;color:rgba(255,255,255,0.25);letter-spacing:0.1em;z-index:200;line-height:1.8;}
+
+#toolboxes{position:fixed;top:52px;right:10px;z-index:300;display:flex;flex-direction:column;gap:7px;pointer-events:none;align-items:flex-end;}
+.toolbox{background:rgba(4,6,14,0.96);border:1px solid rgba(255,255,255,0.13);border-radius:10px;padding:11px 13px;min-width:220px;backdrop-filter:blur(16px);display:none;pointer-events:all;}
+.toolbox.open{display:block;}
+.tb-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+.tb-title{font-size:8px;letter-spacing:0.22em;color:rgba(255,255,255,0.38);text-transform:uppercase;}
+.gl-wrap{position:relative;display:inline-block;}
+.gl-badge{font-size:8px;color:rgba(255,255,255,0.32);background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.13);border-radius:4px;padding:2px 6px;cursor:pointer;}
+.gl-badge:hover{background:rgba(255,255,255,0.14);color:#fff;}
+.gl-tip{position:fixed;width:190px;background:rgba(0,0,0,0.98);border:1px solid rgba(255,255,255,0.22);border-radius:7px;padding:9px 11px;font-size:9px;color:rgba(255,255,255,0.75);line-height:1.55;pointer-events:none;opacity:0;transition:opacity 0.18s;z-index:9999;font-family:'Courier New',monospace;}
+.gl-wrap:hover .gl-tip{opacity:1;}
+.tool-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+.tool-row:last-child{margin-bottom:0;}
+.tool-row label{font-size:9px;color:rgba(255,255,255,0.38);width:72px;flex-shrink:0;}
+.tool-row input[type=range]{flex:1;height:3px;cursor:pointer;-webkit-appearance:none;appearance:none;background:rgba(255,255,255,0.1);border-radius:2px;outline:none;}
+.tool-row input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:#e8e8e8;border:2px solid rgba(0,0,0,0.4);cursor:pointer;}
+.tool-row .val{font-size:9px;color:rgba(255,255,255,0.32);width:28px;text-align:right;}
+.tone-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+.tone-row label{font-size:9px;color:rgba(255,255,255,0.38);width:72px;flex-shrink:0;}
+.switch-btn{padding:4px 10px;border-radius:5px;border:1px solid rgba(255,255,255,0.16);background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.4);font-size:9px;letter-spacing:0.1em;cursor:pointer;text-transform:uppercase;}
+.switch-btn.on{background:rgba(160,60,255,0.2);border-color:rgba(160,60,255,0.6);color:#c080ff;}
+.tb-actions{display:flex;gap:5px;flex-wrap:wrap;margin-top:10px;}
+.tb-action{padding:5px 9px;border-radius:5px;border:1px solid rgba(255,255,255,0.5);background:rgba(255,255,255,0.06);color:#fff;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;}
+.tb-action.active{background:rgba(255,255,255,0.18);border-color:rgba(255,255,255,0.9);}
+.mix-header{font-size:8px;letter-spacing:0.15em;color:rgba(255,255,255,0.28);margin:10px 0 8px;padding-top:9px;border-top:1px solid rgba(255,255,255,0.07);}
+.cvrow{display:flex;align-items:center;gap:7px;margin-bottom:7px;}
+.cvrow .cvlabel{font-size:9px;width:62px;flex-shrink:0;color:rgba(255,255,255,0.38);}
+.cvrow input[type=range]{flex:1;height:3px;cursor:pointer;-webkit-appearance:none;appearance:none;background:rgba(255,255,255,0.1);border-radius:2px;outline:none;}
+.cvrow input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:#e8e8e8;border:2px solid rgba(0,0,0,0.4);cursor:pointer;}
+.cvrow .val{font-size:9px;color:rgba(255,255,255,0.28);width:22px;text-align:right;}
+.tb-sep{height:1px;background:rgba(255,255,255,0.07);margin:8px 0;}
+
+#mode-badge{position:fixed;top:50px;left:50%;transform:translateX(-50%);font-size:8px;letter-spacing:0.16em;color:rgba(255,255,255,0.22);z-index:190;text-transform:uppercase;pointer-events:none;}
+#bond-badge{position:fixed;top:64px;left:50%;transform:translateX(-50%);font-size:7px;letter-spacing:0.14em;color:rgba(255,220,0,0);z-index:190;text-transform:uppercase;pointer-events:none;transition:color 0.5s;}
+#bond-badge.show{color:rgba(255,220,0,0.7);}
+#feed-badge{position:fixed;top:50px;right:10px;font-size:7px;letter-spacing:0.1em;color:rgba(0,220,100,0.5);z-index:190;pointer-events:none;}
+
+#crystal-pills{position:fixed;top:100px;left:10px;display:flex;flex-direction:column;gap:6px;z-index:200;}
+.cpill{display:flex;flex-direction:column;align-items:center;gap:4px;background:rgba(0,0,0,0.72);border:1px solid rgba(255,255,255,0.55);border-radius:11px;padding:7px 9px 6px;cursor:pointer;transition:all 0.14s;min-width:52px;}
+.cpill.active{border-color:#fff;background:rgba(255,255,255,0.14);}
+.cpill svg{width:20px;height:20px;}
+.cpill span{font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:#fff;}
+.cpill.active span{color:#fff;}
+
+#science-pill{position:fixed;bottom:16px;left:12px;max-width:360px;z-index:190;padding:11px 14px;border-radius:10px;font-size:12px;line-height:1.62;letter-spacing:0.04em;opacity:0;transition:opacity 1s;border:1px solid transparent;background:rgba(2,4,12,0.85);backdrop-filter:blur(12px);pointer-events:none;}
+#science-pill.visible{opacity:1;}
+#pill-label{font-size:8px;letter-spacing:0.18em;text-transform:uppercase;margin-bottom:5px;font-weight:bold;}
+#pill-text{color:rgba(255,255,255,0.83);}
+#status{position:fixed;top:54px;left:50%;transform:translateX(-50%);font-size:9px;color:rgba(255,255,255,0.22);letter-spacing:0.12em;z-index:190;white-space:nowrap;text-align:center;pointer-events:none;text-transform:uppercase;}
+#branding{position:fixed;bottom:12px;right:12px;font-size:7px;color:rgba(255,255,255,0.12);letter-spacing:0.2em;z-index:200;text-align:right;line-height:2;}
+
+/* FULLSCREEN MODE */
+#btn-fs{padding:5px 8px;border-radius:5px;border:1px solid rgba(255,255,255,0.5);background:rgba(255,255,255,0.07);color:#fff;font-size:10px;font-family:'Courier New',monospace;letter-spacing:0.07em;text-transform:uppercase;cursor:pointer;white-space:nowrap;line-height:1;}
+#btn-fs:active{background:rgba(255,255,255,0.22);}
+#fs-back{position:fixed;top:10px;right:10px;z-index:9999;display:none;padding:6px 11px;border-radius:6px;border:1px solid rgba(255,255,255,0.28);background:rgba(0,0,0,0.55);color:rgba(255,255,255,0.55);font-size:9px;font-family:'Courier New',monospace;letter-spacing:0.12em;text-transform:uppercase;cursor:pointer;backdrop-filter:blur(8px);}
+#fs-back:active{background:rgba(255,255,255,0.12);color:#fff;}
+body.fullscreen #topbar,
+body.fullscreen #toolboxes,
+body.fullscreen #crystal-pills,
+body.fullscreen #counter,
+body.fullscreen #mode-badge,
+body.fullscreen #bond-badge,
+body.fullscreen #feed-badge,
+body.fullscreen #science-pill,
+body.fullscreen #status,
+body.fullscreen #branding{display:none!important;}
+body.fullscreen #fs-back{display:block;}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+
+<div id="topbar">
+  <div id="logo">SONIK CRYSTALZ</div>
+  <div id="toolbtns">
+    <button class="tbtn" id="btn-shape">SHAPE</button>
+    <button class="tbtn" id="btn-color">COLOR</button>
+    <button class="tbtn" id="btn-physics">PHYSICS</button>
+    <button class="tbtn" id="btn-glitch">GLITCH</button>
+    <button class="tbtn" id="btn-audio">AUDIO</button>
+    <button class="tbtn" id="btn-granular" style="color:#c0ffb0">GRANULAR</button>
+  </div>
+  <div id="actionbtns">
+    <button class="tbtn-primary mode-fan" id="btn-buildmode">BUILD: FAN</button>
+    <button class="tbtn-primary form-btn" id="btn-form">&#9673; FORM</button>
+    <button class="tbtn" id="btn-trans">TRANS</button>
+    <button class="tbtn" id="btn-bgrand">BG</button>
+    <button class="tbtn" id="btn-bloat" style="opacity:0.35;cursor:not-allowed;" title="BLOAT — unlock at 15 crystals">BLOAT</button>
+    <button class="tbtn audio-on" id="btn-audiotog">&#9834; ON</button>
+    <button class="tbtn" id="btn-pulse">PULSE</button>
+    <button class="tbtn rand-btn" id="btn-rand">RAND</button>
+    <button class="tbtn" id="btn-undo">UNDO</button>
+    <button class="tbtn" id="btn-redo">REDO</button>
+    <button class="tbtn clear-btn" id="btn-clear">CLEAR</button>
+    <button id="btn-fs">⛶ FULL</button>
+  </div>
+</div>
+
+<button id="fs-back">✕ EXIT</button>
+
+<div id="counter"><div id="cnt-c">0 crystals</div><div id="cnt-f">0 faces</div></div>
+<div id="mode-badge">mode: fan triangulation</div>
+<div id="bond-badge">&#9672; WALL-LOCK</div>
+<div id="feed-badge"></div>
+
+<div id="toolboxes">
+  <div class="toolbox" id="tb-shape">
+    <div class="tb-header"><span class="tb-title">SHAPE</span>
+      <div class="gl-wrap"><div class="gl-badge" id="gl-shape">G</div><div class="gl-tip" id="tip-shape">G = all crystals. L = last touched only.</div></div>
+    </div>
+    <div class="tool-row"><label>spike</label><input type="range" min="0" max="100" value="40" id="sl-spike"><span class="val" id="v-spike">40</span></div>
+    <div class="tool-row"><label>breath</label><input type="range" min="0" max="100" value="50" id="sl-breath"><span class="val" id="v-breath">50</span></div>
+    <div class="tool-row"><label>elasticity</label><input type="range" min="0" max="100" value="60" id="sl-elas"><span class="val" id="v-elas">60</span></div>
+  </div>
+  <div class="toolbox" id="tb-color">
+    <div class="tb-header"><span class="tb-title">COLOR</span>
+      <div class="gl-wrap"><div class="gl-badge" id="gl-color">G</div><div class="gl-tip" id="tip-color">G = all crystals. L = last touched only.</div></div>
+    </div>
+    <div class="tool-row"><label>hue shift</label><input type="range" min="-180" max="180" value="0" id="sl-hue"><span class="val" id="v-hue">0</span></div>
+    <div class="tool-row"><label>saturation</label><input type="range" min="0" max="100" value="70" id="sl-sat"><span class="val" id="v-sat">70</span></div>
+    <div class="tool-row"><label>brightness</label><input type="range" min="20" max="90" value="52" id="sl-bright"><span class="val" id="v-bright">52</span></div>
+    <div class="tool-row"><label>alpha</label><input type="range" min="10" max="100" value="72" id="sl-alpha"><span class="val" id="v-alpha">72</span></div>
+    <div class="tone-row"><label>2-tone</label><button class="switch-btn" id="btn-2tone">OFF</button></div>
+  </div>
+  <div class="toolbox" id="tb-physics">
+    <div class="tb-header"><span class="tb-title">PHYSICS</span>
+      <div class="gl-wrap"><div class="gl-badge" id="gl-physics">G</div><div class="gl-tip" id="tip-physics">G = all crystals. L = last touched only.</div></div>
+    </div>
+    <div class="tool-row"><label>drift</label><input type="range" min="0" max="100" value="0" id="sl-drift"><span class="val" id="v-drift">0</span></div>
+    <div class="tool-row"><label>viscosity</label><input type="range" min="0" max="100" value="85" id="sl-visc"><span class="val" id="v-visc">85</span></div>
+    <div class="tool-row"><label>attraction</label><input type="range" min="0" max="100" value="0" id="sl-attract"><span class="val" id="v-attract">0</span></div>
+    <div class="tool-row"><label>separation</label><input type="range" min="0" max="100" value="0" id="sl-sep"><span class="val" id="v-sep">0</span></div>
+    <div class="tool-row"><label>bond pull</label><input type="range" min="0" max="100" value="40" id="sl-bondpull"><span class="val" id="v-bondpull">40</span></div>
+    <div class="tb-actions">
+      <button class="tb-action" id="pa-pulse">PULSE</button>
+      <button class="tb-action" id="pa-trans">TRANS</button>
+    </div>
+  </div>
+  <div class="toolbox" id="tb-glitch">
+    <div class="tb-header"><span class="tb-title">GLITCH</span>
+      <div class="gl-wrap"><div class="gl-badge" id="gl-glitch">G</div><div class="gl-tip" id="tip-glitch">G = all crystals. L = last touched. Double-tap crystal to trigger.</div></div>
+    </div>
+    <div class="tool-row"><label>intensity</label><input type="range" min="0" max="100" value="30" id="sl-gint"><span class="val" id="v-gint">30</span></div>
+    <div class="tool-row"><label>speed</label><input type="range" min="0" max="100" value="40" id="sl-gspd"><span class="val" id="v-gspd">40</span></div>
+    <div class="tool-row"><label>fracture</label><input type="range" min="0" max="100" value="20" id="sl-gfrac"><span class="val" id="v-gfrac">20</span></div>
+  </div>
+  <div class="toolbox" id="tb-audio">
+    <div class="tb-header"><span class="tb-title">AUDIO</span></div>
+    <div class="tool-row"><label>reverb</label><input type="range" min="0" max="100" value="0" id="sl-rev"><span class="val" id="v-rev">0</span></div>
+    <div class="tool-row"><label>ping-pong</label><input type="range" min="0" max="100" value="0" id="sl-del"><span class="val" id="v-del">0</span></div>
+    <div class="tool-row"><label>dub delay</label><input type="range" min="0" max="100" value="0" id="sl-dub"><span class="val" id="v-dub">0</span></div>
+    <div class="tool-row">
+      <label style="font-size:8px;line-height:1.3">filter<br><span style="opacity:0.4">LP ← ·· → HP</span></label>
+      <input type="range" min="-100" max="100" value="0" id="sl-filter"><span class="val" id="v-filter">0</span>
+    </div>
+    <div class="tool-row">
+      <label style="font-size:8px;line-height:1.3">stutter<br><span style="opacity:0.4">←  off  →</span><br>beat gate</label>
+      <input type="range" min="-100" max="100" value="0" id="sl-stutter"><span class="val" id="v-stutter">0</span>
+    </div>
+    <div class="tool-row"><label>time stretch</label><input type="range" min="50" max="200" value="100" id="sl-stretch"><span class="val" id="v-stretch">100</span></div>
+    <div class="tool-row"><label>master vol</label><input type="range" min="0" max="100" value="90" id="sl-vol"><span class="val" id="v-vol">90</span></div>
+    <div class="mix-header">CRYSTAL MIX</div>
+    <div class="cvrow"><div class="cvlabel" style="color:#7de8ff">Quartz</div><input type="range" min="0" max="100" value="80" id="vol-quartz"><span class="val" id="vv-quartz">80</span></div>
+    <div class="cvrow"><div class="cvlabel" style="color:#c880ff">Amethyst</div><input type="range" min="0" max="100" value="80" id="vol-amethyst"><span class="val" id="vv-amethyst">80</span></div>
+    <div class="cvrow"><div class="cvlabel" style="color:#f0c840">Pyrite</div><input type="range" min="0" max="100" value="80" id="vol-pyrite"><span class="val" id="vv-pyrite">80</span></div>
+    <div class="cvrow"><div class="cvlabel" style="color:#d09060">Smoky</div><input type="range" min="0" max="100" value="80" id="vol-smoky"><span class="val" id="vv-smoky">80</span></div>
+    <div class="cvrow"><div class="cvlabel" style="color:#9090ff">Grape</div><input type="range" min="0" max="100" value="80" id="vol-grape"><span class="val" id="vv-grape">80</span></div>
+    <div class="cvrow"><div class="cvlabel" style="color:#c060ff">Ametrine</div><input type="range" min="0" max="100" value="80" id="vol-ametrine"><span class="val" id="vv-ametrine">80</span></div>
+    <div class="cvrow"><div class="cvlabel" style="color:#ffffff">Titanium</div><input type="range" min="0" max="100" value="80" id="vol-titanium"><span class="val" id="vv-titanium">80</span></div>
+  </div>
+
+  <!-- GRANULAR STANDALONE TOOLBOX -->
+  <div class="toolbox" id="tb-granular">
+    <div class="tb-header"><span class="tb-title" style="color:#c0ffb0;letter-spacing:0.22em">GRANULAR ENGINE</span></div>
+    <div class="tool-row">
+      <label style="font-size:8px;line-height:1.3">density<br><span style="opacity:0.4">sparse → cloud</span></label>
+      <input type="range" min="0" max="100" value="0" id="sl-g-density"><span class="val" id="v-g-density">0</span>
+    </div>
+    <div class="tool-row">
+      <label style="font-size:8px;line-height:1.3">grain size<br><span style="opacity:0.4">micro → long</span></label>
+      <input type="range" min="0" max="100" value="50" id="sl-g-size"><span class="val" id="v-g-size">50</span>
+    </div>
+    <div class="tool-row">
+      <label style="font-size:8px;line-height:1.3">pitch scatter<br><span style="opacity:0.4">tight → wild</span></label>
+      <input type="range" min="0" max="100" value="20" id="sl-g-pitch"><span class="val" id="v-g-pitch">20</span>
+    </div>
+    <div class="tool-row">
+      <label style="font-size:8px;line-height:1.3">time freeze<br><span style="opacity:0.4">live → frozen</span></label>
+      <input type="range" min="0" max="100" value="0" id="sl-g-freeze"><span class="val" id="v-g-freeze">0</span>
+    </div>
+    <div class="tool-row">
+      <label style="font-size:8px;line-height:1.3">warp speed<br><span style="opacity:0.4">still → blur</span></label>
+      <input type="range" min="0" max="100" value="30" id="sl-g-warp"><span class="val" id="v-g-warp">30</span>
+    </div>
+    <div class="tool-row">
+      <label style="font-size:8px;line-height:1.3">crystal stain<br><span style="opacity:0.4">clean → saturate</span></label>
+      <input type="range" min="0" max="100" value="0" id="sl-g-stain"><span class="val" id="v-g-stain">0</span>
+    </div>
+    <div class="tool-row">
+      <label style="font-size:8px;line-height:1.3">chaos<br><span style="opacity:0.4">order → entropy</span></label>
+      <input type="range" min="0" max="100" value="10" id="sl-g-chaos"><span class="val" id="v-g-chaos">10</span>
+    </div>
+    <div class="tool-row">
+      <label style="font-size:8px;line-height:1.3">filter<br><span style="opacity:0.4">LP ← ·· → HP</span></label>
+      <input type="range" min="-100" max="100" value="0" id="sl-g-filter"><span class="val" id="v-g-filter">0</span>
+    </div>
+    <div class="tool-row">
+      <label style="font-size:8px;line-height:1.3">space echo<br><span style="opacity:0.4">dry → infinite</span></label>
+      <input type="range" min="0" max="100" value="0" id="sl-g-echo"><span class="val" id="v-g-echo">0</span>
+    </div>
+  </div>
+</div>
+
+<div id="science-pill"><div id="pill-label">Science</div><div id="pill-text"></div></div>
+<div id="status">tap to place points</div>
+
+<div id="crystal-pills">
+  <div class="cpill active" data-type="quartz"><svg viewBox="0 0 24 24"><polygon points="12,2 20,8 20,16 12,22 4,16 4,8" fill="none" stroke="#7de8ff" stroke-width="1.5"/><line x1="12" y1="2" x2="12" y2="22" stroke="#7de8ff" stroke-width="0.7" opacity="0.5"/><line x1="4" y1="8" x2="20" y2="16" stroke="#7de8ff" stroke-width="0.7" opacity="0.4"/><line x1="20" y1="8" x2="4" y2="16" stroke="#7de8ff" stroke-width="0.7" opacity="0.4"/></svg><span>Quartz</span></div>
+  <div class="cpill" data-type="amethyst"><svg viewBox="0 0 24 24"><polygon points="12,1 22,8 19,20 5,20 2,8" fill="none" stroke="#c880ff" stroke-width="1.5"/><line x1="12" y1="1" x2="12" y2="20" stroke="#c880ff" stroke-width="0.7" opacity="0.5"/></svg><span>Amethyst</span></div>
+  <div class="cpill" data-type="pyrite"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" fill="none" stroke="#f0c840" stroke-width="1.5"/><line x1="4" y1="4" x2="20" y2="20" stroke="#f0c840" stroke-width="0.7" opacity="0.5"/><line x1="20" y1="4" x2="4" y2="20" stroke="#f0c840" stroke-width="0.7" opacity="0.5"/></svg><span>Pyrite</span></div>
+  <div class="cpill" data-type="smoky"><svg viewBox="0 0 24 24"><polygon points="12,2 22,12 12,22 2,12" fill="none" stroke="#d09060" stroke-width="1.5"/><line x1="12" y1="2" x2="12" y2="22" stroke="#d09060" stroke-width="0.7" opacity="0.5"/><line x1="2" y1="12" x2="22" y2="12" stroke="#d09060" stroke-width="0.7" opacity="0.5"/></svg><span>Smoky</span></div>
+  <div class="cpill" data-type="grape"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="#9090ff" stroke-width="1.5"/><polygon points="12,3 21,12 12,21 3,12" fill="none" stroke="#9090ff" stroke-width="0.7" opacity="0.5"/></svg><span>Grape</span></div>
+  <div class="cpill" data-type="ametrine"><svg viewBox="0 0 24 24"><polygon points="12,2 20,7 20,17 12,22 4,17 4,7" fill="none" stroke="#c060ff" stroke-width="1.5"/><line x1="12" y1="2" x2="12" y2="22" stroke="#f0c840" stroke-width="1.2" opacity="0.7"/></svg><span>Ametrine</span></div>
+  <div class="cpill" data-type="titanium"><svg viewBox="0 0 24 24" style="opacity:0.45"><polygon points="12,2 22,9 18,21 6,21 2,9" fill="none" stroke="url(#tg)" stroke-width="1.5"/><defs><linearGradient id="tg" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#ff80ff"/><stop offset="50%" stop-color="#80ffff"/><stop offset="100%" stop-color="#ffff80"/></linearGradient></defs></svg><span>Titanium</span></div>
+</div>
+
+<div id="branding">SPAZECRAFT<br><span style="color:rgba(255,255,255,0.06)">KAIJU FRUIT LABS</span></div>
+
+<script>
+// ============================================================
+//  SONIK CRYSTALZ v8.18 — SpazeCraft / Kaiju Fruit Labs
+//  Jun 14 2026
+//  CHANGES from v8.17:
+//  1. FACTOID PILL REPOSITIONED — bottom:16px (was 98px), now sits in true
+//     bottom-left corner, clear of the status/instructions layer.
+//  2. STATUS / INSTRUCTIONS MOVED TO TOP-CENTER — top:54px, subtle opacity,
+//     uppercase 9px tracking. No longer overlapping science pill.
+//  3. GRAPE + AMETRINE VOLUME REDUCED — TYPE_VOLS grape:.45 ametrine:.42
+//     (both were .80). Per-partial peak amplitude also trimmed. Balanced
+//     against Quartz/Amethyst/Pyrite/Smoky.
+//  4. TITANIUM TEXT WHITE — inline color override removed; cpill span
+//     now inherits universal #fff color same as all other crystal names.
+//  5. BOND PEEL — HOLD TIME 800MS (was 2000ms). Also added FAST-SWIPE PEEL:
+//     dragging a bonded crystal at >280px/s AND >60px from touchdown
+//     auto-peels without needing the hold. DETACH_DRAG_PX raised 22→38
+//     so micro-jitter during hold doesn't accidentally trigger.
+//  6. AUDIO RECOVERY HARDENED — on visibilitychange return, all active
+//     loop types are stopped and restarted (stale loopNodes entries from
+//     iOS background timer throttle no longer cause silent return).
+//     pageshow + visibilitychange both fully handle closed/suspended cases.
+// ============================================================
+
+const canvas=document.getElementById('c');
+const ctx=canvas.getContext('2d');
+function resize(){canvas.width=window.innerWidth;canvas.height=window.innerHeight;}
+resize();window.addEventListener('resize',resize);
+
+const SPECS={
+  quartz:  {hMin:195,hMax:215,sMin:25,sMax:40, lBase:55},
+  amethyst:{hMin:265,hMax:290,sMin:65,sMax:85, lBase:45},
+  pyrite:  {hMin:38, hMax:55, sMin:75,sMax:95, lBase:50},
+  smoky:   {hMin:25, hMax:45, sMin:40,sMax:60, lBase:38},
+  grape:   {hMin:225,hMax:255,sMin:55,sMax:75, lBase:50},
+  ametrine:{hMin:255,hMax:275,sMin:75,sMax:85, lBase:50,split:true,h2Min:42,h2Max:52},
+  titanium:{hMin:0,  hMax:360,sMin:90,sMax:100,lBase:60,rolling:true}
+};
+const BIRTH={quartz:[0,7,12,19],amethyst:[0,3,7,10],pyrite:[0,4,7,14],smoky:[0,5,7,12],grape:[0,7,14,17],ametrine:[0,3,10,14],titanium:[0,4,7,11,14]};
+const TYPE_VOLS={quartz:.8,amethyst:.8,pyrite:.8,smoky:.8,grape:.45,ametrine:.42,titanium:.8};
+const LABELS={quartz:'Quartz',amethyst:'Amethyst',pyrite:'Pyrite',smoky:'Smoky',grape:'Grape',ametrine:'Ametrine',titanium:'Titanium'};
+
+function rnd(a,b){return a+Math.random()*(b-a);}
+function hsl(h,s,l,a){return `hsla(${((h%360)+360)%360|0},${s|0}%,${l|0}%,${Math.max(0,Math.min(1,a)).toFixed(3)})`;}
+
+// Global settings — breath/elas drive the v7c elastic directly
+const G={spike:40,breath:50,elas:60,
+         hueShift:0,sat:70,bright:52,alpha:.72,
+         drift:0,visc:85,attract:0,sep:0,bondPull:40,
+         gint:30,gspd:40,gfrac:20,vol:.9,
+         reverb:0,delay:0,dub:0,lp:0,hp:0,stretch:1.0};
+const glMode={shape:'G',color:'G',physics:'G',glitch:'G'};
+
+const BOND_ATTRACT_RADIUS=280;  // proximity pull field
+const BOND_SNAP_DIST=65;        // wider snap — accounts for elastic vert wobble
+const BOND_DETACH_MS=800;       // 800ms hold to arm peel (was 2000ms — too long)
+const BUILD_CAP=100;
+
+// ── BG COLOR SYSTEM — 100 colors, brights / neons / pastels ──
+// Long-press BG button returns to black.
+function generateBGColors(){
+  const cols=[];
+  // NEONS — ultra-saturated, mid-high lightness (vivid electric)
+  for(let h=0;h<360;h+=15){
+    cols.push({type:'solid',c:`hsl(${h|0},100%,${55+Math.random()*10|0}%)`});
+  }
+  // BRIGHTS — full saturation, slightly higher lightness
+  for(let h=0;h<360;h+=20){
+    cols.push({type:'solid',c:`hsl(${(h+7)|0},${85+Math.random()*15|0}%,${60+Math.random()*12|0}%)`});
+  }
+  // PASTELS — lower saturation, high lightness (soft contrast)
+  for(let h=0;h<360;h+=18){
+    cols.push({type:'solid',c:`hsl(${h|0},${60+Math.random()*25|0}%,${75+Math.random()*12|0}%)`});
+  }
+  // DEEP NEONS — saturated but slightly darker (jewel tones)
+  for(let h=0;h<360;h+=24){
+    cols.push({type:'solid',c:`hsl(${h|0},100%,${42+Math.random()*10|0}%)`});
+  }
+  // SOFT & LIGHT — whites, creams, pastels, powder tones
+  // These make crystals pop hard — maximum contrast with dark geometry
+  const softs=[
+    {type:'solid',c:'hsl(0,0%,96%)'},      // white
+    {type:'solid',c:'hsl(40,60%,94%)'},     // cream
+    {type:'solid',c:'hsl(50,80%,92%)'},     // warm cream
+    {type:'solid',c:'hsl(340,60%,92%)'},    // powder pink
+    {type:'solid',c:'hsl(350,70%,90%)'},    // blush
+    {type:'solid',c:'hsl(320,50%,91%)'},    // lavender blush
+    {type:'solid',c:'hsl(200,65%,91%)'},    // baby blue
+    {type:'solid',c:'hsl(210,70%,89%)'},    // sky
+    {type:'solid',c:'hsl(185,55%,88%)'},    // powder teal
+    {type:'solid',c:'hsl(150,55%,88%)'},    // mint green
+    {type:'solid',c:'hsl(140,50%,86%)'},    // soft sage
+    {type:'solid',c:'hsl(60,80%,90%)'},     // butter yellow
+    {type:'solid',c:'hsl(45,90%,88%)'},     // pale gold
+    {type:'solid',c:'hsl(280,50%,92%)'},    // lilac
+    {type:'solid',c:'hsl(260,55%,90%)'},    // soft violet
+    {type:'solid',c:'hsl(20,70%,91%)'},     // peach
+    {type:'solid',c:'hsl(15,65%,89%)'},     // apricot
+    {type:'solid',c:'hsl(170,50%,87%)'},    // seafoam
+    {type:'solid',c:'hsl(0,0%,88%)'},       // silver grey
+    {type:'solid',c:'hsl(230,40%,91%)'},    // periwinkle mist
+  ];
+  softs.forEach(s=>cols.push(s));
+  for(let i=cols.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [cols[i],cols[j]]=[cols[j],cols[i]];
+  }
+  // Insert aurora easter eggs at random positions
+  const a1={type:'aurora', label:'G3 Storm \xb7 Jun 8-9 2026 \xb7 Aurora UK'};
+  const a2={type:'aurora2',label:'CME \xb7 AR4455 \xb7 Jun 3 2026 \xb7 Direct Hit'};
+  const p1=10+Math.floor(Math.random()*40);
+  const p2=50+Math.floor(Math.random()*40);
+  cols.splice(p1,0,a1);
+  cols.splice(p2,0,a2);
+  return cols.slice(0,100);
+}
+const BG_DECK=generateBGColors();
+let bgIdx=0;
+// Start pure black
+let bgScene={type:'solid',c:'#000000'};
+
+// ── APP STATE ────────────────────────────────────────────────
+let crystals=[],undoStack=[],redoStack=[];
+let buildMode='fan';
+let buildPts=[];
+let currentType='quartz';
+let transMode=false,bloatMode=false,twoToneMode=false;
+let audioOn=true;
+let pillsUnlocked=false,lastTouched=null;
+let clearFade=false,clearStart=0;
+let nextId=1;
+let pillPaused=false,pillsTimer=null,pillIdx=0;
+let frame=0;  // global frame counter for v7c-style physics
+
+// ── AUDIO — full chain with WIRED wet sends ───────────────────
+// DRY path: tone → hpFilter → lpFilter → gateNode → masterGain
+// gateNode: ScriptProcessor-based gate for stutter/beat-gate effect.
+// Left slider = stutter chop (chaos, rapid fragmentation)
+// Right slider = beat grid gating (quarter→8th→16th→32nd subdivisions)
+// Center = gate open, no effect.
+let audioCtx=null,masterGain=null,reverbNode=null,delayNode=null,dubDelayNode=null,lpFilter=null,hpFilter=null;
+let reverbSend=null,delaySend=null,dubSend=null,delayFeedback=null,dubFeedback=null;
+let gateNode=null,gateGain=null; // gateGain sits between lpFilter and masterGain
+const loopNodes={};
+let stretchFactor=1.0;
+// Stutter/gate state
+let stutterVal=0;       // -100 to 100, 0 = off
+let stutterRAF=null;    // requestAnimationFrame loop for gate timing
+const GATE_BPM=90;      // base tempo for beat-gate right side
+
+// Granular synthesis state declared inside engine block below
+
+// Per-type loop interval timing — ametrine leads (jazz chord bed), grape is rarest
+// All intervals extended +6-7s for breathing room. ±40% randomization applied per trigger.
+const LOOP_TIMES={ametrine:11000,quartz:14000,pyrite:17000,smoky:21000,amethyst:25000,titanium:29000,grape:38000};
+
+// Per-type tone generation — distinct ambient characters
+const TONE_CHARS={
+  // Tibetan bell: pure harmonics, fast attack, long ring
+  quartz(ctx,gain,vol){
+    const f=174.6+rnd(-2,2);
+    [[1,0.9],[2.76,0.45],[5.4,0.2],[8.1,0.08]].forEach(([rat,amp])=>{
+      const o=ctx.createOscillator(),g=ctx.createGain();
+      o.type='sine';o.frequency.value=f*rat;
+      g.gain.setValueAtTime(0,ctx.currentTime);
+      g.gain.linearRampToValueAtTime(amp*vol*0.55,ctx.currentTime+0.008);
+      g.gain.exponentialRampToValueAtTime(0.0001,ctx.currentTime+9+rat);
+      o.connect(g);g.connect(gain);o.start();o.stop(ctx.currentTime+10+rat);
+    });
+  },
+  // Slow modulating synth warble: LFO on frequency, long sustain
+  amethyst(ctx,gain,vol){
+    const base=130+rnd(-10,10);
+    const lfo=ctx.createOscillator(),lfoG=ctx.createGain();
+    lfo.frequency.value=0.22+rnd(-0.05,0.05);lfoG.gain.value=6;
+    lfo.connect(lfoG);
+    [[base,0.8,'sine'],[base*2.003,0.35,'sine'],[base*0.501,0.3,'triangle']].forEach(([freq,amp,type])=>{
+      const o=ctx.createOscillator(),g=ctx.createGain();
+      o.type=type;o.frequency.value=freq;
+      lfoG.connect(o.frequency);
+      g.gain.setValueAtTime(0,ctx.currentTime);
+      g.gain.linearRampToValueAtTime(amp*vol*0.55,ctx.currentTime+0.8);
+      g.gain.setValueAtTime(amp*vol*0.55,ctx.currentTime+7);
+      g.gain.linearRampToValueAtTime(0,ctx.currentTime+9);
+      o.connect(g);g.connect(gain);o.start();o.stop(ctx.currentTime+9.5);
+    });
+    lfo.start();lfo.stop(ctx.currentTime+9.5);
+  },
+  // Ghostly foghorn: triangle, vibrato, very loud
+  pyrite(ctx,gain,vol){
+    const f=82.4+rnd(-5,5);
+    const vib=ctx.createOscillator(),vibG=ctx.createGain();
+    vib.frequency.value=0.5;vibG.gain.value=2;vib.connect(vibG);
+    [[f,0.9,'triangle'],[f*2.01,0.3,'sine'],[f*0.5,0.5,'sine']].forEach(([freq,amp,type])=>{
+      const o=ctx.createOscillator(),g=ctx.createGain();
+      o.type=type;o.frequency.value=freq;
+      vibG.connect(o.frequency);
+      g.gain.setValueAtTime(0,ctx.currentTime);
+      g.gain.linearRampToValueAtTime(amp*vol*0.6,ctx.currentTime+2);
+      g.gain.setValueAtTime(amp*vol*0.6,ctx.currentTime+7);
+      g.gain.linearRampToValueAtTime(0,ctx.currentTime+10);
+      o.connect(g);g.connect(gain);o.start();o.stop(ctx.currentTime+10.5);
+    });
+    vib.start();vib.stop(ctx.currentTime+10.5);
+  },
+  // Deep pad drone: fat, warm, filtered
+  smoky(ctx,gain,vol){
+    const f=65.4+rnd(-4,4);
+    const filt=ctx.createBiquadFilter();filt.type='lowpass';filt.frequency.value=400;filt.Q.value=2;
+    filt.connect(gain);
+    [[f,0.9,'sawtooth'],[f*2.005,0.5,'sawtooth'],[f*3.01,0.3,'triangle'],[f*0.5,0.7,'sine']].forEach(([freq,amp,type])=>{
+      const o=ctx.createOscillator(),g=ctx.createGain();
+      o.type=type;o.frequency.value=freq;
+      g.gain.setValueAtTime(0,ctx.currentTime);
+      g.gain.linearRampToValueAtTime(amp*vol*0.55,ctx.currentTime+2.5);
+      g.gain.setValueAtTime(amp*vol*0.55,ctx.currentTime+7);
+      g.gain.linearRampToValueAtTime(0,ctx.currentTime+9.5);
+      o.connect(g);g.connect(filt);o.start();o.stop(ctx.currentTime+10);
+    });
+  },
+  // Glass harmonic: high crystalline tones — slow fade in, gentle fade out
+  // Attack 1.2s so it blooms into existence. Sustain ~5s. 2s tail fade.
+  grape(ctx,gain,vol){
+    const base=523.25+rnd(-30,30);
+    [1,1.498,1.999,2.996,4.001].forEach((rat,i)=>{
+      const o=ctx.createOscillator(),og=ctx.createGain(),env=ctx.createGain();
+      o.type='sine';o.frequency.value=base*rat;
+      og.gain.value=[0.8,0.5,0.3,0.18,0.09][i];
+      // Slow bloom attack — each partial enters slightly staggered for shimmer
+      const attackStart=ctx.currentTime+i*0.18;
+      const attackEnd=attackStart+1.2;
+      const sustainEnd=attackEnd+4.5;
+      const releaseEnd=sustainEnd+2.0;
+      env.gain.setValueAtTime(0,ctx.currentTime);
+      env.gain.setValueAtTime(0,attackStart);
+      env.gain.linearRampToValueAtTime(vol*0.38,attackEnd);
+      env.gain.setValueAtTime(vol*0.38,sustainEnd);
+      env.gain.linearRampToValueAtTime(0.0001,releaseEnd);
+      o.connect(og);og.connect(env);env.connect(gain);
+      o.start(ctx.currentTime);o.stop(releaseEnd+0.1);
+    });
+  },
+  // Jazz chord arpeggio — notes bloom 1.0s apart, full chord takes ~5s to open.
+  // Each trigger picks a new root so consecutive loops = chord changes.
+  // Slow enough for a pianist to read, respond, improvise on top.
+  ametrine(ctx,gain,vol){
+    const roots=[261.63,293.66,329.63,349.23,392,440,493.88]; // C D E F G A B
+    const root=roots[Math.floor(rnd(0,roots.length))];
+    // Intervals: root, major 3rd, perfect 5th, major 7th, 9th — lush jazz voicing
+    const intervals=[1,1.25,1.5,1.875,2.25];
+    intervals.forEach((rat,i)=>{
+      const o=ctx.createOscillator(),og=ctx.createGain(),env=ctx.createGain();
+      o.type='sine';
+      // Slight detune on upper notes for warmth
+      o.frequency.value=root*rat+rnd(-0.6,0.6);
+      og.gain.value=vol*0.38*(1-i*0.12);
+      // Each note enters 1.0s after the previous — slow bloom
+      const noteOn=ctx.currentTime+i*1.0;
+      const notePeak=noteOn+0.8;       // 0.8s fade in per note
+      const noteSustain=notePeak+5.5;  // long sustain
+      const noteOff=noteSustain+2.2;   // 2.2s fade out tail
+      env.gain.setValueAtTime(0,ctx.currentTime);
+      env.gain.setValueAtTime(0,noteOn);
+      env.gain.linearRampToValueAtTime(1,notePeak);
+      env.gain.setValueAtTime(1,noteSustain);
+      env.gain.linearRampToValueAtTime(0.0001,noteOff);
+      o.connect(og);og.connect(env);env.connect(gain);
+      o.start(noteOn);o.stop(noteOff+0.1);
+    });
+  },
+  // Metallic shimmer: inharmonic, bright
+  titanium(ctx,gain,vol){
+    const base=329.63+rnd(-20,20);
+    [1,1.782,2.562,3.344,4.128,5.024].forEach((rat,i)=>{
+      const o=ctx.createOscillator(),og=ctx.createGain(),env=ctx.createGain();
+      o.type=i%2===0?'sine':'triangle';o.frequency.value=base*rat;
+      og.gain.value=vol*0.5*[1,0.55,0.32,0.2,0.12,0.07][i];
+      env.gain.setValueAtTime(0,ctx.currentTime);
+      env.gain.linearRampToValueAtTime(1,ctx.currentTime+0.015);
+      env.gain.exponentialRampToValueAtTime(0.0001,ctx.currentTime+5+i*0.5);
+      o.connect(og);og.connect(env);env.connect(gain);
+      o.start();o.stop(ctx.currentTime+6+i*0.5);
+    });
+  }
+};
+
+function initAudio(){
+  if(audioCtx)return;
+  try{
+    audioCtx=new(window.AudioContext||window.webkitAudioContext)();
+    audioCtx.resume();
+
+    // iOS ringer warning — if context stays suspended after first user gesture,
+    // the ringer switch is likely OFF. Show a non-blocking hint.
+    setTimeout(()=>{
+      if(audioCtx&&audioCtx.state==='suspended'){
+        setStatus('No sound? Check your ringer switch \u2014 it must be ON');
+        setTimeout(()=>setStatus(''),6000);
+      }
+    },800);
+
+    // Master output — wire this FIRST so audio works immediately
+    masterGain=audioCtx.createGain();
+    masterGain.gain.value=G.vol;
+    masterGain.connect(audioCtx.destination);
+
+    // HP filter — fully open, entry point for all tones
+    hpFilter=audioCtx.createBiquadFilter();
+    hpFilter.type='highpass';
+    hpFilter.frequency.value=20;
+    hpFilter.Q.value=0.7;
+
+    // LP filter — safe 18kHz ceiling avoids Nyquist clamp on mobile
+    lpFilter=audioCtx.createBiquadFilter();
+    lpFilter.type='lowpass';
+    lpFilter.frequency.value=18000;
+    lpFilter.Q.value=1.2;
+
+    // Gate gain — stutter engine controls this
+    gateGain=audioCtx.createGain();
+    gateGain.gain.value=1;
+
+    // DRY path: tone → hp → lp → gate → master
+    // Wire this first — audio plays immediately even before effects init
+    hpFilter.connect(lpFilter);
+    lpFilter.connect(gateGain);
+    gateGain.connect(masterGain);
+
+    // Effects wire in async so they don't block audio startup on mobile
+    setTimeout(()=>initEffects(),80);
+
+  }catch(e){console.warn('Audio init failed:',e);}
+}
+
+function initEffects(){
+  if(!audioCtx)return;
+  try{
+    // Reverb — 2.5s buffer, pre-wet so it's audible immediately when slider moves
+    reverbNode=audioCtx.createConvolver();
+    reverbNode.buffer=makeReverb(2.5);
+    reverbNode.connect(masterGain);
+    reverbSend=audioCtx.createGain();
+    reverbSend.gain.value=0;
+    reverbSend.connect(reverbNode);
+
+    // Delay with feedback — audible slapback from 20% up
+    delayNode=audioCtx.createDelay(4);
+    delayNode.delayTime.value=0.38;
+    delayFeedback=audioCtx.createGain();
+    delayFeedback.gain.value=0.45; // higher starting feedback = more obvious effect
+    delayNode.connect(delayFeedback);
+    delayFeedback.connect(delayNode);
+    delayNode.connect(masterGain);
+    delaySend=audioCtx.createGain();
+    delaySend.gain.value=0;
+    delaySend.connect(delayNode);
+
+    // Dub delay — longer time, feeds reverb, more wash
+    dubDelayNode=audioCtx.createDelay(4);
+    dubDelayNode.delayTime.value=0.68;
+    dubFeedback=audioCtx.createGain();
+    dubFeedback.gain.value=0.55; // dub needs more feedback to actually dub
+    dubDelayNode.connect(dubFeedback);
+    dubFeedback.connect(dubDelayNode);
+    dubDelayNode.connect(reverbNode);
+    dubDelayNode.connect(masterGain); // also direct to master so it's audible
+    dubSend=audioCtx.createGain();
+    dubSend.gain.value=0;
+    dubSend.connect(dubDelayNode);
+
+    // Wire wet sends off lpFilter
+    lpFilter.connect(reverbSend);
+    lpFilter.connect(delaySend);
+    lpFilter.connect(dubSend);
+
+  }catch(e){console.warn('Effects init failed:',e);}
+}
+
+function makeReverb(secs){
+  // Lightweight impulse response — 2s max, simple exponential decay
+  const sr=audioCtx.sampleRate;
+  const len=Math.floor(sr*Math.min(secs,2.0)); // hard cap at 2s for mobile
+  const b=audioCtx.createBuffer(2,len,sr);
+  for(let c=0;c<2;c++){
+    const d=b.getChannelData(c);
+    for(let i=0;i<len;i++){
+      d[i]=(Math.random()*2-1)*Math.pow(1-i/len,1.4);
+    }
+  }
+  return b;
+}
+
+function getDest(){
+  // Null-guarded — returns first available node in chain
+  // If effects haven't wired yet, falls back gracefully to master
+  return hpFilter||lpFilter||gateGain||masterGain;
+}
+
+// ── STUTTER / BEAT-GATE ENGINE ────────────────────────────────
+// Left (-100 to -1): stutter chop — rapid random gating, pure chaos.
+//   At -100: chop interval ~18ms (ultra shred). At -1: ~200ms (slow stutter).
+//   Gate is on/off random bursts — not rhythmically synced.
+// Right (1 to 100): beat grid gating — synced to GATE_BPM tempo.
+//   At 1-25: quarter notes (chill throb).
+//   At 26-50: eighth notes (groove pulse).
+//   At 51-75: sixteenth notes (machine tight).
+//   At 76-100: thirty-second notes + polyrhythmic layer (full complexity).
+// Center (0): gate fully open, engine stopped.
+
+let _gatePhase=0;      // 0-1 phase within current gate subdivision
+let _gateOpen=true;    // current gate state
+let _gateLastTime=0;
+let _polyPhase=0;      // second rhythmic layer for polyrhythm on right side
+
+function startGateEngine(){
+  if(stutterRAF)return;
+  _gateLastTime=audioCtx.currentTime;
+  _gatePhase=0;_polyPhase=0;_gateOpen=true;
+  function tick(){
+    stutterRAF=requestAnimationFrame(tick);
+    if(!audioCtx||!gateGain||stutterVal===0){
+      // Cleanly open gate and stop
+      if(gateGain)gateGain.gain.setTargetAtTime(1,audioCtx.currentTime,0.005);
+      stutterRAF=null;cancelAnimationFrame(stutterRAF);return;
+    }
+    const now=audioCtx.currentTime;
+    const dt=now-_gateLastTime;
+    _gateLastTime=now;
+    const v=stutterVal;
+
+    if(v<0){
+      // ── STUTTER LEFT — chaos chop ──
+      // Map -100→-1 to chop interval 18ms→200ms
+      const t=Math.abs(v)/100; // 0→1
+      const chopMs=18+((1-t)*182); // -100=18ms, -1=200ms
+      const chopSec=chopMs/1000;
+      _gatePhase+=dt/chopSec;
+      if(_gatePhase>=1){
+        _gatePhase%=1;
+        // Random on/off with duty cycle weighted by intensity
+        // More extreme = shorter on-time (more fragmented)
+        const onProb=0.25+((1-t)*0.45); // -100=25% on, -1=70% on
+        _gateOpen=Math.random()<onProb;
+        const target=_gateOpen?1:0;
+        // Very fast transition for stutter feel
+        gateGain.gain.setTargetAtTime(target,now,0.002);
+      }
+    } else {
+      // ── BEAT GATE RIGHT — rhythmic grid ──
+      const t=v/100; // 0→1
+      // Subdivision: 0-0.25=quarter, 0.25-0.5=8th, 0.5-0.75=16th, 0.75-1=32nd
+      let subdivision;
+      if(t<0.25)subdivision=1;        // quarter note
+      else if(t<0.5)subdivision=2;    // 8th note
+      else if(t<0.75)subdivision=4;   // 16th note
+      else subdivision=8;             // 32nd note
+
+      const beatSec=60/GATE_BPM;
+      const subSec=beatSec/subdivision;
+      // Duty cycle: gate open for ~55% of each subdivision
+      const dutyOpen=0.55;
+
+      _gatePhase+=dt/subSec;
+      if(_gatePhase>=1)_gatePhase%=1;
+      const shouldBeOpen=_gatePhase<dutyOpen;
+      if(shouldBeOpen!==_gateOpen){
+        _gateOpen=shouldBeOpen;
+        // Slightly softer transitions for musical feel vs stutter hard cut
+        gateGain.gain.setTargetAtTime(_gateOpen?1:0.02,now,0.004);
+      }
+
+      // Polyrhythmic layer kicks in at t>0.75 — adds a 3-against-4 pulse on top
+      if(t>0.75){
+        const polyT=(t-0.75)/0.25; // 0→1 within top range
+        const polySec=beatSec*(4/3)/4; // triplet 16th
+        _polyPhase+=dt/polySec;
+        if(_polyPhase>=1)_polyPhase%=1;
+        const polyOpen=_polyPhase<0.5;
+        // Poly layer modulates gain on top of main gate — creates complexity
+        if(!polyOpen&&_gateOpen){
+          const polyDepth=0.35*polyT;
+          gateGain.gain.setTargetAtTime(1-polyDepth,now,0.003);
+        }
+      }
+    }
+  }
+  tick();
+}
+
+function stopGateEngine(){
+  if(stutterRAF){cancelAnimationFrame(stutterRAF);stutterRAF=null;}
+  if(gateGain&&audioCtx)gateGain.gain.setTargetAtTime(1,audioCtx.currentTime,0.015);
+  _gateOpen=true;
+}
+
+// ── GRANULAR SYNTHESIS ENGINE — BufferSource grain cloud ──────
+// No ScriptProcessor (deprecated, throws on iOS Chrome).
+// Instead: pre-recorded silence buffer gets replaced with live audio
+// approximation via periodic BufferSource grain spawning.
+// Each grain: short AudioBuffer filled with noise shaped to crystal
+// harmonics, pitch-shifted via playbackRate, panned, Hann-windowed.
+// Spawner fires on interval — density and grain size controlled by slider.
+
+// ── GRANULAR ENGINE STATE ──────────────────────────────────────
+let granularVal=0;       // legacy density (0-100)
+let granularSpawner=null;
+let granularOutput=null;
+let granularEchoDelay=null,granularEchoFeedback=null,granularEchoSend=null;
+let granularLPF=null,granularHPF=null;
+
+// Granular params object — all 7 dimensions
+const GR={
+  density:0,    // 0-100 spawn rate: sparse→cloud
+  size:50,      // 0-100 grain length: micro→long
+  pitch:20,     // 0-100 pitch scatter: tight→wild
+  freeze:0,     // 0-100 time freeze depth
+  warp:30,      // 0-100 playback rate wobble speed
+  stain:0,      // 0-100 visual crystal saturation injection
+  chaos:10,     // 0-100 randomizes all params per grain
+  filter:0,     // -100→+100 LP←→HP
+  echo:0        // 0-100 space echo wet
+};
+
+// Visual state driven by granular
+let granularVisualMod=0; // 0-1, drives crystal visual effects in drawCrystal
+
+function initGranularFX(){
+  if(!audioCtx||granularOutput)return;
+  granularOutput=audioCtx.createGain();
+  granularOutput.gain.value=1;
+
+  // Granular-specific LP + HP filters
+  granularLPF=audioCtx.createBiquadFilter();
+  granularLPF.type='lowpass';granularLPF.frequency.value=18000;granularLPF.Q.value=1;
+  granularHPF=audioCtx.createBiquadFilter();
+  granularHPF.type='highpass';granularHPF.frequency.value=20;granularHPF.Q.value=1;
+
+  // Space echo — delay with self-feedback
+  granularEchoDelay=audioCtx.createDelay(4);
+  granularEchoDelay.delayTime.value=0.44;
+  granularEchoFeedback=audioCtx.createGain();granularEchoFeedback.gain.value=0.0;
+  granularEchoSend=audioCtx.createGain();granularEchoSend.gain.value=0.0;
+  granularEchoDelay.connect(granularEchoFeedback);
+  granularEchoFeedback.connect(granularEchoDelay);
+  granularEchoDelay.connect(masterGain);
+
+  // Chain: granularOutput → HPF → LPF → echoSend → master
+  granularOutput.connect(granularHPF);
+  granularHPF.connect(granularLPF);
+  granularLPF.connect(masterGain);
+  granularLPF.connect(granularEchoSend);
+  granularEchoSend.connect(granularEchoDelay);
+}
+
+function spawnGrain(){
+  if(!audioCtx||!masterGain||GR.density===0)return;
+  if(!audioOn)return;
+  try{
+    const sr=audioCtx.sampleRate;
+    const density=GR.density/100;
+    const chaos=GR.chaos/100;
+
+    // Apply chaos — randomly perturb params per grain
+    const localSize=Math.max(0,Math.min(1,(GR.size/100)+rnd(-chaos*0.4,chaos*0.4)));
+    const localPitch=Math.max(0,Math.min(1,(GR.pitch/100)+rnd(-chaos*0.3,chaos*0.3)));
+    const localFreeze=Math.max(0,Math.min(1,(GR.freeze/100)+rnd(-chaos*0.3,chaos*0.3)));
+
+    // Grain length: 8ms (micro) at 0 → 400ms (long) at 100
+    const grainMs=8+localSize*392;
+    const grainSamples=Math.max(64,Math.floor((grainMs/1000)*sr));
+
+    // Time freeze: when freeze is high, grain loops same slice repeatedly
+    const freezePhaseOffset=localFreeze>0.5?Math.random()*0.15:Math.random();
+
+    // Build grain buffer
+    const buf=audioCtx.createBuffer(2,grainSamples,sr);
+    const freqs=[130.8,174.6,196,220,261.6,293.7,349.2,392,440,523.2,659.3,880];
+    const rootFreq=freqs[Math.floor(Math.random()*freqs.length)];
+    const numPartials=2+Math.floor(density*5);
+
+    for(let ch=0;ch<2;ch++){
+      const d=buf.getChannelData(ch);
+      const stereoDetune=ch===1?1+(rnd(-0.004,0.004)):1;
+      for(let i=0;i<grainSamples;i++){
+        // Hann window
+        const pos=i/grainSamples;
+        const freezePos=localFreeze>0.3?(freezePhaseOffset+(pos*(1-localFreeze*0.8)))%1:pos;
+        const win=0.5*(1-Math.cos(2*Math.PI*freezePos));
+        let s=0;
+        for(let p=0;p<numPartials;p++){
+          const f=rootFreq*(p+1)*stereoDetune;
+          // Warp: frequency modulated by slow sine scaled by warp param
+          const warpHz=f*(1+Math.sin(Date.now()*0.001*(0.2+GR.warp*0.04))*0.015*(GR.warp/100));
+          s+=Math.sin(2*Math.PI*warpHz*i/sr)/(p+1);
+        }
+        d[i]=s*win*0.18;
+      }
+    }
+
+    // Pitch scatter — localPitch drives semitone range
+    const semiRange=0.5+localPitch*18;
+    const semis=(Math.random()*2-1)*semiRange;
+    const rate=Math.pow(2,semis/12)*(1+rnd(-GR.chaos*0.02,GR.chaos*0.02));
+
+    // Pan scatter — full stereo at high chaos/density
+    const panAmt=density*0.5+chaos*0.5;
+    const pan=(Math.random()*2-1)*Math.min(0.95,panAmt);
+    const panNode=audioCtx.createStereoPanner();panNode.pan.value=pan;
+
+    const grainGain=audioCtx.createGain();
+    grainGain.gain.value=0.25+density*0.55+(chaos*rnd(0,0.2));
+
+    const src=audioCtx.createBufferSource();
+    src.buffer=buf;src.playbackRate.value=Math.max(0.1,Math.min(8,rate));
+    src.connect(grainGain);grainGain.connect(panNode);
+    panNode.connect(granularOutput||masterGain);
+    src.start();src.stop(audioCtx.currentTime+(grainMs/1000)+0.05);
+
+    // VISUAL COUPLING — stain param drives crystal sat/brightness modulation
+    if(GR.stain>0||GR.chaos>20){
+      granularVisualMod=Math.min(1,(GR.density/100)*0.6+(GR.stain/100)*0.4+(GR.chaos/100)*0.2);
+    } else {
+      granularVisualMod*=0.97; // decay toward 0 when off
+    }
+  }catch(e){}
+}
+
+function startGranular(){
+  if(granularSpawner)return;
+  if(!audioOn)return;
+  if(!granularOutput)initGranularFX();
+  // Spawn interval driven by density: sparse(5)=240ms, cloud(100)=12ms
+  const t=Math.max(0.05,GR.density/100);
+  const ms=Math.max(12,240-(t*228));
+  granularSpawner=setInterval(()=>spawnGrain(),ms);
+}
+
+function updateGranularRate(){
+  stopGranular();
+  if(GR.density>0&&audioOn)startGranular();
+}
+
+function stopGranular(){
+  if(granularSpawner){clearInterval(granularSpawner);granularSpawner=null;}
+  granularVisualMod=0;
+}
+
+function setGranular(v){
+  GR.density=v;granularVal=v;
+  if(!audioCtx)return;
+  if(v===0){stopGranular();return;}
+  updateGranularRate();
+}
+
+function applyGranularFilter(){
+  if(!granularLPF||!granularHPF||!audioCtx)return;
+  const v=GR.filter; // -100=full LP, 0=flat, +100=full HP
+  const sr=audioCtx.sampleRate/2;
+  if(v<=0){
+    // LP mode: 0=open(sr), -100=200Hz
+    const t=Math.abs(v)/100;
+    const freq=sr*Math.pow(200/sr,t);
+    granularLPF.frequency.setTargetAtTime(Math.max(200,freq),audioCtx.currentTime,0.04);
+    granularLPF.Q.setTargetAtTime(0.8+t*5,audioCtx.currentTime,0.04);
+    granularHPF.frequency.setTargetAtTime(20,audioCtx.currentTime,0.04);
+  } else {
+    // HP mode: 0=20Hz, +100=3000Hz
+    const t=v/100;
+    granularHPF.frequency.setTargetAtTime(20+t*2980,audioCtx.currentTime,0.04);
+    granularHPF.Q.setTargetAtTime(0.7+t*4,audioCtx.currentTime,0.04);
+    granularLPF.frequency.setTargetAtTime(sr,audioCtx.currentTime,0.04);
+  }
+}
+
+function applyGranularEcho(){
+  if(!granularEchoSend||!granularEchoFeedback||!audioCtx)return;
+  const t=GR.echo/100;
+  granularEchoSend.gain.setTargetAtTime(t*1.6,audioCtx.currentTime,0.05);
+  granularEchoFeedback.gain.setTargetAtTime(0.3+t*0.62,audioCtx.currentTime,0.07);
+}
+
+
+function playClick(){
+  if(!audioCtx||!audioOn)return;
+  try{
+    const o=audioCtx.createOscillator(),g=audioCtx.createGain();
+    o.type='sine';o.frequency.value=1400;
+    g.gain.setValueAtTime(0.06,audioCtx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.0001,audioCtx.currentTime+0.04);
+    o.connect(g);g.connect(masterGain);o.start();o.stop(audioCtx.currentTime+0.05);
+  }catch(e){}
+}
+
+function playBondSnap(){
+  if(!audioCtx||!audioOn)return;
+  try{
+    const o=audioCtx.createOscillator(),g=audioCtx.createGain();
+    o.type='sine';o.frequency.value=1100;
+    o.frequency.exponentialRampToValueAtTime(550,audioCtx.currentTime+0.1);
+    g.gain.setValueAtTime(0.12,audioCtx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.0001,audioCtx.currentTime+0.18);
+    o.connect(g);g.connect(reverbNode||masterGain);o.start();o.stop(audioCtx.currentTime+0.2);
+  }catch(e){}
+}
+
+function triggerCrystalTone(type){
+  if(!audioCtx||!audioOn||!masterGain)return;
+  const fn=TONE_CHARS[type];if(!fn)return;
+  const vol=(TYPE_VOLS[type]||0.8);
+  try{
+    const dest=getDest();
+    if(!dest)return; // safety — don't attempt connect if chain not ready
+    const triggerGain=audioCtx.createGain();
+    triggerGain.gain.value=vol;
+    triggerGain.connect(dest);
+    fn(audioCtx,triggerGain,vol);
+    // Schedule next — ±40% randomization, time stretched by stretchFactor
+    const base=LOOP_TIMES[type]||8000;
+    const spread=base*0.4;
+    const next=(base+rnd(-spread,spread))*stretchFactor;
+    if(loopNodes[type]&&loopNodes[type].on){
+      loopNodes[type].timer=setTimeout(()=>triggerCrystalTone(type),next);
+    }
+  }catch(e){
+    // Don't let one bad tone kill the scheduler — reschedule anyway
+    const base=LOOP_TIMES[type]||8000;
+    if(loopNodes[type]&&loopNodes[type].on){
+      loopNodes[type].timer=setTimeout(()=>triggerCrystalTone(type),base);
+    }
+  }
+}
+
+function ensureLoop(type){
+  if(!audioCtx||!audioOn||loopNodes[type])return;
+  loopNodes[type]={on:true,timer:null};
+  // Stagger initial start so crystals don't all fire together
+  const delay=rnd(0,2000);
+  loopNodes[type].timer=setTimeout(()=>triggerCrystalTone(type),delay);
+}
+function stopLoop(t){
+  if(loopNodes[t]){loopNodes[t].on=false;if(loopNodes[t].timer)clearTimeout(loopNodes[t].timer);delete loopNodes[t];}
+}
+function syncLoops(){
+  if(!audioCtx)return;
+  const active=new Set(crystals.filter(c=>c.formed).map(c=>c.type));
+  if(audioOn)active.forEach(t=>ensureLoop(t));
+  Object.keys(loopNodes).forEach(t=>{if(!active.has(t)||!audioOn)stopLoop(t);});
+}
+
+// ── CRYSTAL FACTORY — v7c vert structure (x,y,vx,vy ONLY) ───
+function makeCrystal(pts,type){
+  const sp=SPECS[type]||SPECS.quartz;
+  let cx=0,cy=0;pts.forEach(p=>{cx+=p.x;cy+=p.y;});cx/=pts.length;cy/=pts.length;
+  // Count existing crystals of this type for hue offset (each instance slightly different)
+  const sameTypeCount=crystals.filter(c=>c.type===type).length;
+  const typeHueOffset=sameTypeCount*8; // 8 degrees per instance
+  const hue=sp.rolling?rnd(0,360):((rnd(sp.hMin,sp.hMax)+typeHueOffset)%360);
+  const sat=rnd(sp.sMin,sp.sMax);
+  const hue2=sp.split?rnd(sp.h2Min,sp.h2Max):null;
+  const n=pts.length;
+  // v7c: verts are just x,y offset from center + vx,vy — no ox/oy
+  const verts=pts.map((p,i)=>({
+    x: p.x-cx, y: p.y-cy,
+    vx:0, vy:0,
+    hOff:(i/n)*55-27
+  }));
+  return{
+    id:nextId++,type,sp,cx,cy,verts,hue,sat,hue2,
+    lgt:sp.lBase,alpha:G.alpha,
+    formed:false,satBoost:0,colorDrift:0,
+    scaleX:1,scaleY:1,
+    pulseT:-9999,glitchAmt:0,
+    driftVx:0,driftVy:0,
+    breath:Math.random()*Math.PI*2,  // staggered per-crystal
+    wakened:false, // v7c: gates physics
+    showHandles:false,handleFade:0,handleTimer:0,
+    rollHue:hue,bonds:[],bondFlashT:-9999,
+    awakenT:performance.now()
+  };
+}
+
+// Point-in-polygon ray cast — finger must be INSIDE the actual crystal shape
+function pointInCrystal(x,y,cr){
+  const pts=cr.verts.map(v=>({
+    x:cr.cx+v.x*cr.scaleX,
+    y:cr.cy+v.y*cr.scaleY
+  }));
+  // Ray-cast from centroid fan: check if point is inside any triangle
+  const cx=cr.cx,cy=cr.cy;
+  const n=pts.length;
+  for(let i=0;i<n;i++){
+    const a=pts[i],b=pts[(i+1)%n];
+    // Sign of cross products for point-in-triangle (centroid, a, b)
+    const d1=(x-a.x)*(cy-a.y)-(cx-a.x)*(y-a.y);
+    const d2=(x-b.x)*(a.y-b.y)-(a.x-b.x)*(y-b.y);
+    const d3=(x-cx)*(b.y-cy)-(b.x-cx)*(y-cy);
+    const hasNeg=(d1<0)||(d2<0)||(d3<0);
+    const hasPos=(d1>0)||(d2>0)||(d3>0);
+    if(!(hasNeg&&hasPos))return true; // inside this triangle
+  }
+  return false;
+}
+
+function hitTest(x,y){
+  // Iterate reverse so topmost crystal wins
+  for(let i=crystals.length-1;i>=0;i--){
+    const cr=crystals[i];
+    if(!cr.formed)continue;
+    if(pointInCrystal(x,y,cr))return cr;
+  }
+  return null;
+}
+
+// Find which vertex of a crystal was touched (world coords)
+// Returns {cr, vi} or null. Hit radius 32px — generous for finger sculpting.
+function findVert(x,y){
+  const HIT=32;
+  for(const cr of crystals){
+    if(!cr.formed)continue;
+    for(let i=0;i<cr.verts.length;i++){
+      const v=cr.verts[i];
+      const wx=cr.cx+v.x*cr.scaleX;
+      const wy=cr.cy+v.y*cr.scaleY;
+      if(Math.hypot(x-wx,y-wy)<HIT) return{cr,vi:i};
+    }
+  }
+  return null;
+}
+
+// ── DRAW CRYSTAL ────────────────────────────────────────────
+function drawCrystal(cr,now){
+  if(!cr.formed)return;
+
+  const tP=(now-cr.pulseT)/1000;
+  const pScale=tP<1.5?1+0.15*Math.exp(-tP*3)*Math.cos(tP*8):1;
+
+  let gx=0,gy=0;
+  if(cr.glitchAmt>0.01){
+    const gp=now*0.05;
+    gx=Math.sin(gp)*cr.glitchAmt*16*(G.gint/100);
+    gy=Math.cos(gp*0.7)*cr.glitchAmt*6*(G.gint/100);
+    cr.glitchAmt*=0.90;
+  }else cr.glitchAmt=0;
+
+  const fadeMult=clearFade?Math.max(0,1-(now-clearStart)/1500):1;
+  const alpha=cr.alpha*fadeMult;
+  cr.colorDrift+=0.0018;
+  const wv=cr.verts;
+  if(wv.length<3)return;
+
+  const baseSat=cr.sat*(0.55+0.45*cr.satBoost);
+  // GRANULAR VISUAL COUPLING — stain + chaos drive extra saturation and hue shimmer
+  const granSatBoost=granularVisualMod*(GR.stain/100)*60;
+  const granHueShimmer=granularVisualMod*(GR.chaos/100)*18*Math.sin(now*0.003+cr.id*1.7);
+  const transSat=transMode?Math.min(100,baseSat*1.55+40):Math.min(100,baseSat+granSatBoost);
+  const transAlpha=transMode?Math.min(1,alpha*1.15):alpha;
+
+  ctx.save();
+  const bs=cr._breathS||1;
+  ctx.translate(cr.cx+gx,cr.cy+gy);
+  ctx.scale(pScale*cr.scaleX*bs,pScale*cr.scaleY*bs);
+  if(transMode)ctx.globalCompositeOperation='screen';
+
+  const n=wv.length;
+  for(let i=0;i<n;i++){
+    const A=wv[i],B=wv[(i+1)%n];
+    let fH;
+    if(cr.sp.rolling){fH=(cr.rollHue+i*(360/n)+cr.colorDrift*18)%360;}
+    else if(cr.sp.split){fH=i%2===0?((cr.hue+cr.colorDrift*10)%360):((cr.hue2||cr.hue+120)+cr.colorDrift*8)%360;}
+    else{fH=((cr.hue+A.hOff+i*11+cr.colorDrift*10)%360+360)%360;}
+    fH=(fH+granHueShimmer+360)%360;
+    const dH=transMode?(fH+35*(i%3===0?1:i%3===1?-1:2)+360)%360:fH;
+    const fL=Math.max(22,Math.min(78,cr.lgt+A.hOff*0.35));
+    const dL=transMode?Math.min(78,fL+12):fL;
+    ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(A.x,A.y);ctx.lineTo(B.x,B.y);ctx.closePath();
+    if(twoToneMode){
+      const grd=ctx.createLinearGradient(A.x,A.y,B.x,B.y);
+      grd.addColorStop(0,hsl(dH,transSat,dL+7,transAlpha));
+      grd.addColorStop(1,hsl((dH+50)%360,transSat,dL-10,transAlpha));
+      ctx.fillStyle=grd;
+    }else{ctx.fillStyle=hsl(dH,transSat,dL,transAlpha);}
+    ctx.fill();
+    ctx.strokeStyle=`rgba(255,255,255,${(transMode?0.62:0.46)*transAlpha})`;
+    ctx.lineWidth=transMode?1.3:1.0;ctx.stroke();
+  }
+
+  if(bloatMode){
+    const maxR=wv.reduce((m,v)=>Math.max(m,Math.hypot(v.x,v.y)),0);
+    const grd=ctx.createRadialGradient(0,0,2,0,0,maxR*0.65);
+    grd.addColorStop(0,hsl(cr.hue,Math.min(cr.sat+18,100),Math.min(cr.lgt+22,80),alpha*0.14));
+    grd.addColorStop(1,'transparent');
+    ctx.fillStyle=grd;
+    ctx.beginPath();ctx.moveTo(wv[0].x,wv[0].y);
+    for(let i=1;i<wv.length;i++)ctx.lineTo(wv[i].x,wv[i].y);
+    ctx.closePath();ctx.fill();
+  }
+
+  // Bond flash: TIGHT perimeter outline only — 2px, no radial blob
+  const bondAge=(now-cr.bondFlashT)/1000;
+  if(bondAge<1.4){
+    const bt=bondAge/1.4;
+    const bA=bt<0.15?(bt/0.15):Math.max(0,1-(bt-0.15)/0.85);
+    ctx.beginPath();
+    ctx.moveTo(wv[0].x,wv[0].y);
+    for(let i=1;i<wv.length;i++)ctx.lineTo(wv[i].x,wv[i].y);
+    ctx.closePath();
+    ctx.strokeStyle=hsl(cr.hue+60,100,82,bA*0.95);
+    ctx.lineWidth=2.2;ctx.stroke();
+  }
+
+  if(cr.handleFade>0.01){
+    wv.forEach(v=>{
+      ctx.beginPath();ctx.arc(v.x,v.y,6,0,Math.PI*2);
+      ctx.fillStyle=`rgba(255,255,255,${cr.handleFade*0.10})`;ctx.fill();
+      ctx.strokeStyle=`rgba(255,255,255,${cr.handleFade*0.70})`;ctx.lineWidth=1.2;ctx.stroke();
+    });
+  }
+
+  ctx.globalCompositeOperation='source-over';
+  ctx.restore();
+  if(cr.sp.rolling)cr.rollHue=(cr.rollHue+0.14)%360;
+}
+
+// ── BUILD POINTS ─────────────────────────────────────────────
+function drawBuildPts(now){
+  if(!buildPts.length)return;
+  const sp=SPECS[currentType],bh=(sp.hMin+sp.hMax)/2;
+  ctx.save();
+
+  // LIVE PREVIEW: fan triangulation from centroid — shows cellular division
+  if(buildPts.length>=3){
+    let pcx=0,pcy=0;buildPts.forEach(p=>{pcx+=p.x;pcy+=p.y;});pcx/=buildPts.length;pcy/=buildPts.length;
+    const n=buildPts.length;
+    for(let i=0;i<n;i++){
+      const A=buildPts[i],B=buildPts[(i+1)%n];
+      const fH=(bh+i*22+now*0.005)%360;
+      ctx.beginPath();ctx.moveTo(pcx,pcy);ctx.lineTo(A.x,A.y);ctx.lineTo(B.x,B.y);ctx.closePath();
+      ctx.fillStyle=hsl(fH,sp.sMin+20,sp.lBase,0.28);ctx.fill();
+      ctx.strokeStyle=`rgba(255,255,255,0.18)`;ctx.lineWidth=0.7;ctx.stroke();
+    }
+  }
+
+  // Outline
+  ctx.strokeStyle='rgba(160,160,160,0.28)';ctx.lineWidth=1;
+  ctx.beginPath();
+  buildPts.forEach((p,i)=>{i===0?ctx.moveTo(p.x,p.y):ctx.lineTo(p.x,p.y);});
+  if(buildPts.length>2)ctx.lineTo(buildPts[0].x,buildPts[0].y);
+  ctx.stroke();
+
+  // Dots — LOOP first pulse only, FAN all static
+  buildPts.forEach((p,i)=>{
+    const pulse=(buildMode==='loop'&&i===0)?0.72+0.28*Math.sin(now*0.004):1;
+    ctx.beginPath();ctx.arc(p.x,p.y,7*pulse,0,Math.PI*2);
+    ctx.fillStyle=hsl(bh,60,68,0.80);ctx.fill();
+    ctx.strokeStyle='rgba(255,255,255,0.62)';ctx.lineWidth=1.4;ctx.stroke();
+  });
+  ctx.restore();
+}
+
+// ── AURORA ───────────────────────────────────────────────────
+let _stars=null;
+function drawAurora(now,variant){
+  const w=canvas.width,h=canvas.height;
+  ctx.fillStyle='#000408';ctx.fillRect(0,0,w,h);
+  const t=now*0.00032;
+  const bands=variant==='aurora2'?[
+    {y:0.15,bh:0.40,hue:150,hue2:180,amp:0.06,spd:0.8},
+    {y:0.38,bh:0.30,hue:280,hue2:300,amp:0.05,spd:1.1},
+    {y:0.62,bh:0.24,hue:320,hue2:340,amp:0.04,spd:0.65},
+    {y:0.82,bh:0.18,hue:200,hue2:230,amp:0.035,spd:0.9},
+  ]:[
+    {y:0.12,bh:0.44,hue:135,hue2:165,amp:0.07,spd:0.9},
+    {y:0.36,bh:0.30,hue:270,hue2:295,amp:0.055,spd:1.2},
+    {y:0.60,bh:0.24,hue:170,hue2:195,amp:0.04,spd:0.55},
+    {y:0.80,bh:0.16,hue:300,hue2:320,amp:0.03,spd:0.75},
+  ];
+  bands.forEach(b=>{
+    const wave=Math.sin(t*b.spd)*b.amp,cy2=(b.y+wave)*h,bh2=b.bh*h;
+    for(let x=0;x<w;x+=18){
+      const wx=Math.sin(x*0.012+t*b.spd*0.7)*bh2*0.18,lum=50+Math.sin(x*0.008+t)*10;
+      const grd=ctx.createLinearGradient(0,cy2+wx-bh2*.5,0,cy2+wx+bh2*.5);
+      grd.addColorStop(0,'transparent');
+      grd.addColorStop(0.25,hsl(b.hue+Math.sin(x*0.005)*14,80,lum,0.14));
+      grd.addColorStop(0.5,hsl(b.hue2,84,lum+7,0.22));
+      grd.addColorStop(0.75,hsl(b.hue,76,lum-5,0.12));
+      grd.addColorStop(1,'transparent');
+      ctx.fillStyle=grd;ctx.fillRect(x,0,18,h);
+    }
+  });
+  if(!_stars)_stars=Array.from({length:140},()=>({x:rnd(0,1),y:rnd(0,1),r:rnd(0.4,1.8),p:rnd(0,Math.PI*2)}));
+  _stars.forEach(s=>{
+    const a=0.10+0.10*Math.sin(now*0.0008+s.p);
+    ctx.beginPath();ctx.arc(s.x*w,s.y*h,s.r,0,Math.PI*2);
+    ctx.fillStyle=`rgba(255,255,255,${a.toFixed(3)})`;ctx.fill();
+  });
+}
+
+function drawBG(now){
+  const w=canvas.width,h=canvas.height;
+  if(bgScene.type==='aurora'||bgScene.type==='aurora2'){drawAurora(now,bgScene.type);return;}
+  ctx.fillStyle=bgScene.c||'#000';ctx.fillRect(0,0,w,h);
+}
+
+// ── FORM CRYSTAL ────────────────────────────────────────────
+function formCrystal(){
+  if(buildPts.length<3){setStatus('need at least 3 points');return;}
+  const pts=[...buildPts];
+  buildPts=[];  // clear FIRST — fixes frozen point bug
+  const cr=makeCrystal(pts,currentType);
+  cr.formed=true;
+  cr.wakened=true;  // v7c: immediately active, breath starts now
+  crystals.push(cr);
+  undoStack.push({type:'add',cr});redoStack=[];
+  const t0=performance.now();
+  function bloom(n){cr.satBoost=Math.min(1,(n-t0)/380);if(cr.satBoost<1)requestAnimationFrame(bloom);}
+  requestAnimationFrame(bloom);
+  if(!pillsUnlocked){pillsUnlocked=true;startPills();}
+  updateCounter();
+  const fc=crystals.filter(c=>c.formed).length;
+  setStatus(`${fc} crystal${fc!==1?'s':''} — tap to place more`);
+  if(!audioCtx)initAudio();
+  if(audioCtx)syncLoops();
+}
+
+// ── BONDING ─────────────────────────────────────────────────
+function worldEdges(cr){
+  return cr.verts.map((v,i)=>{
+    const nx=cr.verts[(i+1)%cr.verts.length];
+    return{ax:cr.cx+v.x*cr.scaleX,ay:cr.cy+v.y*cr.scaleY,
+           bx:cr.cx+nx.x*cr.scaleX,by:cr.cy+nx.y*cr.scaleY};
+  });
+}
+function applyProximityMagnetism(){
+  const formed=crystals.filter(c=>c.formed);
+  const pullStr=(G.bondPull/100)*0.0004;
+  for(let i=0;i<formed.length-1;i++){
+    for(let j=i+1;j<formed.length;j++){
+      const a=formed[i],b=formed[j];
+      if(a.bonds.some(bd=>bd.other===b))continue;
+      const dx=b.cx-a.cx,dy=b.cy-a.cy,d=Math.hypot(dx,dy);
+      if(d<BOND_ATTRACT_RADIUS&&d>14){
+        const f=pullStr*(1-d/BOND_ATTRACT_RADIUS)/d;
+        a.driftVx+=dx*f;a.driftVy+=dy*f;
+        b.driftVx-=dx*f;b.driftVy-=dy*f;
+      }
+    }
+  }
+}
+function checkBonds(cr){
+  const edges=worldEdges(cr);
+  for(const other of crystals){
+    if(other===cr||!other.formed)continue;
+    if(cr.bonds.some(b=>b.other===other))continue;
+    for(const e of edges){
+      for(const oe of worldEdges(other)){
+        const mx=(e.ax+e.bx)/2,my=(e.ay+e.by)/2;
+        const omx=(oe.ax+oe.bx)/2,omy=(oe.ay+oe.by)/2;
+        if(Math.hypot(mx-omx,my-omy)>BOND_SNAP_DIST)continue;
+        const a1=Math.atan2(e.by-e.ay,e.bx-e.ax),a2=Math.atan2(oe.by-oe.ay,oe.bx-oe.ax);
+        let da=Math.abs(a1-a2);if(da>Math.PI)da=2*Math.PI-da;
+        // 0.65 rad (~37°) tolerance — forgiving enough for elastic verts
+        if(da<0.65||(Math.PI-da)<0.65){
+          const now=performance.now();
+          // Snap: gentle nudge so edges kiss — 22% keeps them from colliding through each other
+          const snapDx=omx-mx, snapDy=omy-my;
+          cr.cx+=snapDx*0.22; cr.cy+=snapDy*0.22;
+          other.cx-=snapDx*0.22; other.cy-=snapDy*0.22;
+          cr.driftVx=0;cr.driftVy=0;
+          other.driftVx=0;other.driftVy=0;
+          cr.bonds.push({other,glowT:now});other.bonds.push({other:cr,glowT:now});
+          cr.bondFlashT=now;other.bondFlashT=now;
+          const badge=document.getElementById('bond-badge');
+          badge.classList.add('show');setTimeout(()=>badge.classList.remove('show'),1600);
+          if(audioCtx)playBondSnap();
+          if(pillsUnlocked)showPill({t:'sci',l:'WALL-LOCK',p:'Two crystalline faces aligned — a lattice bond formed. This is how crystals grow in nature: parallel faces snap into geometric lock.'});
+          return;
+        }
+      }
+    }
+  }
+}
+
+// ── MAIN LOOP — v7c physics runs here, not in drawCrystal ────
+function loop(now){
+  requestAnimationFrame(loop);
+  frame++;
+  drawBG(now);
+
+  // NO proximity glow
+  applyProximityMagnetism();
+
+  // v7c jellyfish elastic — runs in main loop, not draw
+  crystals.forEach(cr=>{
+    if(!cr.formed||!cr.wakened)return;
+
+    // ── JELLYFISH ELASTIC — v7c formula, UNCONDITIONAL, runs every frame ──
+    // MUST be outside any drift/condition guard. This is what makes verts breathe.
+    // el = (elas/100)*0.03  — at default elas=60: el=0.018, clearly visible.
+    // atan2 uses CURRENT v.x,v.y not rest position — that's the magic.
+    const el=(G.elas/100)*0.03;
+    const breathS=1+Math.sin(cr.breath)*0.015*(G.breath/100);
+    cr.verts.forEach(v=>{
+      const ang=cr.breath+Math.atan2(v.y,v.x);
+      v.vx=(v.vx||0)*0.85+Math.sin(ang)*el;
+      v.vy=(v.vy||0)*0.85+Math.cos(ang)*el*0.6;
+      v.x+=v.vx; v.y+=v.vy;
+    });
+    cr.breath+=0.006;
+    cr._breathS=breathS;
+
+    // Drift physics — separate, optional
+    if(G.drift>0||cr.driftVx!==0||cr.driftVy!==0){
+      const visc=1-(G.visc/100)*0.008;
+      cr.driftVx*=visc;cr.driftVy*=visc;
+      if(G.attract>0){
+        const mx=canvas.width/2,my=canvas.height/2;
+        cr.driftVx+=(mx-cr.cx)*0.00006*(G.attract/50);
+        cr.driftVy+=(my-cr.cy)*0.00006*(G.attract/50);
+      }
+      cr.cx+=cr.driftVx;cr.cy+=cr.driftVy;
+      cr.cx=Math.max(40,Math.min(canvas.width-40,cr.cx));
+      cr.cy=Math.max(56,Math.min(canvas.height-92,cr.cy));
+    }
+  });
+
+  crystals.forEach(cr=>{
+    if(!cr.formed)return;
+    // Vertex handles: HIDDEN after form, only visible when tapped/sculpting
+    // showHandles=true on touch, fades out 2.2s after last touch
+    cr.handleFade=cr.showHandles
+      ?Math.min(1,cr.handleFade+0.065)
+      :Math.max(0,cr.handleFade-0.035); // fade to ZERO — no ambient handle glow
+    if(cr.showHandles&&cr.handleTimer>0&&now-cr.handleTimer>2200)cr.showHandles=false;
+    drawCrystal(cr,now);
+  });
+
+  // Passive bond check — catches crystals that drifted into range
+  if(frame%6===0){
+    crystals.filter(c=>c.formed&&c.bonds.length===0).forEach(cr=>checkBonds(cr));
+  }
+  // NO bond lines drawn at all
+  drawBuildPts(now);
+
+  if(clearFade&&now-clearStart>1500){
+    crystals=[];clearFade=false;updateCounter();
+    Object.keys(loopNodes).forEach(stopLoop);
+  }
+}
+requestAnimationFrame(loop);
+
+// ── STATUS & PILLS ───────────────────────────────────────────
+function setStatus(msg,pause){
+  document.getElementById('status').textContent=msg;
+  if(pause){pillPaused=true;document.getElementById('science-pill').classList.remove('visible');setTimeout(()=>{pillPaused=false;},8000);}
+}
+
+
+const PILLS=[
+  // ── CRYSTAL SCIENCE ──────────────────────────────────────────
+  {t:'sci',l:'Crystal Science',p:'Quartz oscillates at 32,768 Hz when electrically stimulated. Every digital clock you own is timed by a crystal resonating right now.'},
+  {t:'sci',l:'Crystal Science',p:'Piezoelectricity: squeeze quartz and it generates voltage. That\'s how vinyl record needles work — a crystal reading groove vibrations and converting them to electrical signal.'},
+  {t:'sci',l:'Crystal Science',p:'Crystals create radio frequencies. A galena crystal acts as a radio receiver with zero battery power. The crystal converts electromagnetic waves directly into audible sound.'},
+  {t:'sci',l:'Crystal Science',p:'Amethyst gets its purple color from iron impurities and natural radiation exposure over millions of years. Color is history. Every hue is a geological timestamp.'},
+  {t:'sci',l:'Crystal Science',p:'Pyrite is called Fool\'s Gold, but it wasn\'t foolish — it\'s still used in solar cells today. Its semiconducting properties convert light to electricity.'},
+  {t:'sci',l:'Crystal Science',p:'Smoky quartz gets its color from natural gamma radiation hitting silicon dioxide. The Earth itself irradiated these crystals over millions of years.'},
+  {t:'sci',l:'Crystal Science',p:'Titanium is the 9th most abundant element in Earth\'s crust. Every rock you\'ve ever stepped on contains trace titanium.'},
+  {t:'sci',l:'Crystal Science',p:'Ametrine is a single crystal that is half amethyst, half citrine — two different oxidation states of iron in the same stone. Nature\'s gradient.'},
+  {t:'sci',l:'Crystal Science',p:'Grape agate is actually a cluster of tiny chalcedony spheres — not a single crystal, but thousands of them packed together like bubbles. Community structure.'},
+  {t:'sci',l:'Crystal Growth',p:'Crystals grow by adding one molecule at a time to their surface. A crystal you can hold took thousands to millions of years to form, one molecular layer at a time.'},
+  {t:'sci',l:'Crystal Growth',p:'Snowflakes are crystals. Every snowflake is unique because each one falls through a slightly different atmospheric path. Environment shapes form. Always.'},
+  {t:'sci',l:'Crystal Growth',p:'Liquid crystals are real — they flow like liquids but have the ordered molecular structure of crystals. Your phone screen is made of them. You\'re touching a crystal right now.'},
+  {t:'sci',l:'Wall-Lock',p:'Crystalline faces bond when parallel edges align — the same process that built every mineral formation on Earth. You are simulating geological bonding in real time.'},
+  {t:'sci',l:'Bonding Physics',p:'Crystal growth is electromagnetism at the molecular scale. Electrons in one face attract nuclei in the approaching face. The bond forms when electromagnetic force overcomes thermal noise.'},
+  {t:'sci',l:'Resonance',p:'Every physical object has a resonant frequency. Crystals are shaped by theirs. When you play the right frequency at a crystal, it vibrates at maximum amplitude. This is how ultrasound shatters kidney stones.'},
+  {t:'sci',l:'Physics',p:'Sound = pressure wave. Light = electromagnetic wave. A crystal resonates at both simultaneously. That\'s not a metaphor — it\'s materials science.'},
+  {t:'sci',l:'Physics',p:'Fractals: branching fern = coastline = lightning bolt = blood vessel = crystal growth. The same mathematics appears at every scale in nature.'},
+  {t:'sci',l:'Physics',p:'The six-sided symmetry of a snowflake comes from the hexagonal molecular bonding angle of water. Geometry is chemistry. Chemistry is physics. Physics is math.'},
+  {t:'sci',l:'Solar Event \xb7 Jun 2026',p:'Active Region 4455 erupted June 3 with M9.3, M7.7, then X1.0 flares — three eruptions from the same region in one day.'},
+  {t:'sci',l:'Solar Event \xb7 Jun 2026',p:'A CME arrived June 8. Aurora was visible over Scotland, northern England, and Northern Ireland. The electromagnetic field reached Earth in 18 hours.'},
+
+  // ── VECTOR / BEZIER / DESIGN ──────────────────────────────────
+  {t:'vec',l:'Vector Art',p:'Every point you place is a vertex — the same data structure used in every logo, typeface, icon, and illustration you\'ve ever seen. You\'re building in the language of design.'},
+  {t:'vec',l:'Vector Art',p:'Vector graphics never lose quality. Zoom in infinitely and the edges stay sharp. That\'s because they\'re stored as math — coordinates and equations, not pixels.'},
+  {t:'vec',l:'Bézier Curves',p:'Pierre Bézier invented parametric curves in the 1960s to design car bodies at Renault. Every smooth curve in every font, logo, and illustration is a Bézier curve.'},
+  {t:'vec',l:'Bézier Curves',p:'A Bézier curve is defined by control points — you pull the handles, the curve follows. The math underneath is a weighted blend of positions. You\'re doing calculus with your fingertips.'},
+  {t:'vec',l:'Bézier Curves',p:'The letter S in every font is two cubic Bézier curves joined at an inflection point. Type designers spend weeks getting that join right. Precision at the microscopic scale.'},
+  {t:'vec',l:'Polygon Math',p:'The shapes you build are polygons — defined entirely by their vertex positions. Triangle, pentagon, crystal: all the same data structure. 3 points or 300, same math.'},
+  {t:'vec',l:'Polygon Math',p:'Triangulation: any polygon can be divided into triangles. Every 3D model in every video game is made of triangles. Your crystal previews show you this in real time.'},
+  {t:'vec',l:'Design Theory',p:'The golden ratio (1.618) appears in nautilus shells, sunflower seeds, galaxy spirals, and the proportions designers use for layout. Nature optimized aesthetics before humans did.'},
+  {t:'vec',l:'Design Theory',p:'Symmetry triggers dopamine. The brain reads symmetry as genetic fitness — balanced features = healthy organism. That\'s why symmetrical compositions feel satisfying.'},
+  {t:'vec',l:'Design Theory',p:'Negative space is shape. The space around your crystal is as intentional as the crystal itself. Every composition is the relationship between form and void.'},
+  {t:'vec',l:'Color Theory',p:'Hue, saturation, lightness. Change one and the other two shift in perception. Color is relational — nothing exists in isolation on a canvas.'},
+  {t:'vec',l:'Color Theory',p:'Complementary colors sit opposite each other on the color wheel. They vibrate when placed next to each other. That vibration is called simultaneous contrast — your eyes are being tricked by physics.'},
+
+  // ── HIP HOP PEDAGOGY ──────────────────────────────────────────
+  {t:'hph',l:'Hip Hop Ped.',p:'DJ Kool Herc invented the breakbeat in 1973 by isolating the drum break on two copies of the same record. He wasn\'t mixing music. He was manipulating time.'},
+  {t:'hph',l:'Hip Hop Ped.',p:'Kool Herc once told Aaron "SpazeCraft": "You\'re Johnny Quest — always into something different." Forge your own path. Curiosity is the method.'},
+  {t:'hph',l:'Hip Hop Ped.',p:'Sampling is archaeology. Every loop digs up a frozen moment and makes it breathe again. The sample is a time machine set to a specific groove.'},
+  {t:'hph',l:'Hip Hop Ped.',p:'GZA said the universe was dark until light broke through. Cosmology. The Big Bang. Also a bar. Science and poetry have always been the same thing.'},
+  {t:'hph',l:'The Diamond Needle',p:'A record needle is a diamond — literally. It rides the microscopic mountain ranges pressed into vinyl, picking up stray hitchhiker vibrations between the grooves. Every imperfection in the groove becomes sound. The diamond is reading geology at 33 RPM.'},
+  {t:'hph',l:'Purpose Hack',p:'The needle was designed to do one thing: follow the groove and reproduce recorded audio. Nobody intended it to become a rhythmic instrument. That\'s purpose hacking — taking a tool beyond its original intention into territory its inventors never imagined.'},
+  {t:'hph',l:'Grand Wizard Theodore',p:'In 1975, a teenager named Theodore Livingston was in his room practicing when his mother called him to stop. He held the record still with his hand — and heard it. That friction against the spinning platter, that squeal and drag: the scratch. Born in a kitchen in the Bronx because his mom was yelling for him. A whole global movement from one interrupted moment.'},
+  {t:'hph',l:'Turntablism',p:'What Grand Wizard Theodore discovered became turntablism — the practice of using turntables as instruments, not playback devices. It now has world champions, international competitions, and a codified technique library. The scratch is the hallmark of hip hop: an alien jazz communication language spoken fluently by masters like DJ Qbert, whose hands move faster than most people\'s thoughts.'},
+  {t:'hph',l:'The Scratch as Instrument',p:'The scratch is a 21st century instrument. It has its own vocabulary: baby scratch, transformer, flare, crab, chirp, orbit. Each technique is a different phoneme in a sonic language that didn\'t exist before 1975. A turntable championship is a recital. The judges are listening for fluency in a language invented from an accident.'},
+  {t:'hph',l:'Afrika Bambaataa',p:'Afrika Bambaataa connected hip hop culture to ancient African cosmology and futurism simultaneously. The culture was always about where we\'re going, not just where we came from.'},
+  {t:'hph',l:'Hip Hop Ped.',p:'Grandmaster Flash invented punch phrasing — isolating one note or phrase from a record and repeating it rhythmically. He turned a turntable into a percussive instrument.'},
+  {t:'hph',l:'Hip Hop Ped.',p:'The four elements: DJing, MCing, B-boying, and aerosol art. Each one requires mastery of time, rhythm, space, and composition. These are also the four pillars of music education.'},
+  {t:'hph',l:'Hip Hop Ped.',p:'Battling in hip hop is peer review. You present your best work, get critiqued in real time, and are expected to respond with something better. That\'s the scientific method in cypher form.'},
+  {t:'hph',l:'Hip Hop Ped.',p:'J Dilla\'s beats were intentionally slightly off the grid — human feel quantized to 33% instead of 100%. Imperfection as aesthetic choice. Knowing the rules to break them.'},
+  {t:'hph',l:'Hip Hop Ped.',p:'Rakim said "I start to think, and then I sink into the paper like I was ink." Writing as physics. Thought as matter. Language as force.'},
+  {t:'hph',l:'Hip Hop Ped.',p:'The breakbeat IS granular synthesis. Herc was isolating grains — short sections of audio — and looping them. Ableton just automated what DJs invented by hand in 1973.'},
+  {t:'hph',l:'Hip Hop Ped.',p:'JUEGO DIGITAL. Digital play is still play. The fingertips learning a screen are learning the same way hands learned clay, paint, and turntables.'},
+
+  // ── SPAZECRAFT / PHILOSOPHY ───────────────────────────────────
+  {t:'spz',l:'Purpose Hack',p:'The needle wasn\'t intended to become an instrument. The spray can wasn\'t intended to become a mural. The turntable wasn\'t intended to become a stage. Purpose hacking is the act of taking a tool beyond its original intention into territory its inventors never imagined. That\'s what you\'re doing right now.'},
+  {t:'spz',l:'SpazeCraft',p:'You are not making shapes. You are growing crystals in a digital electromagnetic field. Each closed form is a standing wave made visible.'},
+  {t:'spz',l:'SpazeCraft',p:'NDT: No Determined Trajectory. The universe has no preferred direction for its expansion. Neither does your sculpture. Every placement is valid cosmology.'},
+  {t:'spz',l:'SpazeCraft',p:'The FORM button is not for the crystal. It\'s for the version of you that decided what shape it should take.'},
+  {t:'spz',l:'SpazeCraft',p:'Industry Grade. Community Made. The tools don\'t belong to the industry anymore. They belong to whoever learns how to use them.'},
+  {t:'spz',l:'SpazeCraft',p:'A maker is someone who sees a gap between what exists and what should exist — and fills it. You were born a maker. This is just practice.'},
+  {t:'spz',l:'SpazeCraft',p:'The Remix Garden: every tool you build can be remixed by someone else into something you never imagined. That\'s not losing authorship. That\'s exponential authorship.'},
+  {t:'spz',l:'SpazeCraft',p:'Vibe coding is hypothesis-driven design. You have an idea, you ask for it, you test it, you iterate. The scientific method and the creative process are the same process.'},
+  {t:'spz',l:'SpazeCraft',p:'The Maker → Creator → Collaborator arc. First you make. Then you create your own system. Then you build with others. You are at step one. The other two are waiting.'},
+  {t:'spz',l:'Kaiju Fruit Labs',p:'Kaiju means "strange beast" in Japanese. Strange beasts don\'t fit in boxes. They make new terrain wherever they go. Build strange.'},
+
+  // ── SYNESTHESIA / MULTIMODAL ──────────────────────────────────
+  {t:'syn',l:'Synesthesia',p:'Kandinsky heard chords as color fields and painted what he heard. He called it a visual score. You\'re doing the same thing right now.'},
+  {t:'syn',l:'Synesthesia',p:'About 4% of people experience synesthesia — hearing colors, seeing sounds, tasting shapes. But all human perception is cross-modal. We all mix senses. Some just know it.'},
+  {t:'syn',l:'Synesthesia',p:'Duke Ellington saw colors when he heard musical notes. D was dark blue. G was light blue. He composed for the colors. The music was a painting first.'},
+  {t:'syn',l:'Synesthesia',p:'The visual cortex and auditory cortex are adjacent in the brain and constantly cross-talk. Every sound you hear slightly activates your visual system. Vision and hearing were never separate.'},
+  {t:'syn',l:'Deep Listening',p:'Pauline Oliveros developed Deep Listening as a practice — attending to every sound in your environment simultaneously. No hierarchy, no focus, just awareness of the full acoustic field.'},
+  {t:'syn',l:'Deep Listening',p:'The difference between hearing and listening: hearing is passive reception. Listening is active attention. This tool requires listening. That\'s not an accident.'},
+  {t:'syn',l:'Multitask Cellular',p:'Your brain is running multiple parallel processes right now: visual composition, audio discrimination, tactile gesture, spatial reasoning, aesthetic judgment. Each session creates new neural pathways.'},
+  {t:'syn',l:'Cellular Imprints',p:'Repeated multi-sensory experiences leave cellular memory — the body learns, not just the mind. Musicians don\'t think about finger placement. Their hands remember. You\'re building that kind of memory now.'},
+
+  // ── HYPOTHESES ────────────────────────────────────────────────
+  {t:'hyp',l:'Hypothesis',p:'The June 2026 G3 storm disrupted Earth\'s electromagnetic field enough to produce aurora at mid-latitudes. What did those fluctuations do to the bioelectric field running through every living body?'},
+  {t:'hyp',l:'Hypothesis',p:'If the aesthetic choices you make in this tool reflect your nervous system\'s current state — what would your session from yesterday look like vs today? Could a composition be a biometric?'},
+  {t:'hyp',l:'Hypothesis',p:'Children who don\'t receive labels yet play with this tool with zero hesitation and maximum creativity. The label came after the limitation. What does that suggest about where limits actually live?'},
+  {t:'hyp',l:'Hypothesis',p:'Every culture independently invented drumming, melody, and visual pattern-making. What does it mean that creativity is not cultural — it\'s biological? That art is what humans do when they are most fully human?'},
+  {t:'hyp',l:'Hypothesis',p:'If two people on opposite sides of the world develop the same creative concept without ever communicating — is that coincidence, or evidence that ideas exist in the field waiting to be found?'},
+];
+
+
+const PILL_COLORS={
+  sci:{bg:'rgba(0,180,255,0.12)',bc:'rgba(0,180,255,0.38)',lc:'#40c0ff'},
+  hyp:{bg:'rgba(180,0,255,0.12)',bc:'rgba(180,0,255,0.38)',lc:'#c060ff'},
+  spz:{bg:'rgba(255,100,0,0.12)',bc:'rgba(255,100,0,0.38)',lc:'#ff8040'},
+  hph:{bg:'rgba(255,200,0,0.12)',bc:'rgba(255,200,0,0.38)',lc:'#ffcc20'},
+  syn:{bg:'rgba(0,255,180,0.12)',bc:'rgba(0,255,180,0.38)',lc:'#20ffb0'},
+  vec:{bg:'rgba(255,60,160,0.12)',bc:'rgba(255,60,160,0.38)',lc:'#ff60c0'},
+};
+
+function showPill(p){
+  if(!pillsUnlocked||pillPaused)return;
+  const col=PILL_COLORS[p.t]||PILL_COLORS.sci;
+  const el=document.getElementById('science-pill');
+  el.style.background=col.bg;el.style.borderColor=col.bc;
+  document.getElementById('pill-label').style.color=col.lc;
+  document.getElementById('pill-label').textContent=p.l;
+  document.getElementById('pill-text').textContent=p.p;
+  el.classList.remove('visible');setTimeout(()=>el.classList.add('visible'),60);
+}
+function startPills(){
+  if(pillsTimer)return;fetchNOAA();
+  showPill(PILLS[pillIdx%PILLS.length]);
+  pillsTimer=setInterval(()=>{if(!pillPaused){pillIdx++;showPill(PILLS[pillIdx%PILLS.length]);}},30000);
+}
+async function fetchNOAA(){
+  try{
+    const end=new Date().toISOString().slice(0,10);
+    const start=new Date(Date.now()-7*86400000).toISOString().slice(0,10);
+    const res=await fetch(`https://kauai.ccmc.gsfc.nasa.gov/DONKI/WS/get/CME?startDate=${start}&endDate=${end}&mostAccurateOnly=true&completeEntryOnly=true&speed=500&halfAngle=30&catalog=ALL&keyword=NONE`,{signal:AbortSignal.timeout(6000)});
+    const data=await res.json();
+    if(data&&data.length){
+      const ev=data[data.length-1];const speed=ev.cmeAnalyses?.[0]?.speed||'';const note=ev.note||'';
+      if(speed||note){PILLS.unshift({t:'sci',l:'LIVE \xb7 NOAA',p:`CME ${ev.startTime?.slice(0,10)||'recent'}${speed?' @ '+Math.round(speed)+' km/s':''}.${note?' '+note.slice(0,100):''}`});document.getElementById('feed-badge').textContent='\u25cf LIVE';}
+    }
+  }catch(e){}
+}
+
+// ── INPUT ────────────────────────────────────────────────────
+let dragging=null,pinchD0=null,pinchSc0=null,lpTimer=null,lpTarget=null;
+let twistAngle0=null,twistCr=null,twistCx=0,twistCy=0;
+// Vertex sculpting drag state
+let vertDrag=null; // {cr, vi, lastX, lastY}
+// Swipe velocity tracking — last N positions for smooth release velocity
+let swipeHistory=[]; // [{x,y,t}] — rolling 5-frame window
+const SWIPE_HISTORY_MS=80; // only use positions from last 80ms for velocity
+// Bond detach state — hold readies it, drag executes it
+let detachReady=false;   // true once 2s hold confirmed
+let detachDownX=0,detachDownY=0; // finger position at hold-start, for drag distance check
+const DETACH_DRAG_PX=38; // how far finger must move after hold to actually peel
+function getXY(e){if(e.changedTouches){const t=e.changedTouches[0];return{x:t.clientX,y:t.clientY};}return{x:e.clientX,y:e.clientY};}
+function isUI(e){return['topbar','toolboxes','crystal-pills'].some(id=>{const el=document.getElementById(id);return el&&el.contains(e.target);});}
+
+// ── iOS AUDIO UNLOCK ─────────────────────────────────────────
+// MUST happen before preventDefault on any touchstart.
+// iOS Chrome invalidates user gesture if preventDefault called first.
+// This listener is passive:true so it fires before preventDefault
+// and satisfies iOS AudioContext unlock requirement.
+document.addEventListener('touchstart',()=>{
+  if(!audioCtx){
+    initAudio();
+  } else if(audioCtx.state==='suspended'){
+    audioCtx.resume();
+  }
+},{passive:true,once:false});
+
+// Also handle mouse click for desktop
+document.addEventListener('mousedown',()=>{
+  if(!audioCtx)initAudio();
+  else if(audioCtx.state==='suspended')audioCtx.resume();
+},{once:true});
+
+canvas.addEventListener('touchstart',e=>{e.preventDefault();if(!isUI(e))handleDown(e);},{passive:false});
+canvas.addEventListener('mousedown',e=>{if(!isUI(e))handleDown(e);});
+canvas.addEventListener('touchmove',e=>{e.preventDefault();handleMove(e);},{passive:false});
+canvas.addEventListener('mousemove',e=>handleMove(e));
+canvas.addEventListener('touchend',()=>handleUp());
+canvas.addEventListener('mouseup',()=>handleUp());
+canvas.addEventListener('dblclick',e=>{const p=getXY(e),h=hitTest(p.x,p.y);if(h)h.glitchAmt=1;});
+
+function handleDown(e){
+  swipeHistory=[];
+  // Audio already unlocked by passive touchstart listener above
+  if(audioCtx&&audioCtx.state==='suspended')audioCtx.resume();
+  const touches=e.touches;
+  if(touches&&touches.length===3){
+    // Three-finger twist — rotate crystal
+    const cx3=(touches[0].clientX+touches[1].clientX+touches[2].clientX)/3;
+    const cy3=(touches[0].clientY+touches[1].clientY+touches[2].clientY)/3;
+    twistAngle0=Math.atan2(touches[0].clientY-cy3,touches[0].clientX-cx3);
+    twistCr=hitTest(cx3,cy3);twistCx=cx3;twistCy=cy3;return;
+  }
+  if(touches&&touches.length===2){
+    pinchD0=Math.hypot(touches[0].clientX-touches[1].clientX,touches[0].clientY-touches[1].clientY);
+    const hit=hitTest((touches[0].clientX+touches[1].clientX)/2,(touches[0].clientY+touches[1].clientY)/2);
+    pinchSc0=hit?{cr:hit,sx:hit.scaleX,sy:hit.scaleY}:null;return;
+  }
+  const p=getXY(e);
+
+  // Check vertex hit FIRST — sculpting takes priority over body drag
+  const vh=findVert(p.x,p.y);
+  if(vh){
+    vertDrag={cr:vh.cr,vi:vh.vi,lastX:p.x,lastY:p.y};
+    lastTouched=vh.cr;
+    vh.cr.showHandles=true;vh.cr.handleTimer=performance.now();
+    // Zero out this vert's velocity so it doesn't fight the finger
+    vh.cr.verts[vh.vi].vx=0;
+    vh.cr.verts[vh.vi].vy=0;
+    return;
+  }
+
+  const hit=hitTest(p.x,p.y);
+  if(hit){
+    dragging={cr:hit,ox:p.x-hit.cx,oy:p.y-hit.cy};
+    lastTouched=hit;hit.showHandles=true;hit.handleTimer=performance.now();
+    lpTarget=hit;
+    detachReady=false;
+    detachDownX=p.x;detachDownY=p.y;
+    // Only arm detach timer if this crystal has bonds
+    if(hit.bonds.length>0){
+      lpTimer=setTimeout(()=>{
+        if(lpTarget&&lpTarget.bonds.length>0){
+          // HOLD CONFIRMED — arm detach, pulse crystal as visual cue
+          detachReady=true;
+          lpTarget.bondFlashT=performance.now(); // borrow bond flash as "ready" pulse
+          setStatus('drag to peel away \u2014 or release to keep');
+        }
+      },BOND_DETACH_MS);
+    }
+    return;
+  }
+  if(buildMode==='fan'){
+    buildPts.push({x:p.x,y:p.y});
+    if(audioCtx)playClick();
+    const n=buildPts.length;
+    if(n>=BUILD_CAP){setStatus('100 pts — forming',true);setTimeout(formCrystal,60);return;}
+    const CLOSE=32;
+    if(n>=3&&Math.hypot(p.x-buildPts[0].x,p.y-buildPts[0].y)<CLOSE){buildPts.pop();setStatus('forming\u2026',true);setTimeout(formCrystal,60);}
+    else{setStatus(n===1?'keep placing\u2026':n===2?'keep going\u2026':`${n} pts \u2014 FORM to close`);}
+  }else{
+    if(buildPts.length>=BUILD_CAP){setStatus('100 pts \u2014 closing',true);setTimeout(formCrystal,60);return;}
+    const CLOSE=32;
+    if(buildPts.length>=4){
+      let closed=false;
+      for(let i=0;i<buildPts.length;i++){if(Math.hypot(p.x-buildPts[i].x,p.y-buildPts[i].y)<CLOSE){setStatus('forming\u2026',true);setTimeout(formCrystal,60);closed=true;break;}}
+      if(closed)return;
+    }else if(buildPts.length>=3&&Math.hypot(p.x-buildPts[0].x,p.y-buildPts[0].y)<CLOSE){setStatus('forming\u2026',true);setTimeout(formCrystal,60);return;}
+    buildPts.push({x:p.x,y:p.y});
+    if(audioCtx)playClick();
+    const n=buildPts.length,rem=BUILD_CAP-n;
+    if(n===1)setStatus('keep placing\u2026');
+    else if(n===2)setStatus('keep going\u2026');
+    else if(n===3)setStatus('3 pts \u2014 tap any point to close');
+    else setStatus(`${n} pts \xb7 ${rem} left \xb7 tap any point to close`);
+  }
+}
+function handleMove(e){
+  e.preventDefault?.();
+  const touches=e.touches;
+  if(touches&&touches.length===3&&twistAngle0!==null&&twistCr){
+    const cx3=(touches[0].clientX+touches[1].clientX+touches[2].clientX)/3;
+    const cy3=(touches[0].clientY+touches[1].clientY+touches[2].clientY)/3;
+    const ang=Math.atan2(touches[0].clientY-cy3,touches[0].clientX-cx3);
+    const delta=ang-twistAngle0;
+    // Rotate all verts of this crystal by delta
+    twistCr.verts.forEach(v=>{
+      const r=Math.hypot(v.x,v.y),a=Math.atan2(v.y,v.x)+delta;
+      v.x=Math.cos(a)*r;v.y=Math.sin(a)*r;
+      v.vx=0;v.vy=0; // zero velocity so elastic settles from new position
+    });
+    twistAngle0=ang;
+    checkBonds(twistCr);
+    return;
+  }
+  if(touches&&touches.length===2&&pinchD0){
+    const d=Math.hypot(touches[0].clientX-touches[1].clientX,touches[0].clientY-touches[1].clientY);
+    const delta=(d-pinchD0)*0.0025;
+    if(pinchSc0){const cr=pinchSc0.cr;cr.scaleX=Math.max(0.1,Math.min(5.5,pinchSc0.sx+delta));cr.scaleY=Math.max(0.1,Math.min(5.5,pinchSc0.sy+delta));}
+    return;
+  }
+  // Vertex sculpt drag — 1:1 finger, vert STAYS where you leave it
+  if(vertDrag){
+    const p=getXY(e);
+    const cr=vertDrag.cr;
+    const dx=p.x-vertDrag.lastX;
+    const dy=p.y-vertDrag.lastY;
+    // Move vert in crystal-local space (accounting for scale)
+    cr.verts[vertDrag.vi].x+=dx/cr.scaleX;
+    cr.verts[vertDrag.vi].y+=dy/cr.scaleY;
+    // Zero velocity so elastic wobble doesn't fight the drag
+    cr.verts[vertDrag.vi].vx=0;
+    cr.verts[vertDrag.vi].vy=0;
+    vertDrag.lastX=p.x;vertDrag.lastY=p.y;
+    return;
+  }
+
+  if(!dragging)return;
+  const p=getXY(e);
+  const prevX=dragging.cr.cx,prevY=dragging.cr.cy;
+
+  // DRAG-TO-PEEL MUTEX — once detachReady is armed, cluster-drag MUST NOT fire.
+  // Only the peeled crystal moves. Guard covers the full move event.
+  if(detachReady){
+    if(lpTarget&&lpTarget.bonds.length>0){
+      const moved=Math.hypot(p.x-detachDownX,p.y-detachDownY);
+      if(moved>DETACH_DRAG_PX){
+        // Peel THIS crystal only — partners keep their bonds to each other
+        const peeled=lpTarget;
+        peeled.bonds.forEach(b=>{
+          b.other.bonds=b.other.bonds.filter(bd=>bd.other!==peeled);
+        });
+        peeled.bonds=[];
+        // Move ONLY the peeled crystal to follow the finger
+        peeled.cx=p.x-dragging.ox;
+        peeled.cy=p.y-dragging.oy;
+        peeled.driftVx=0;peeled.driftVy=0;
+        // Inject drift away from cluster on release
+        const dragAngle=Math.atan2(p.y-detachDownY,p.x-detachDownX);
+        peeled.driftVx=Math.cos(dragAngle)*4;
+        peeled.driftVy=Math.sin(dragAngle)*4;
+        peeled.bondFlashT=performance.now();
+        setStatus('flower peeled free');
+        detachReady=false;
+        clearTimeout(lpTimer);lpTimer=null;lpTarget=null;
+      }
+    } else {
+      // lpTarget gone or no bonds — cancel detach mode safely
+      detachReady=false;lpTarget=null;
+    }
+    return; // MUTEX: cluster-drag block below never runs while detachReady was true
+  }
+
+  dragging.cr.cx=p.x-dragging.ox;dragging.cr.cy=p.y-dragging.oy;
+  dragging.cr.driftVx=0;dragging.cr.driftVy=0;
+
+  // FAST-SWIPE PEEL — if dragging a bonded crystal fast enough, peel it without hold
+  // Velocity threshold: moved >60px from initial touchdown at decent speed
+  if(dragging.cr.bonds.length>0&&!detachReady){
+    const movedFromDown=Math.hypot(p.x-detachDownX,p.y-detachDownY);
+    const now3=performance.now();
+    // Check recent velocity from swipeHistory
+    let fastSwipe=false;
+    if(swipeHistory.length>=2&&movedFromDown>60){
+      const recent=swipeHistory[swipeHistory.length-1];
+      const prev=swipeHistory[0];
+      const dt3=now3-prev.t;
+      if(dt3>4){
+        const spd=Math.hypot((dragging.cr.cx-prev.x)/dt3,(dragging.cr.cy-prev.y)/dt3)*1000;
+        if(spd>280)fastSwipe=true; // px/s — intentional swipe speed
+      }
+    }
+    if(fastSwipe){
+      // Fast peel — same logic as hold+drag peel
+      const peeled=dragging.cr;
+      clearTimeout(lpTimer);lpTarget=null;
+      peeled.bonds.forEach(b=>{
+        b.other.bonds=b.other.bonds.filter(bd=>bd.other!==peeled);
+      });
+      peeled.bonds=[];
+      peeled.bondFlashT=performance.now();
+      setStatus('flower peeled free');
+      // Don't zero driftV — velocity is injected by handleUp swipeHistory
+    } else {
+      // Move bonded crystals with the dragged one (cluster drag)
+      const ddx=dragging.cr.cx-prevX,ddy=dragging.cr.cy-prevY;
+      dragging.cr.bonds.forEach(b=>{
+        b.other.cx+=ddx;b.other.cy+=ddy;
+        b.other.driftVx=0;b.other.driftVy=0;
+      });
+    }
+  } else {
+    // No bonds or already detaching — normal cluster-drag
+    const ddx=dragging.cr.cx-prevX,ddy=dragging.cr.cy-prevY;
+    dragging.cr.bonds.forEach(b=>{
+      b.other.cx+=ddx;b.other.cy+=ddy;
+      b.other.driftVx=0;b.other.driftVy=0;
+    });
+  }
+
+  checkBonds(dragging.cr);
+  // Track swipe history for velocity-on-release
+  const now2=performance.now();
+  swipeHistory.push({x:dragging.cr.cx,y:dragging.cr.cy,t:now2});
+  // Keep only recent history within SWIPE_HISTORY_MS
+  while(swipeHistory.length>1&&now2-swipeHistory[0].t>SWIPE_HISTORY_MS)swipeHistory.shift();
+}
+function handleUp(){
+  clearTimeout(lpTimer);
+  // Swipe-to-float — inject release velocity into driftVx/driftVy
+  // Works from crystal 1, no unlock gate required
+  if(dragging&&swipeHistory.length>=2){
+    const first=swipeHistory[0],last=swipeHistory[swipeHistory.length-1];
+    const dt=last.t-first.t;
+    if(dt>4){ // guard against divide-by-near-zero
+      const vx=(last.x-first.x)/dt*16; // scale to per-frame velocity (~60fps)
+      const vy=(last.y-first.y)/dt*16;
+      // Cap velocity so it's satisfying but not chaotic
+      const speed=Math.hypot(vx,vy);
+      const maxSpeed=18;
+      const scale=speed>maxSpeed?maxSpeed/speed:1;
+      dragging.cr.driftVx=vx*scale;
+      dragging.cr.driftVy=vy*scale;
+      // Bonded crystals get same velocity impulse (they travel together)
+      dragging.cr.bonds.forEach(b=>{
+        b.other.driftVx=vx*scale;
+        b.other.driftVy=vy*scale;
+      });
+    }
+  }
+  swipeHistory=[];
+  detachReady=false;
+  dragging=null;pinchD0=null;pinchSc0=null;lpTarget=null;
+  twistAngle0=null;twistCr=null;
+  vertDrag=null;
+}
+
+// ── TOOLBOXES ────────────────────────────────────────────────
+const TB_IDS=['shape','color','physics','glitch','audio','granular'];
+TB_IDS.forEach(id=>{
+  document.getElementById('btn-'+id).addEventListener('click',()=>{
+    const tb=document.getElementById('tb-'+id),btn=document.getElementById('btn-'+id);
+    const open=tb.classList.toggle('open');btn.classList.toggle('active',open);
+    const opens=TB_IDS.filter(k=>document.getElementById('tb-'+k).classList.contains('open'));
+    if(opens.length>2){const toClose=opens.find(k=>k!==id);if(toClose){document.getElementById('tb-'+toClose).classList.remove('open');document.getElementById('btn-'+toClose).classList.remove('active');}}
+  });
+});
+['shape','color','physics','glitch'].forEach(id=>{
+  const badge=document.getElementById('gl-'+id),tip=document.getElementById('tip-'+id);
+  if(badge)badge.addEventListener('click',()=>{glMode[id]=glMode[id]==='G'?'L':'G';badge.textContent=glMode[id];});
+  if(badge&&tip){badge.addEventListener('mouseenter',()=>{const r=badge.getBoundingClientRect();tip.style.top=(r.bottom+6)+'px';tip.style.left=Math.min(r.left,window.innerWidth-200)+'px';});}
+});
+
+function bindSl(id,key,cb){
+  const inp=document.getElementById('sl-'+id),val=document.getElementById('v-'+id);
+  if(!inp)return;
+  inp.addEventListener('input',()=>{const v=parseFloat(inp.value);val.textContent=v;G[key]=v;if(cb)cb(v);});
+}
+bindSl('spike','spike');
+bindSl('breath','breath');
+bindSl('elas','elas');
+// Hue shift: store base hues, apply absolute offset from slider center
+let hueBaseMap=new Map();
+document.getElementById('sl-hue').addEventListener('input',function(){
+  const v=parseFloat(this.value);
+  document.getElementById('v-hue').textContent=v;
+  const targets=glMode.color==='G'?crystals.filter(c=>c.formed):(lastTouched?[lastTouched]:[]);
+  targets.forEach(c=>{
+    if(!hueBaseMap.has(c.id))hueBaseMap.set(c.id,c.hue);
+    c.hue=((hueBaseMap.get(c.id)+v)+360)%360;
+  });
+});
+// Reset base map when slider returns to 0
+document.getElementById('sl-hue').addEventListener('change',function(){
+  if(parseFloat(this.value)===0)hueBaseMap.clear();
+});
+bindSl('sat','sat',v=>{const t=glMode.color==='G'?crystals.filter(c=>c.formed):(lastTouched?[lastTouched]:[]);t.forEach(c=>c.sat=v);});
+bindSl('bright','bright',v=>{const t=glMode.color==='G'?crystals.filter(c=>c.formed):(lastTouched?[lastTouched]:[]);t.forEach(c=>c.lgt=v);});
+bindSl('alpha','alpha',v=>{const a=v/100,t=glMode.color==='G'?crystals.filter(c=>c.formed):(lastTouched?[lastTouched]:[]);t.forEach(c=>c.alpha=a);});
+bindSl('drift','drift');
+bindSl('visc','visc');
+bindSl('attract','attract');
+bindSl('sep','sep');
+bindSl('bondpull','bondPull');
+bindSl('gint','gint');bindSl('gspd','gspd');bindSl('gfrac','gfrac');
+bindSl('vol','vol',v=>{G.vol=v/100;if(masterGain)masterGain.gain.value=G.vol;});
+
+// AUDIO EFFECTS — steeper curves, audible from ~20%, drenched at 100%
+bindSl('rev','reverb',v=>{
+  G.reverb=v/100;
+  if(!reverbSend||!audioCtx)return;
+  // Linear curve — no more hiding at low end. 20% = clearly audible.
+  const amt=(v/100)*1.8;
+  reverbSend.gain.setTargetAtTime(amt,audioCtx.currentTime,0.05);
+});
+
+// Ping-pong delay — slapback from 15%, feedback loop at 80%+
+bindSl('del','delay',v=>{
+  G.delay=v/100;
+  if(!delaySend||!delayFeedback||!audioCtx)return;
+  const sendAmt=(v/100)*1.6;
+  delaySend.gain.setTargetAtTime(sendAmt,audioCtx.currentTime,0.05);
+  // Feedback: 0.45 at 0% → 0.92 at 100%
+  const fb=0.45+((v/100)*0.47);
+  delayFeedback.gain.setTargetAtTime(fb,audioCtx.currentTime,0.08);
+});
+
+// Dub delay — reggae smear audible from 20%, infinite echo at 90%+
+bindSl('dub','dub',v=>{
+  G.dub=v/100;
+  if(!dubSend||!dubFeedback||!audioCtx)return;
+  const sendAmt=(v/100)*1.8;
+  dubSend.gain.setTargetAtTime(sendAmt,audioCtx.currentTime,0.05);
+  // Dub feedback: 0.55 → 0.91
+  const fb=0.55+((v/100)*0.36);
+  dubFeedback.gain.setTargetAtTime(fb,audioCtx.currentTime,0.1);
+});
+
+// STUTTER / BEAT-GATE — center=off, left=chaos chop, right=rhythmic grid
+document.getElementById('sl-stutter').addEventListener('input',function(){
+  const v=parseFloat(this.value);
+  document.getElementById('v-stutter').textContent=v;
+  stutterVal=v;
+  if(v===0){
+    stopGateEngine();
+  } else {
+    if(!audioCtx)initAudio();
+    if(audioCtx)startGateEngine();
+  }
+});
+
+// GRANULAR — removed from audio toolbox, now has its own panel
+// sl-granular is gone; granular is driven by sl-g-density in #tb-granular
+// LP/HP CROSSFADER (audio toolbox) — center=flat, left=LP dark, right=HP bright
+document.getElementById('sl-filter').addEventListener('input',function(){
+  const v=parseFloat(this.value);
+  document.getElementById('v-filter').textContent=v;
+  if(!audioCtx||!lpFilter||!hpFilter)return;
+  const sr=audioCtx.sampleRate/2;
+  if(v<=0){
+    // LP: 0=open, -100=200Hz dark
+    const t=Math.abs(v)/100;
+    const freq=sr*Math.pow(200/sr,t);
+    lpFilter.frequency.setTargetAtTime(Math.max(200,freq),audioCtx.currentTime,0.05);
+    lpFilter.Q.setTargetAtTime(0.8+t*6.5,audioCtx.currentTime,0.05);
+    hpFilter.frequency.setTargetAtTime(20,audioCtx.currentTime,0.05);
+  } else {
+    // HP: 0=20Hz, +100=3000Hz bright
+    const t=v/100;
+    hpFilter.frequency.setTargetAtTime(20+t*2980,audioCtx.currentTime,0.05);
+    hpFilter.Q.setTargetAtTime(0.7+t*4,audioCtx.currentTime,0.05);
+    lpFilter.frequency.setTargetAtTime(sr,audioCtx.currentTime,0.05);
+  }
+});
+
+// GRANULAR TOOLBOX — 9 sliders, all driving GR params + audio + visual
+function bindGR(id,key,cb){
+  const inp=document.getElementById('sl-g-'+id);
+  const val=document.getElementById('v-g-'+id);
+  if(!inp)return;
+  inp.addEventListener('input',()=>{
+    const v=parseFloat(inp.value);
+    val.textContent=v;
+    GR[key]=v;
+    if(!audioCtx&&GR.density>0)initAudio();
+    if(cb)cb(v);
+  });
+}
+bindGR('density','density',v=>{
+  if(!audioCtx&&v>0)initAudio();
+  setGranular(v);
+});
+bindGR('size','size',()=>updateGranularRate());
+bindGR('pitch','pitch');
+bindGR('freeze','freeze');
+bindGR('warp','warp');
+bindGR('stain','stain');
+bindGR('chaos','chaos');
+bindGR('filter','filter',()=>applyGranularFilter());
+bindGR('echo','echo',()=>applyGranularEcho());
+bindSl('stretch','stretch',v=>{stretchFactor=v/100;});
+
+['quartz','amethyst','pyrite','smoky','grape','ametrine','titanium'].forEach(type=>{
+  const inp=document.getElementById('vol-'+type),val=document.getElementById('vv-'+type);
+  if(inp)inp.addEventListener('input',()=>{val.textContent=inp.value;TYPE_VOLS[type]=parseFloat(inp.value)/100;});
+});
+
+document.getElementById('btn-2tone').addEventListener('click',()=>{
+  twoToneMode=!twoToneMode;
+  document.getElementById('btn-2tone').textContent=twoToneMode?'ON':'OFF';
+  document.getElementById('btn-2tone').classList.toggle('on',twoToneMode);
+});
+document.getElementById('btn-buildmode').addEventListener('click',()=>{
+  buildMode=buildMode==='fan'?'loop':'fan';buildPts=[];
+  const btn=document.getElementById('btn-buildmode');
+  if(buildMode==='fan'){btn.textContent='BUILD: FAN';btn.className='tbtn-primary mode-fan';document.getElementById('mode-badge').textContent='fan \xb7 FORM to close \xb7 100pt cap';}
+  else{btn.textContent='BUILD: LOOP';btn.className='tbtn-primary mode-loop';document.getElementById('mode-badge').textContent='loop \xb7 tap any point to close \xb7 100pt cap';}
+});
+document.getElementById('btn-pulse').addEventListener('click',()=>{
+  if(!audioCtx)initAudio();
+  crystals.filter(c=>c.formed).forEach(c=>{c.pulseT=performance.now();c.driftVx+=rnd(-.8,.8);c.driftVy+=rnd(-.8,.8);});
+});
+document.getElementById('pa-pulse')?.addEventListener('click',()=>document.getElementById('btn-pulse').click());
+document.getElementById('btn-trans').addEventListener('click',()=>{
+  transMode=!transMode;
+  document.getElementById('btn-trans').classList.toggle('trans-on',transMode);
+  document.getElementById('pa-trans')?.classList.toggle('active',transMode);
+});
+document.getElementById('pa-trans')?.addEventListener('click',()=>document.getElementById('btn-trans').click());
+document.getElementById('btn-bgrand').addEventListener('click',()=>{
+  bgIdx=(bgIdx+1)%BG_DECK.length;
+  bgScene=BG_DECK[bgIdx];
+  if(bgScene.label&&pillsUnlocked){
+    showPill({t:'sci',l:'BG: '+bgScene.label,
+      p:bgScene.label.includes('Aurora')?
+        'June 8-9 2026: CME from AR4455 hit Earth. Aurora erupted over Scotland — green from oxygen at 100km, purple from nitrogen above. This canvas is that sky.':
+        'June 3 2026: AR4455 fired M9.3 and M7.7 flares. "Direct Hit." The plasma wave is the color palette of this background.'
+    });
+  }
+});
+// Long-press BG → return to black
+let bgLpTimer=null;
+document.getElementById('btn-bgrand').addEventListener('pointerdown',()=>{
+  bgLpTimer=setTimeout(()=>{bgScene={type:'solid',c:'#000000'};bgIdx=0;setStatus('bg reset to black');},700);
+});
+document.getElementById('btn-bgrand').addEventListener('pointerup',()=>clearTimeout(bgLpTimer));
+document.getElementById('btn-bgrand').addEventListener('pointerleave',()=>clearTimeout(bgLpTimer));
+document.getElementById('btn-bloat').addEventListener('click',()=>{
+  const fc=crystals.filter(c=>c.formed).length;
+  if(fc<15){setStatus('BLOAT unlocks at 15 crystals ('+fc+'/15)');return;}
+  bloatMode=!bloatMode;
+  const btn=document.getElementById('btn-bloat');
+  btn.textContent=bloatMode?'BLOAT':'FLAT';
+  btn.className='tbtn '+(bloatMode?'bloat-on':'');
+  btn.style.opacity='1';btn.style.cursor='pointer';
+});
+document.getElementById('btn-audiotog').addEventListener('click',()=>{
+  audioOn=!audioOn;
+  if(!audioCtx&&audioOn)initAudio();
+  const btn=document.getElementById('btn-audiotog');
+  btn.textContent=audioOn?'\u266a ON':'\u266a OFF';btn.className='tbtn '+(audioOn?'audio-on':'audio-off');
+  if(!audioOn)Object.keys(loopNodes).forEach(stopLoop);else if(audioCtx)syncLoops();
+  // Granular must also respect the audio toggle
+  if(!audioOn)stopGranular();
+});
+document.getElementById('btn-rand').addEventListener('click',()=>{
+  crystals.filter(c=>c.formed).forEach(cr=>{
+    cr.verts.forEach(v=>{const off=rnd(12,28),ang=rnd(0,Math.PI*2);v.x+=Math.cos(ang)*off;v.y+=Math.sin(ang)*off;});
+    cr.hue=(cr.hue+rnd(-40,40)+360)%360;
+    // Subtle dimensional variation — just a whisper, never flattening
+    cr.scaleX=Math.max(.85,Math.min(1.18,cr.scaleX*rnd(.96,1.04)));
+    cr.scaleY=Math.max(.85,Math.min(1.18,cr.scaleY*rnd(.96,1.04)));
+    cr.pulseT=performance.now();
+  });
+});
+document.getElementById('btn-form').addEventListener('click',()=>{
+  if(!audioCtx)initAudio();formCrystal();
+});
+document.getElementById('btn-undo').addEventListener('click',()=>{
+  if(buildPts.length){buildPts.pop();return;}
+  const op=undoStack.pop();if(!op)return;
+  if(op.type==='add'){crystals=crystals.filter(c=>c!==op.cr);redoStack.push(op);syncLoops();updateCounter();}
+});
+document.getElementById('btn-redo').addEventListener('click',()=>{
+  const op=redoStack.pop();if(!op)return;
+  if(op.type==='add'){crystals.push(op.cr);undoStack.push(op);syncLoops();updateCounter();}
+});
+document.getElementById('btn-clear').addEventListener('click',()=>{
+  buildPts=[];clearFade=true;clearStart=performance.now();undoStack=[];redoStack=[];
+  setTimeout(()=>{crystals=[];clearFade=false;updateCounter();Object.keys(loopNodes).forEach(stopLoop);},1600);
+});
+function toggleFullscreen(on){
+  document.body.classList.toggle('fullscreen',on);
+  // Also try native fullscreen API where supported
+  if(on&&document.documentElement.requestFullscreen){
+    document.documentElement.requestFullscreen().catch(()=>{});
+  } else if(!on&&document.exitFullscreen&&document.fullscreenElement){
+    document.exitFullscreen().catch(()=>{});
+  }
+}
+document.getElementById('btn-fs').addEventListener('click',()=>toggleFullscreen(true));
+document.getElementById('fs-back').addEventListener('click',()=>toggleFullscreen(false));
+// Exit fullscreen on native ESC key / browser fullscreen exit
+document.addEventListener('fullscreenchange',()=>{
+  if(!document.fullscreenElement)document.body.classList.remove('fullscreen');
+});
+document.querySelectorAll('.cpill').forEach(pill=>{
+  pill.addEventListener('click',()=>{
+    document.querySelectorAll('.cpill').forEach(p=>p.classList.remove('active'));
+    pill.classList.add('active');currentType=pill.dataset.type;
+    setStatus(LABELS[currentType]+' selected');
+  });
+});
+function updateCounter(){
+  const f=crystals.filter(c=>c.formed);
+  const faces=f.reduce((s,c)=>s+Math.max(0,c.verts.length-2),0);
+  document.getElementById('cnt-c').textContent=f.length+' crystal'+(f.length!==1?'s':'');
+  document.getElementById('cnt-f').textContent=faces+' face'+(faces!==1?'s':'');
+}
+document.addEventListener('touchmove',e=>{if(e.target.tagName==='INPUT')return;e.preventDefault();},{passive:false});
+document.addEventListener('gesturestart',e=>e.preventDefault(),{passive:false});
+
+// ── BACKGROUND / FOREGROUND AUDIO HANDLING ───────────────────
+// Goal: no abrupt cut on hide, no flood on return.
+// Loops are setTimeout-based — they keep scheduling even when hidden.
+// On hide: fade masterGain to near-zero (0.8s) so it's not a hard cut.
+// On show: resume context if suspended, fade masterGain back in (1.2s).
+// iOS nuclear case (context fully closed): re-init with staggered loop restart.
+let _bgFadeTimer=null;
+
+document.addEventListener('visibilitychange',()=>{
+  if(document.hidden){
+    // Going to background — fade out gracefully, don't stop loops
+    if(masterGain&&audioCtx){
+      if(_bgFadeTimer)clearTimeout(_bgFadeTimer);
+      masterGain.gain.setTargetAtTime(0.001,audioCtx.currentTime,0.25);
+    }
+  } else {
+    // Returning to foreground
+    if(_bgFadeTimer)clearTimeout(_bgFadeTimer);
+
+    if(!audioCtx||audioCtx.state==='closed'){
+      // iOS killed the context entirely — full re-init with staggered restart
+      audioCtx=null;masterGain=null;reverbNode=null;
+      delayNode=null;dubDelayNode=null;lpFilter=null;hpFilter=null;
+      reverbSend=null;delaySend=null;dubSend=null;delayFeedback=null;dubFeedback=null;
+      gateGain=null;stutterRAF=null;
+      stopGranular();granularOutput=null;
+      initAudio();
+      if(audioOn){
+        // Stagger restarts so they don't all fire at once
+        const active=[...new Set(crystals.filter(c=>c.formed).map(c=>c.type))];
+        active.forEach((t,i)=>{
+          setTimeout(()=>ensureLoop(t),i*600+rnd(0,400));
+        });
+      }
+    } else {
+      // Context exists — resume and fade back in, then aggressively re-ensure loops
+      // (iOS throttles background timers so scheduled loops may have died)
+      audioCtx.resume().then(()=>{
+        if(masterGain){
+          masterGain.gain.cancelScheduledValues(audioCtx.currentTime);
+          masterGain.gain.setValueAtTime(masterGain.gain.value,audioCtx.currentTime);
+          masterGain.gain.setTargetAtTime(G.vol,audioCtx.currentTime,0.3);
+        }
+        if(audioOn){
+          // Re-ensure ALL active type loops — don't trust loopNodes entries after background
+          const active=[...new Set(crystals.filter(c=>c.formed).map(c=>c.type))];
+          active.forEach((t,i)=>{
+            // Stop any stale node and restart fresh
+            stopLoop(t);
+            setTimeout(()=>ensureLoop(t),i*300+100);
+          });
+        }
+      });
+    }
+  }
+});
+
+window.addEventListener('focus',()=>{
+  // Secondary safety net for desktop — same gentle resume
+  if(audioCtx&&audioCtx.state==='suspended'){
+    audioCtx.resume().then(()=>{
+      if(masterGain)masterGain.gain.setTargetAtTime(G.vol,audioCtx.currentTime,0.4);
+    });
+  }
+});
+
+// iOS back-navigation: pageshow fires when browser restores page from bfcache
+// audioCtx may be closed (iOS killed it) or suspended (paused in background)
+window.addEventListener('pageshow',()=>{
+  if(!audioOn)return;
+  if(!audioCtx||audioCtx.state==='closed'){
+    // Full re-init — iOS killed the context
+    audioCtx=null;masterGain=null;reverbNode=null;
+    delayNode=null;dubDelayNode=null;lpFilter=null;hpFilter=null;
+    reverbSend=null;delaySend=null;dubSend=null;delayFeedback=null;dubFeedback=null;
+    gateGain=null;stutterRAF=null;
+    stopGranular();granularOutput=null;
+    initAudio();
+    const active=[...new Set(crystals.filter(c=>c.formed).map(c=>c.type))];
+    active.forEach((t,i)=>{setTimeout(()=>ensureLoop(t),i*600+rnd(0,400));});
+  } else if(audioCtx.state==='suspended'){
+    audioCtx.resume().then(()=>{
+      if(masterGain){
+        masterGain.gain.cancelScheduledValues(audioCtx.currentTime);
+        masterGain.gain.setValueAtTime(masterGain.gain.value,audioCtx.currentTime);
+        masterGain.gain.setTargetAtTime(G.vol,audioCtx.currentTime,0.4);
+      }
+      if(audioOn){
+        const active=new Set(crystals.filter(c=>c.formed).map(c=>c.type));
+        active.forEach(t=>{if(!loopNodes[t])ensureLoop(t);});
+      }
+    });
+  }
+});
+</script>
+</body>
+</html>
