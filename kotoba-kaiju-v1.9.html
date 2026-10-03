@@ -1,0 +1,1484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Kotoba Kaiju v1.9</title>
+<style>
+/* Fonts live in the fonts/ folder next to this file (subset to the characters the app uses).
+   New decks with new kanji: re-run the font subset step so the new characters are included. */
+@font-face{font-family:"Dela Gothic One";src:url("fonts/DelaGothicOne-kk.woff2") format("woff2");font-weight:400;font-display:swap}
+@font-face{font-family:"DotGothic16";src:url("fonts/DotGothic16-kk.woff2") format("woff2");font-weight:400;font-display:swap}
+@font-face{font-family:"M PLUS Rounded 1c";src:url("fonts/MPLUSRounded1c-Medium-kk.woff2") format("woff2");font-weight:500;font-display:swap}
+@font-face{font-family:"M PLUS Rounded 1c";src:url("fonts/MPLUSRounded1c-Bold-kk.woff2") format("woff2");font-weight:700;font-display:swap}
+@font-face{font-family:"M PLUS Rounded 1c";src:url("fonts/MPLUSRounded1c-ExtraBold-kk.woff2") format("woff2");font-weight:800;font-display:swap}
+:root{
+  color-scheme: dark;
+  --void:#0C0A24;      /* deep space */
+  --void2:#17123D;
+  --red:#F2283A;       /* tokusatsu red */
+  --yellow:#FFD319;    /* hero yellow */
+  --beam:#35E4FF;      /* specium cyan */
+  --slime:#8CF25A;     /* kaiju green */
+  --orange:#FF8A1F;    /* travel */
+  --paper:#FFF4DE;     /* card stock */
+  --ink:#140F2E;
+  --muted:#E4E0FF;
+  --display:"Dela Gothic One","Hiragino Kaku Gothic ProN","Yu Gothic","Noto Sans JP",Impact,sans-serif;
+  --body:"M PLUS Rounded 1c","Hiragino Maru Gothic ProN","Noto Sans JP",system-ui,sans-serif;
+  --hud:"DotGothic16","M PLUS Rounded 1c","MS Gothic",ui-monospace,monospace;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{height:100%}
+body{
+  margin:0; background:var(--void); color:var(--paper);
+  font-family:var(--body); font-size:15px; line-height:1.5;
+  overflow-x:hidden;
+}
+#stars{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none}
+.wrap{position:relative;z-index:1;max-width:980px;margin:0 auto;padding-inline:16px;padding-block:18px 40px}
+
+/* ---------- header ---------- */
+header{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.mascot{width:74px;height:74px;flex:none;cursor:pointer;filter:drop-shadow(3px 3px 0 #000)}
+.mascot{-webkit-tap-highlight-color:transparent;outline:none}
+.mascot:focus{outline:none}
+.mascot:focus-visible{outline:3px dashed var(--beam);outline-offset:4px;border-radius:50%}
+button,[role="button"]{-webkit-tap-highlight-color:transparent}
+.logo{display:flex;flex-direction:column;line-height:1}
+.logo h1{
+  margin:0;font-family:var(--display);font-weight:400;
+  font-size:clamp(30px,7vw,52px);letter-spacing:.01em;color:var(--yellow);
+  text-shadow:3px 3px 0 var(--red),6px 6px 0 #000;
+  transform:skewX(-8deg);
+}
+.logo .jp{font-family:var(--display);font-size:15px;color:var(--beam);letter-spacing:.35em;margin-top:8px;transform:skewX(-8deg)}
+.hudline{margin-left:auto;font-family:var(--hud);font-size:13px;color:var(--muted);text-align:right}
+.hudline b{color:var(--slime);font-weight:400}
+
+/* ---------- filters ---------- */
+.bar{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0 6px;align-items:center}
+.chip{
+  font-family:var(--display);font-size:13px;letter-spacing:.06em;
+  padding:8px 14px;border:3px solid #000;border-radius:999px;
+  background:var(--void2);color:var(--paper);cursor:pointer;
+  box-shadow:3px 3px 0 #000;transition:transform .1s;
+}
+.chip:hover{transform:translate(-1px,-1px)}
+.chip:active{transform:translate(2px,2px);box-shadow:1px 1px 0 #000}
+.chip[aria-pressed="true"]{background:var(--yellow);color:var(--ink)}
+.chip.ghost{margin-left:auto;background:transparent;border-color:var(--muted);color:var(--muted);box-shadow:none}
+.chip:focus-visible,.btn:focus-visible,.tile:focus-visible{outline:3px solid var(--beam);outline-offset:3px}
+
+/* ---------- main layout ---------- */
+main{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:28px;margin-top:14px;align-items:start}
+@media (max-width:820px){main{grid-template-columns:minmax(0,1fr)}}
+
+.stage{display:flex;flex-direction:column;align-items:center;gap:16px;overflow-x:clip;padding-block:4px 12px}
+.hint{font-family:var(--hud);font-size:13px;color:var(--muted);text-align:center}
+.hint b{color:var(--beam);font-weight:400}
+
+.scene{width:min(100%,400px);aspect-ratio:5/7;max-width:100%;perspective:1100px;position:relative;touch-action:pan-y;user-select:none;-webkit-user-select:none}
+.card{position:absolute;inset:0;transform-style:preserve-3d;cursor:grab;will-change:transform}
+.card.snap{transition:transform .55s cubic-bezier(.2,1.4,.4,1)}
+.card:active{cursor:grabbing}
+.face{
+  position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;
+  border:5px solid #000;border-radius:22px;overflow:hidden;
+  box-shadow:10px 10px 0 #000;
+}
+/* front */
+.face *{-webkit-backface-visibility:hidden;backface-visibility:hidden}
+.front{transform:rotateY(0deg);background:var(--red);color:var(--paper);display:flex;flex-direction:column}
+.front.deep{background:var(--beam);color:var(--ink)}
+.front.rider{background:var(--yellow);color:var(--ink)}
+.front.creator{background:var(--slime);color:var(--ink)}
+.front.num{background:var(--paper);color:var(--ink)}
+.front.travel{background:var(--orange);color:var(--ink)}
+.burst{position:absolute;inset:-40%;
+  background:repeating-conic-gradient(from 0deg, rgba(255,255,255,.16) 0 9deg, transparent 9deg 18deg);
+  animation:spin 40s linear infinite}
+.halftone{position:absolute;inset:0;
+  background-image:radial-gradient(rgba(0,0,0,.28) 1.4px, transparent 1.6px);
+  background-size:10px 10px;
+  -webkit-mask-image:linear-gradient(160deg,transparent 35%,#000 100%);mask-image:linear-gradient(160deg,transparent 35%,#000 100%)}
+@keyframes spin{to{transform:rotate(360deg)}}
+.ftop{position:relative;display:flex;justify-content:space-between;align-items:flex-start;padding:14px 16px 0;gap:8px}
+.file{font-family:var(--hud);font-size:14px;background:#000;color:var(--yellow);padding:3px 9px;border-radius:6px}
+.rank{font-family:var(--display);font-size:12px;letter-spacing:.08em;background:var(--yellow);color:var(--ink);
+  border:3px solid #000;padding:5px 10px;transform:rotate(6deg);box-shadow:3px 3px 0 #000;white-space:nowrap}
+.front.deep .rank,.front.rider .rank{background:var(--paper)}
+.kanjiwrap{position:relative;flex:1;display:grid;place-items:center;padding:0 12px}
+.kanji{
+  font-family:var(--display);font-weight:400;line-height:1.05;text-align:center;
+  color:var(--paper);-webkit-text-stroke:3px #000;paint-order:stroke fill;
+  text-shadow:6px 6px 0 #000;word-break:keep-all;
+}
+.front.deep .kanji{color:var(--yellow)}
+.front.rider .kanji,.front.num .kanji{color:var(--red)}
+.fbot{position:relative;background:#000;color:var(--paper);padding:10px 16px 12px;display:flex;justify-content:space-between;align-items:center;gap:10px}
+.fbot .tag{font-family:var(--hud);font-size:13px;color:var(--muted)}
+.fbot .tap{font-family:var(--display);font-size:13px;color:var(--yellow);letter-spacing:.06em;animation:blink 1.4s steps(2) infinite}
+@keyframes blink{50%{opacity:.35}}
+
+/* back */
+.back{background:var(--paper);color:var(--ink);transform:rotateY(180deg);display:flex;flex-direction:column}
+.bhead{background:var(--ink);color:var(--paper);padding:14px 16px 12px;position:relative}
+.bhead::after{content:"";position:absolute;left:0;right:0;bottom:-10px;height:10px;
+  background:linear-gradient(135deg,var(--ink) 50%,transparent 50%) 0 0/14px 10px repeat-x}
+.romaji{font-family:var(--display);font-size:clamp(24px,7vw,32px);line-height:1.05;color:var(--yellow);text-wrap:balance}
+.kana{font-family:var(--body);font-weight:700;font-size:17px;color:var(--beam);margin-top:4px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.say{font-family:var(--display);font-size:11px;letter-spacing:.06em;border:2px solid var(--beam);background:transparent;color:var(--beam);
+  border-radius:999px;padding:4px 10px;cursor:pointer}
+.say:hover{background:var(--beam);color:var(--ink)}
+.bbody{padding:18px 16px 16px;overflow-y:auto;flex:1;display:flex;flex-direction:column;gap:12px;overscroll-behavior:contain}
+.meaning{font-family:var(--body);font-weight:800;font-size:20px;line-height:1.25;text-wrap:balance}
+.parts{display:flex;flex-wrap:wrap;gap:6px}
+.part{display:flex;align-items:center;gap:6px;border:2px solid var(--ink);border-radius:10px;padding:3px 9px 3px 4px;background:#fff;font-size:13px;font-weight:700}
+.part span{font-family:var(--display);font-size:18px;background:var(--red);color:var(--paper);border-radius:6px;padding:0 6px;line-height:1.4}
+.label{font-family:var(--hud);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:#6A5FA8}
+.note{font-size:14px;margin:0}
+.hero{border:3px solid var(--ink);border-radius:12px;padding:9px 12px;background:var(--yellow);font-size:14px;position:relative}
+.hero .label{color:var(--ink);display:block;margin-bottom:2px}
+
+/* flash */
+.flash{position:absolute;inset:-18%;pointer-events:none;opacity:0;z-index:5;
+  background:repeating-conic-gradient(var(--yellow) 0 6deg, transparent 6deg 16deg);
+  -webkit-mask-image:radial-gradient(circle,transparent 18%,#000 30%,transparent 70%);mask-image:radial-gradient(circle,transparent 18%,#000 30%,transparent 70%)}
+.flash.go{animation:flash .5s ease-out}
+@keyframes flash{0%{opacity:1;transform:scale(.6) rotate(0)}100%{opacity:0;transform:scale(1.25) rotate(20deg)}}
+
+/* controls */
+.controls{display:flex;gap:10px;width:min(100%,400px);flex-wrap:wrap}
+.btn{flex:1;min-width:0;font-family:var(--display);font-size:16px;letter-spacing:.04em;
+  border:4px solid #000;border-radius:14px;padding:12px 8px;cursor:pointer;box-shadow:5px 5px 0 #000;
+  transition:transform .08s, box-shadow .08s}
+.btn:active{transform:translate(4px,4px);box-shadow:1px 1px 0 #000}
+.btn small{display:block;font-family:var(--hud);font-size:11px;letter-spacing:.05em;margin-top:2px;opacity:.8}
+.again{background:var(--void2);color:var(--paper)}
+.got{background:var(--slime);color:var(--ink)}
+.nav{flex:0 0 52px;background:var(--paper);color:var(--ink);font-size:20px;padding:12px 0}
+
+/* side panel */
+aside{display:flex;flex-direction:column;gap:18px}
+.panel{background:var(--void2);border:3px solid #000;border-radius:16px;padding:14px;box-shadow:6px 6px 0 #000}
+.panel h2{margin:0 0 10px;font-family:var(--display);font-weight:400;font-size:15px;letter-spacing:.06em;color:var(--yellow);display:flex;justify-content:space-between;align-items:baseline}
+.panel h2 span{font-family:var(--hud);font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.meter{height:26px;border:3px solid #000;border-radius:8px;background:#000;overflow:hidden;position:relative}
+.fill{height:100%;width:0;background:repeating-linear-gradient(90deg,var(--beam) 0 14px,#1DB7D6 14px 18px);transition:width .5s cubic-bezier(.2,1.3,.4,1)}
+.meter.full .fill{background:repeating-linear-gradient(90deg,var(--yellow) 0 14px,var(--red) 14px 18px);animation:pulse .6s ease-in-out infinite alternate}
+@keyframes pulse{to{filter:brightness(1.3)}}
+.mstatus{font-family:var(--hud);font-size:13px;color:var(--muted);margin-top:8px}
+.mstatus b{color:var(--slime);font-weight:400}
+.roster{display:flex;flex-direction:column;gap:8px}
+.rhead{width:100%;display:flex;align-items:center;gap:10px;border:3px solid #000;border-radius:12px;background:var(--void);color:var(--paper);
+  padding:9px 12px;cursor:pointer;font-family:var(--display);font-size:13px;letter-spacing:.04em;text-align:left;box-shadow:3px 3px 0 #000}
+.rhead i{flex:none;width:14px;height:14px;border:2px solid #000;border-radius:4px}
+.rhead .rname{flex:1;min-width:0}
+.rhead .rcount{font-family:var(--hud);font-size:13px;color:var(--paper);font-variant-numeric:tabular-nums}
+.rhead .chev{transition:transform .2s;color:var(--yellow)}
+.rhead[aria-expanded="true"]{background:var(--yellow);color:var(--ink)}
+.rhead[aria-expanded="true"] .rcount{color:var(--ink)}
+.rhead[aria-expanded="true"] .chev{transform:rotate(180deg);color:var(--ink)}
+.rhead:focus-visible{outline:3px solid var(--beam);outline-offset:3px}
+.rbody{display:grid;grid-template-columns:repeat(auto-fill,minmax(44px,1fr));gap:6px;padding:4px 2px 6px}
+.tile{aspect-ratio:1;max-width:100%;border:3px solid #000;border-radius:10px;background:var(--red);color:var(--paper);
+  font-family:var(--display);font-size:16px;display:grid;place-items:center;cursor:pointer;padding:0;position:relative;line-height:1}
+.tile.deep{background:var(--beam);color:var(--ink)}
+.tile.rider{background:var(--yellow);color:var(--ink)}
+.tile.creator{background:var(--slime);color:var(--ink)}
+.tile.num{background:var(--paper);color:var(--red)}
+.tile.travel{background:var(--orange);color:var(--ink)}
+.tile.two{font-size:12px}
+.deckchips{display:contents}
+.tile.cur{outline:3px solid var(--yellow);outline-offset:2px}
+.tile.done::after{content:"✓";position:absolute;right:-6px;top:-8px;font-family:var(--body);font-weight:800;font-size:12px;
+  background:var(--slime);color:var(--ink);border:2px solid #000;border-radius:50%;width:20px;height:20px;display:grid;place-items:center}
+.keys{font-family:var(--hud);font-size:12px;color:var(--muted);line-height:1.8}
+.keys kbd{font-family:var(--hud);background:#000;border:1px solid var(--muted);border-radius:4px;padding:0 5px;color:var(--paper)}
+
+/* coach caption */
+.coach{width:min(100%,400px);display:flex;gap:10px;align-items:flex-start;background:var(--void2);border:3px solid #000;border-radius:14px;padding:10px 12px;box-shadow:5px 5px 0 #000;min-height:64px}
+.coach .who{flex:none;font-family:var(--display);font-size:11px;letter-spacing:.08em;background:var(--beam);color:var(--ink);border:2px solid #000;border-radius:6px;padding:3px 7px;margin-top:2px}
+.coach.talk .who{animation:pulse .35s ease-in-out infinite alternate}
+#coachText{font-size:14px;font-weight:700}
+
+/* paths + directions */
+.paths{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.path{font-family:var(--display);font-size:12px;letter-spacing:.05em;text-align:left;border:3px solid #000;border-radius:12px;
+  background:var(--void);color:var(--paper);padding:8px 10px;cursor:pointer;box-shadow:3px 3px 0 #000;display:grid;grid-template-columns:auto 1fr;column-gap:8px;align-items:center}
+.path .pk{grid-row:span 2;font-size:24px;color:var(--yellow);line-height:1}
+.path small{font-family:var(--hud);font-size:11px;color:var(--muted);letter-spacing:0}
+.path[aria-pressed="true"]{background:var(--yellow);color:var(--ink)}
+.path[aria-pressed="true"] .pk{color:var(--red)}
+.path[aria-pressed="true"] small{color:var(--ink)}
+.path:focus-visible{outline:3px solid var(--beam);outline-offset:3px}
+.dirs{display:flex;flex-direction:column;gap:8px}
+.dirs .chip{text-align:left;font-size:12px}
+
+/* back additions */
+.ex{border:3px dashed var(--ink);border-radius:12px;padding:8px 12px;background:#fff}
+.ex .jp{font-family:var(--body);font-weight:800;font-size:17px;display:flex;justify-content:space-between;gap:8px;align-items:center}
+.ex .say{border-color:var(--ink);color:var(--ink)}
+.ex .say:hover{background:var(--ink);color:var(--paper)}
+.ex .rm{font-size:13px;color:#4A4280}
+.mission{border:3px solid #000;border-radius:12px;padding:9px 12px;background:var(--red);color:var(--paper);font-size:14px}
+.mission .label{color:var(--yellow);display:block;margin-bottom:2px}
+.listen{display:grid;place-items:center;gap:14px;text-align:center}
+.listen .q{font-family:var(--display);font-size:clamp(60px,20vw,96px);-webkit-text-stroke:3px #000;paint-order:stroke fill;text-shadow:6px 6px 0 #000;color:var(--yellow);line-height:1}
+.listen button{font-family:var(--display);font-size:15px;border:4px solid #000;border-radius:999px;background:var(--yellow);color:var(--ink);padding:10px 18px;cursor:pointer;box-shadow:4px 4px 0 #000}
+
+/* header buttons */
+.hbtns{display:flex;gap:8px;align-items:center}
+.qbtn{width:42px;height:42px;padding:0;font-size:18px;display:grid;place-items:center}
+.qbtn.nudge{animation:nudge 1.2s ease-in-out infinite}
+@keyframes nudge{50%{transform:scale(1.14);background:var(--yellow);color:var(--ink)}}
+
+/* manual */
+.manual{position:fixed;inset:0;z-index:25;background:rgba(12,10,36,.9);display:flex;justify-content:center;align-items:flex-start;padding:16px;overflow-y:auto}
+.book{width:100%;max-width:660px;background:var(--paper);color:var(--ink);border:5px solid #000;border-radius:20px;box-shadow:10px 10px 0 #000;overflow:hidden;margin-block:8px 24px}
+.bookhead{background:var(--red);color:var(--paper);padding:16px 18px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;position:relative;
+  background-image:radial-gradient(rgba(0,0,0,.22) 1.4px,transparent 1.6px);background-size:10px 10px}
+.bookhead h2{margin:0;font-family:var(--display);font-weight:400;font-size:clamp(24px,6vw,34px);line-height:1.05;color:var(--yellow);text-shadow:3px 3px 0 #000;transform:skewX(-8deg)}
+.bookhead h2 small{display:block;font-family:var(--hud);font-size:13px;color:var(--paper);text-shadow:none;letter-spacing:.08em;margin-top:6px}
+.x{flex:none;width:42px;height:42px;border:3px solid #000;border-radius:12px;background:var(--paper);color:var(--ink);font-size:18px;font-weight:800;cursor:pointer;box-shadow:3px 3px 0 #000}
+.tabs{display:flex;border-bottom:4px solid #000;background:var(--ink)}
+.tabs button{flex:1;font-family:var(--display);font-size:14px;letter-spacing:.05em;padding:12px 8px;border:0;background:transparent;color:var(--muted);cursor:pointer}
+.tabs button[aria-selected="true"]{background:var(--yellow);color:var(--ink)}
+.tabs button:focus-visible,.x:focus-visible,.tpop button:focus-visible{outline:3px solid var(--beam);outline-offset:-3px}
+.tabpane{padding:18px 18px 22px;display:flex;flex-direction:column;gap:18px}
+.msec h3{margin:0 0 6px;font-family:var(--display);font-weight:400;font-size:17px;display:flex;align-items:center;gap:10px}
+.msec h3 .ic{font-size:15px;background:var(--ink);color:var(--yellow);border-radius:8px;padding:2px 7px}
+.msec ul{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:4px;max-width:62ch}
+.msec li{font-size:15px}
+.msec li b{font-weight:800}
+.msec p{margin:0 0 8px;max-width:62ch;font-size:15px}
+.kpair{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:6px 0 10px}
+.kbox{border:3px solid #000;border-radius:12px;background:var(--red);color:var(--paper);padding:6px 12px;text-align:center;box-shadow:3px 3px 0 #000}
+.kbox b{display:block;font-family:var(--display);font-weight:400;font-size:34px;line-height:1.1}
+.kbox span{font-size:12px;font-weight:700}
+.kbox.eq{background:var(--yellow);color:var(--ink)}
+.kop{font-family:var(--display);font-size:24px}
+.poem{margin:4px 0 0;border-left:6px solid var(--red);background:#fff;border-radius:0 12px 12px 0;padding:12px 14px}
+.poem .ja{font-family:var(--body);font-weight:800;font-size:17px;line-height:1.6}
+.poem .ro{font-size:13px;color:#4A4280;margin-top:4px}
+.poem .enq{font-size:15px;margin-top:8px;font-weight:700}
+.poem cite{display:block;font-style:normal;font-family:var(--hud);font-size:12px;color:#6A5FA8;margin-top:8px}
+.treebox{border:3px solid #000;border-radius:16px;background:var(--void);padding:10px;box-shadow:5px 5px 0 #000}
+.treebox svg{display:block;width:100%;max-width:100%;height:auto}
+.treecount{font-family:var(--hud);font-size:13px;color:var(--paper);display:flex;justify-content:space-between;gap:8px;padding:4px 4px 0;flex-wrap:wrap}
+.treecount b{color:var(--slime);font-weight:400}
+.leaves{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.leafchip{border:2px solid #000;border-radius:999px;padding:2px 10px 2px 4px;font-size:13px;font-weight:700;background:#fff;display:flex;gap:6px;align-items:center}
+.leafchip span{font-family:var(--display);background:var(--red);color:var(--paper);border-radius:999px;padding:0 7px}
+.leafchip.deep span{background:var(--beam);color:var(--ink)}
+.leafchip.rider span{background:var(--yellow);color:var(--ink)}
+.leafchip.creator span{background:var(--slime);color:var(--ink)}
+.leafchip.num span{background:var(--ink);color:var(--paper)}
+.leafchip.travel span{background:var(--orange);color:var(--ink)}
+.zlist{display:flex;flex-direction:column;gap:12px}
+.zcard{border:3px solid #000;border-radius:14px;background:var(--slime);color:var(--ink);padding:12px 14px;box-shadow:4px 4px 0 #000}
+.zcard .zh{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px}
+.zcard .zk{font-family:var(--display);font-size:20px;background:var(--paper);border:2px solid #000;border-radius:8px;padding:0 8px}
+.zcard .zr{font-weight:800}
+.zcard p{margin:0 0 8px;font-size:15px;max-width:62ch}
+.zcard button{font-family:var(--display);font-size:12px;border:2px solid #000;border-radius:999px;background:var(--ink);color:var(--paper);padding:5px 12px;cursor:pointer}
+.forms{display:flex;flex-direction:column;gap:5px}
+.frow{display:grid;grid-template-columns:auto 1fr;gap:0 10px;text-align:left;border:2px solid var(--ink);border-radius:10px;background:#fff;padding:5px 10px;cursor:pointer;font:inherit;color:var(--ink)}
+.frow b{font-family:var(--body);font-weight:800;font-size:16px;grid-row:span 2;align-self:center}
+.frow span{font-size:13px;font-weight:700}
+.frow span+span{color:#4A4280;font-weight:500}
+.vrow{display:grid;grid-template-columns:72px minmax(0,1fr) 42px;gap:8px;align-items:center;margin-bottom:8px}
+.vrow label{font-family:var(--hud);font-size:13px;color:var(--paper)}
+.vrow select{width:100%;min-width:0;font-family:var(--body);font-weight:700;font-size:13px;background:var(--void);color:var(--paper);border:3px solid #000;border-radius:10px;padding:8px}
+.vprev{width:42px;height:42px;border:3px solid #000;border-radius:10px;background:var(--beam);color:var(--ink);font-size:16px;cursor:pointer;box-shadow:2px 2px 0 #000}
+.vprev:focus-visible,.vrow select:focus-visible{outline:3px solid var(--yellow);outline-offset:2px}
+.codebox{display:flex;flex-direction:column;gap:8px;margin-top:12px}
+.codebox textarea{width:100%;font-family:var(--hud);font-size:13px;border:3px solid #000;border-radius:10px;padding:8px;background:#fff;color:var(--ink);resize:vertical}
+.codebox .rbtn{align-self:flex-start}
+.credit{font-family:var(--hud);font-size:12px;color:#6A5FA8;text-align:center;border-top:3px dashed #000;padding-top:14px}
+@keyframes leafpop{from{transform:scale(0)}}
+.newleaf{transform-box:fill-box;transform-origin:center;animation:leafpop .6s cubic-bezier(.2,1.6,.4,1)}
+
+.resetrow{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:8px}
+.rbtn{font-family:var(--display);font-size:13px;border:3px solid #000;border-radius:10px;padding:8px 12px;cursor:pointer;box-shadow:3px 3px 0 #000;background:#fff;color:var(--ink)}
+.rbtn.danger{background:var(--red);color:var(--paper)}
+.rbtn:focus-visible{outline:3px solid var(--beam);outline-offset:3px}
+.confirmtxt{font-weight:800;font-size:14px}
+.savedmsg{font-family:var(--hud);font-size:13px;color:#2E7D12}
+
+/* mission briefing */
+.brief{position:fixed;inset:0;z-index:26;background:rgba(12,10,36,.9);display:flex;justify-content:center;align-items:flex-start;padding:16px;overflow-y:auto}
+.bpanel{width:100%;max-width:560px;margin-block:12px 24px;background:var(--void2);color:var(--paper);border:5px solid #000;border-radius:20px;box-shadow:10px 10px 0 #000;overflow:hidden}
+.bhead2{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 14px;background:var(--red);
+  background-image:radial-gradient(rgba(0,0,0,.22) 1.4px,transparent 1.6px);background-size:10px 10px}
+.bflag{font-family:var(--hud);font-size:14px;letter-spacing:.12em;background:#000;color:var(--yellow);padding:4px 10px;border-radius:6px}
+.bbody2{padding:16px;display:flex;flex-direction:column;gap:14px}
+.btitle{margin:0;white-space:nowrap;font-family:var(--display);font-weight:400;font-size:clamp(21px,6.2vw,34px);line-height:1;color:var(--yellow);text-shadow:3px 3px 0 var(--red),5px 5px 0 #000;transform:skewX(-8deg)}
+.bword{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.bword .k{font-family:var(--display);font-size:26px;background:var(--paper);color:var(--ink);border:3px solid #000;border-radius:10px;padding:2px 10px;box-shadow:3px 3px 0 #000}
+.bword .r{font-weight:800;font-size:16px}
+.bkind{font-family:var(--hud);font-size:12px;letter-spacing:.1em;color:var(--ink);background:var(--slime);border:2px solid #000;border-radius:6px;padding:2px 8px;align-self:flex-start}
+.bkind.remix{background:var(--beam)}
+.btype{font-family:var(--hud);font-size:19px;line-height:1.55;min-height:5.2em;background:#000;border:3px solid var(--beam);border-radius:12px;padding:12px 14px;cursor:pointer;color:var(--paper)}
+.caret{display:inline-block;width:.6em;height:1em;background:var(--beam);vertical-align:-.12em;margin-left:2px;animation:blink 1s steps(2) infinite}
+.btype.done .caret{opacity:0;animation:none}
+.bskip{font-family:var(--hud);font-size:12px;color:var(--muted);text-align:right;margin-top:-8px}
+.bstage{display:flex;flex-direction:column;gap:14px;transition:opacity .3s}
+.bstage.wait{opacity:0;pointer-events:none}
+.bchoose{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.bchoice{font-family:var(--display);font-size:15px;letter-spacing:.03em;text-align:left;border:4px solid #000;border-radius:14px;padding:12px;cursor:pointer;
+  background:var(--void);color:var(--paper);box-shadow:4px 4px 0 #000;display:flex;flex-direction:column;gap:4px}
+.bchoice small{font-family:var(--body);font-weight:700;font-size:12px;color:var(--muted);letter-spacing:0}
+.bchoice[aria-pressed="true"]{background:var(--yellow);color:var(--ink)}
+.bchoice[aria-pressed="true"] small{color:var(--ink)}
+.bchoice:focus-visible,.blesson summary:focus-visible{outline:3px solid var(--beam);outline-offset:3px}
+@media (max-width:420px){.bchoose{grid-template-columns:1fr}}
+.bdetail{background:var(--paper);color:var(--ink);border:3px solid #000;border-radius:14px;padding:12px 14px}
+.bdetail .how{font-weight:800;font-size:15px;margin:0 0 8px}
+.bdetail .label{display:block;margin-bottom:6px}
+.tlist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.tlist label{display:flex;align-items:center;gap:10px;font-weight:700;font-size:15px;cursor:pointer}
+.tlist input{width:20px;height:20px;accent-color:var(--red);flex:none}
+.tlist input:checked + span{text-decoration:line-through;text-decoration-thickness:2px}
+.blesson{border:3px solid #000;border-radius:14px;background:var(--ink);overflow:hidden}
+.blesson summary{cursor:pointer;list-style:none;padding:10px 14px;font-family:var(--display);font-size:14px;letter-spacing:.04em;color:var(--yellow);display:flex;justify-content:space-between;gap:8px}
+.blesson summary::-webkit-details-marker{display:none}
+.blesson summary::after{content:"＋";color:var(--beam)}
+.blesson[open] summary::after{content:"－"}
+.lesson{padding:0 14px 14px;font-size:14px;color:var(--paper)}
+.lesson ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:5px}
+.lesson b{color:var(--yellow)}
+.kstl{display:grid;grid-template-columns:auto 1fr;gap:6px 10px;margin:6px 0 2px;align-items:center}
+.kstl .kk{font-family:var(--display);font-size:20px;background:var(--red);color:var(--paper);border:2px solid #000;border-radius:8px;padding:0 8px;text-align:center}
+.bgo{width:100%}
+/* manual lessons render on paper */
+#manualLessons .lesson{color:var(--ink);padding:0}
+#manualLessons .lesson b{color:var(--red)}
+#manualLessons .lesson h4{margin:10px 0 4px;font-family:var(--display);font-weight:400;font-size:15px}
+/* card-back mission extras */
+.zfact{border:3px solid #000;border-radius:12px;padding:9px 12px;background:var(--slime);color:var(--ink);font-size:14px}
+.zfact .label{color:var(--ink);display:block;margin-bottom:2px}
+.mission .how2{margin-top:6px;font-size:13px;font-weight:700}
+.mission .brbtn{margin-top:8px;font-family:var(--display);font-size:12px;letter-spacing:.05em;border:2px solid #000;border-radius:999px;background:var(--yellow);color:var(--ink);padding:5px 12px;cursor:pointer}
+
+/* tour */
+.tshield{position:fixed;inset:0;z-index:29}
+.tspot{position:fixed;z-index:30;border-radius:16px;pointer-events:none;
+  box-shadow:0 0 0 4px var(--yellow),0 0 0 9999px rgba(12,10,36,.74);transition:all .3s ease}
+.tpop{position:fixed;z-index:31;width:min(320px,calc(100vw - 32px));background:var(--paper);color:var(--ink);border:4px solid #000;border-radius:16px;box-shadow:6px 6px 0 #000;padding:12px 14px}
+.tpop .step{font-family:var(--hud);font-size:12px;color:#6A5FA8}
+.tpop h4{margin:2px 0 4px;font-family:var(--display);font-weight:400;font-size:18px;color:var(--red)}
+.tpop p{margin:0 0 12px;font-size:14px;font-weight:700}
+.tpop .row{display:flex;gap:8px;justify-content:flex-end}
+.tpop button{font-family:var(--display);font-size:13px;border:3px solid #000;border-radius:10px;padding:7px 12px;cursor:pointer;background:#fff;color:var(--ink);box-shadow:2px 2px 0 #000}
+.tpop button.go{background:var(--slime)}
+.tpop button.skip{margin-right:auto;background:transparent;box-shadow:none;border-color:transparent;text-decoration:underline}
+@media (prefers-reduced-motion:reduce){.qbtn.nudge,.newleaf{animation:none}.tspot{transition:none}}
+
+/* win overlay */
+.win{position:fixed;inset:0;z-index:20;display:grid;place-items:center;background:rgba(12,10,36,.86);padding:16px}
+.win .box{text-align:center;max-width:420px}
+.win h3{margin:0;font-family:var(--display);font-weight:400;font-size:clamp(34px,10vw,56px);color:var(--yellow);
+  text-shadow:4px 4px 0 var(--red),8px 8px 0 #000;transform:skewX(-8deg);animation:pop .6s cubic-bezier(.2,1.6,.4,1)}
+.win .jp{font-family:var(--display);color:var(--beam);font-size:22px;letter-spacing:.3em;margin:14px 0}
+.win p{color:var(--paper);margin:0 0 18px}
+@keyframes pop{from{transform:skewX(-8deg) scale(.3)}}
+
+@media (prefers-reduced-motion:reduce){
+  .burst,.fbot .tap,.meter.full .fill{animation:none}
+  .card.snap{transition:transform .2s}
+  .flash.go{animation:none}
+}
+</style>
+</head>
+<body>
+<canvas id="stars" aria-hidden="true"></canvas>
+<div class="wrap">
+  <header>
+    <svg class="mascot" id="mascot" viewBox="0 0 100 100" role="button" tabindex="0" aria-label="Kotoba-kun the word kaiju. Tap to roar.">
+      <!-- original mascot: Kotoba-kun -->
+      <g id="mbody">
+        <path d="M22 30 L28 14 L34 28 L42 10 L48 27 L56 9 L62 27 L70 13 L74 30Z" fill="#FFD319" stroke="#000" stroke-width="3" stroke-linejoin="round"/>
+        <path d="M18 60 C14 36 28 24 48 24 C70 24 84 36 80 62 C78 80 66 92 48 92 C30 92 20 80 18 60Z" fill="#8CF25A" stroke="#000" stroke-width="3.5"/>
+        <ellipse cx="49" cy="70" rx="18" ry="15" fill="#FFF4DE" stroke="#000" stroke-width="3"/>
+        <path d="M36 66 H62 M38 74 H60" stroke="#000" stroke-width="2" opacity=".35"/>
+        <circle cx="49" cy="46" r="13" fill="#fff" stroke="#000" stroke-width="3"/>
+        <circle id="pupil" cx="51" cy="47" r="6" fill="#140F2E"/>
+        <circle cx="53" cy="44" r="2" fill="#fff"/>
+        <path d="M34 60 Q49 67 64 60" fill="none" stroke="#000" stroke-width="3" stroke-linecap="round"/>
+        <path d="M40 61 L42 65 L44 62 M54 62 L56 65 L58 61" fill="#fff" stroke="#000" stroke-width="1.5" stroke-linejoin="round"/>
+        <path d="M80 50 L92 44 L88 56Z" fill="#F2283A" stroke="#000" stroke-width="2.5" stroke-linejoin="round"/>
+      </g>
+    </svg>
+    <div class="logo">
+      <h1>KOTOBA KAIJU</h1>
+      <div class="jp">言葉怪獣</div>
+    </div>
+    <div class="hudline">WORD-BEAST DEFENSE FORCE<br>FILES LOADED: <b id="loaded">100</b></div>
+    <div class="hbtns">
+      <button class="chip" id="openManual">MANUAL 説明書</button>
+      <button class="chip qbtn" id="tourBtn" aria-label="Start Sensei's Tour" title="Sensei's Tour">?</button>
+    </div>
+  </header>
+
+  <div class="bar" role="group" aria-label="Choose a deck">
+    <span class="deckchips" id="deckChips"></span>
+    <button class="chip" id="voice" aria-pressed="true">🔊 VOICE ON</button>
+    <button class="chip ghost" id="shuffle">SHUFFLE</button>
+  </div>
+
+  <main>
+    <section class="stage">
+      <div class="hint"><b>DRAG</b> to spin the card &nbsp;·&nbsp; <b>TAP</b> to flip it</div>
+      <div class="scene" id="scene">
+        <div class="flash" id="flash"></div>
+        <div class="card snap" id="card" tabindex="0" role="button" aria-label="Flashcard. Press Space to flip.">
+          <div class="face front" id="front"></div>
+          <div class="face back" id="back"></div>
+        </div>
+      </div>
+      <div class="controls">
+        <button class="btn nav" id="prev" aria-label="Previous card">◀</button>
+        <button class="btn again" id="again">AGAIN<small>もう一回 · back in the deck</small></button>
+        <button class="btn got" id="got">GOT IT<small>わかった · charge power</small></button>
+        <button class="btn nav" id="next" aria-label="Next card">▶</button>
+      </div>
+      <div class="coach" aria-live="polite"><span class="who">SENSEI</span><span id="coachText">Pick a path, then flip the card. I'll coach you.</span></div>
+    </section>
+
+    <aside>
+      <div class="panel">
+        <h2>CHOOSE YOUR PATH <span>道</span></h2>
+        <div class="paths" role="group" aria-label="Learning path">
+          <button class="path" data-p="speak" aria-pressed="true"><span class="pk">話</span>SPEAKER<small>Say it</small></button>
+          <button class="path" data-p="draw" aria-pressed="false"><span class="pk">描</span>ARTIST<small>Draw it</small></button>
+          <button class="path" data-p="story" aria-pressed="false"><span class="pk">語</span>STORYTELLER<small>Use it</small></button>
+          <button class="path" data-p="think" aria-pressed="false"><span class="pk">考</span>THINKER<small>Reflect</small></button>
+        </div>
+        <h2 style="margin-top:16px">DIRECTION <span>方向</span></h2>
+        <div class="dirs" role="group" aria-label="Teaching direction">
+          <button class="chip" data-d="kanji" aria-pressed="true">KANJI → MEANING</button>
+          <button class="chip" data-d="meaning" aria-pressed="false">MEANING → JAPANESE</button>
+          <button class="chip" data-d="listen" aria-pressed="false">LISTEN → MEANING</button>
+        </div>
+      </div>
+      <div class="panel" id="voicePanel">
+        <h2>SENSEI VOICE <span>声</span></h2>
+        <div class="vrow"><label for="vEn">English</label><select id="vEn"></select><button class="vprev" id="pEn" aria-label="Preview the English voice">▶</button></div>
+        <div class="vrow"><label for="vJa">Japanese</label><select id="vJa"></select><button class="vprev" id="pJa" aria-label="Preview the Japanese voice">▶</button></div>
+        <div class="modenote" id="voiceNote">Pick by ear. Voices come from your device, so every phone, tablet, and computer has different ones.</div>
+      </div>
+      <div class="panel">
+        <h2>HENSHIN POWER <span id="pct">0 / 100</span></h2>
+        <div class="meter" id="meter"><div class="fill" id="fill"></div></div>
+        <div class="mstatus" id="mstatus">Charge the meter to transform.</div>
+      </div>
+      <div class="panel">
+        <h2>KAIJU FILES <span id="left">100 left</span></h2>
+        <div class="roster" id="roster"></div>
+      </div>
+      <div class="panel keys">
+        <kbd>Space</kbd> flip &nbsp; <kbd>←</kbd><kbd>→</kbd> move<br>
+        <kbd>G</kbd> got it &nbsp; <kbd>A</kbd> again &nbsp; <kbd>S</kbd> speak
+      </div>
+    </aside>
+  </main>
+</div>
+
+<div class="manual" id="manual" hidden role="dialog" aria-modal="true" aria-labelledby="mTitle">
+  <div class="book">
+    <div class="bookhead">
+      <h2 id="mTitle">KOTOBA KAIJU<small>取扱説明書 · OWNER'S MANUAL</small></h2>
+      <button class="x" id="closeManual" aria-label="Close manual">✕</button>
+    </div>
+    <div class="tabs" role="tablist">
+      <button role="tab" id="t-play" data-tab="play" aria-selected="true" aria-controls="tab-play">HOW TO PLAY</button>
+      <button role="tab" id="t-origin" data-tab="origin" aria-selected="false" aria-controls="tab-origin">ORIGIN 言葉</button>
+      <button role="tab" id="t-zeek" data-tab="zeek" aria-selected="false" aria-controls="tab-zeek">ZEEK'S FACTOIDS ⚡</button>
+    </div>
+
+    <div class="tabpane" id="tab-play" role="tabpanel" aria-labelledby="t-play">
+      <div class="msec"><h3><span class="ic">札</span>THE CARD</h3><ul>
+        <li><b>Drag</b> the card left or right to spin it around.</li>
+        <li><b>Tap</b> the card to flip it.</li>
+        <li>The front is the challenge. The back is the answer.</li>
+        <li>On the back, scroll down for your mission, a sentence to say, the kanji breakdown, the culture file, and the hero link.</li></ul></div>
+      <div class="msec"><h3><span class="ic">押</span>THE BUTTONS</h3><ul>
+        <li><b>GOT IT:</b> you know it. The card leaves the deck and your power goes up.</li>
+        <li><b>AGAIN:</b> not yet. The card goes to the back of the deck so you see it again.</li>
+        <li><b>◀ ▶:</b> look at the previous or next card without scoring.</li>
+        <li><b>SHUFFLE:</b> mixes up the cards.</li></ul></div>
+      <div class="msec"><h3><span class="ic">変</span>HENSHIN POWER</h3><ul>
+        <li>Every GOT IT charges the power meter.</li>
+        <li>Fill it all the way to transform.</li>
+        <li>Then tap <b>RUN IT BACK</b> to play the deck again.</li></ul></div>
+      <div class="msec"><h3><span class="ic">道</span>CHOOSE YOUR PATH</h3><ul>
+        <li><b>Speaker 話:</b> say it out loud, then say the sentence.</li>
+        <li><b>Artist 描:</b> draw it big and turn part of it into a kaiju.</li>
+        <li><b>Storyteller 語:</b> use it in a comic, or teach it to a friend.</li>
+        <li><b>Thinker 考:</b> answer a big question about the word.</li>
+        <li>Tap a path to open its <b>Mission Briefing</b>. The mission types itself in, and Sensei reads it to you.</li>
+        <li>Then choose <b>CREATE PHYSICAL ✎</b> (hands on: paper, tools, people) or <b>CREATE DIGITAL ▣</b> (on screen: apps and devices).</li>
+        <li>Physical missions come with a tools checklist. Tap each tool as you grab it.</li>
+        <li><b>Signature missions</b> are written for each word. <b>Remix missions</b> are random challenges that mix in, so no two sessions play the same.</li>
+        <li>Your mission also shows on the back of the card. Tap <b>▶ MISSION BRIEFING</b> there to open it again.</li>
+        <li>Switch paths any time. The mission on every card changes to match.</li></ul></div>
+      <div class="msec"><h3><span class="ic">繋</span>A CONNECTED LEARNING SPACE</h3><ul>
+        <li>Kotoba Kaiju connects digital and physical learning. You learn the word on screen, then make something with it, on paper or on a device.</li></ul></div>
+      <div class="msec"><h3><span class="ic">学</span>SENSEI'S LESSONS</h3><div id="manualLessons"></div></div>
+      <div class="msec"><h3><span class="ic">向</span>DIRECTION</h3><ul>
+        <li><b>Kanji → Meaning:</b> see the Japanese, guess the English.</li>
+        <li><b>Meaning → Japanese:</b> see the English, say the Japanese.</li>
+        <li><b>Listen → Meaning:</b> hear the word with nothing to read. The hardest mode.</li></ul></div>
+      <div class="msec"><h3><span class="ic">束</span>DECKS</h3><ul id="manualDecks"></ul></div>
+      <div class="msec"><h3><span class="ic">声</span>VOICE</h3><ul>
+        <li>Sensei talks when you flip a card. Everything Sensei says also shows in the Sensei box.</li>
+        <li><b>HEAR IT</b> plays the word. <b>PLAY</b> plays the sentence. Tap any row under <b>Forms</b> to hear it.</li>
+        <li><b>SENSEI VOICE</b> (in the side panel): pick the English and Japanese voices by ear, and tap ▶ to preview each one. You can even pick the Japanese voice for English.</li>
+        <li>Voices come from your device, so every phone, tablet, and computer has different ones.</li>
+        <li><b>VOICE ON / OFF</b> turns Sensei's talking on or off.</li>
+        <li>No sound? Turn your volume up and make sure your phone is not on silent.</li></ul></div>
+      <div class="msec"><h3><span class="ic">録</span>KAIJU FILES</h3><ul>
+        <li>Your words are grouped by deck. Tap a deck's name to open or close it.</li>
+        <li>Each deck shows how many words you've mastered, like 3/19.</li>
+        <li>Tap any tile to jump to that card. A green ✓ means you mastered it.</li></ul></div>
+      <div class="msec"><h3><span class="ic">鍵</span>KEYBOARD</h3><ul>
+        <li><b>Space</b> flip · <b>← →</b> move · <b>G</b> got it · <b>A</b> again · <b>S</b> speak</li></ul></div>
+      <div class="msec"><h3><span class="ic">保</span>YOUR PROGRESS</h3><ul>
+        <li>Your progress saves by itself, every time you tap.</li>
+        <li>It saves your mastered words, your word tree, your path, physical or digital, your direction, your deck, and your voice setting.</li>
+        <li>It lives on this device, in this browser. A different phone, a different browser, or a private window starts fresh.</li>
+        <li>Clearing your browser's history or site data erases it too.</li></ul>
+        <div class="codebox">
+          <span class="label">MOVING TO A NEW VERSION? Get your code here, then paste it into the new version.</span>
+          <button class="rbtn" id="codeBtn">GET MY PROGRESS CODE</button>
+          <textarea id="codeOut" readonly rows="2" hidden aria-label="Your progress code"></textarea>
+          <button class="rbtn" id="copyCode" hidden>COPY CODE</button>
+          <label class="label" for="codeIn">PASTE A PROGRESS CODE FROM ANOTHER VERSION</label>
+          <textarea id="codeIn" rows="2"></textarea>
+          <button class="rbtn" id="codeLoad">LOAD CODE</button>
+          <span class="savedmsg" id="codeMsg"></span>
+        </div>
+        <div class="resetrow" id="resetAsk"><button class="rbtn" id="resetBtn">RESET PROGRESS</button><span class="savedmsg" id="savedMsg"></span></div>
+        <div class="resetrow" id="resetConfirm" hidden><span class="confirmtxt">Erase every mastered word and your whole tree?</span>
+          <button class="rbtn danger" id="resetYes">YES, ERASE IT</button><button class="rbtn" id="resetNo">KEEP IT</button></div></div>
+      <div class="msec"><h3><span class="ic">師</span>SENSEI'S TIPS</h3><ul>
+        <li>Say every word out loud, even when you're alone.</li>
+        <li>Use AGAIN a lot. That's how heroes train.</li>
+        <li>Beat a deck, then play it again on a different path.</li>
+        <li>Forgot something? Tap <b>?</b> at the top for Sensei's Tour.</li></ul></div>
+    </div>
+
+    <div class="tabpane" id="tab-zeek" role="tabpanel" aria-labelledby="t-zeek" hidden>
+      <div class="msec"><h3><span class="ic">⚡</span>ZEEK'S FACTOIDS</h3>
+        <p>Fun facts from Zeek, our Kamen Rider and tokusatsu expert. Every fact was checked against sources before it went in. Tap OPEN CARD to jump to the word it goes with.</p></div>
+      <div class="zlist" id="zlist"></div>
+    </div>
+    <div class="tabpane" id="tab-origin" role="tabpanel" aria-labelledby="t-origin" hidden>
+      <div class="msec"><h3><span class="ic">言</span>WHAT KOTOBA MEANS</h3>
+        <p><b>Kotoba (言葉, ことば)</b> means "word" or "words." It can also mean language, or the way someone speaks, like "kind words" or the words of a song.</p>
+        <div class="kpair" aria-label="言 plus 葉 equals 言葉">
+          <div class="kbox"><b>言</b><span>to say, speech</span></div><span class="kop">+</span>
+          <div class="kbox"><b>葉</b><span>leaf</span></div><span class="kop">=</span>
+          <div class="kbox eq"><b>言葉</b><span>speech leaves</span></div>
+        </div>
+        <p>So the word for "word" is written as <b>speech leaves</b>.</p></div>
+      <div class="msec"><h3><span class="ic">歌</span>THE OLDEST PICTURE</h3>
+        <p>More than 1,100 years ago, the poet Ki no Tsurayuki wrote the preface to the Kokinshū, a famous collection of Japanese poems. He described poetry as a plant growing out of the heart:</p>
+        <blockquote class="poem">
+          <div class="ja">やまとうたは、人の心を種として、よろづの言の葉とぞなれりける。</div>
+          <div class="ro">Yamato uta wa, hito no kokoro o tane to shite, yorozu no koto no ha to zo narerikeru.</div>
+          <div class="enq">"Japanese poetry takes the human heart as its seed, and grows into countless leaves of words."</div>
+          <cite>Ki no Tsurayuki, preface to the Kokinshū, around 905</cite>
+        </blockquote>
+        <p style="margin-top:10px">That old form, <b>言の葉 (koto no ha)</b>, "leaves of words," is still used in poetry today.</p></div>
+      <div class="msec"><h3><span class="ic">獣</span>WHY A KAIJU?</h3><ul>
+        <li><b>Kotoba Kaiju</b> means "Word Kaiju," or "Word Beast."</li>
+        <li>Kaiju grow by eating. This one eats words.</li>
+        <li>Every card is a leaf off the word tree. Every GOT IT feeds the kaiju and grows the tree.</li>
+        <li>Tokusatsu heroes power up and transform. So do you: fill the Henshin meter by learning.</li></ul></div>
+      <div class="msec"><h3><span class="ic">木</span>YOUR WORD TREE</h3>
+        <p>Your heart is the seed. Each word you master grows one leaf.</p>
+        <div class="treebox">
+          <svg id="tree" viewBox="0 0 340 290" role="img" aria-label="Your word tree"></svg>
+          <div class="treecount"><span id="treeCount">0 of 15 leaves grown</span><span id="treeNext"></span></div>
+        </div>
+        <div class="leaves" id="leafList"></div></div>
+      <div class="credit">Made at Kaiju Fruit Labs · For Zeek · v1.9</div>
+    </div>
+  </div>
+</div>
+
+<div class="brief" id="brief" hidden role="dialog" aria-modal="true" aria-labelledby="bTitle">
+  <div class="bpanel">
+    <div class="bhead2"><span class="bflag">▶ MISSION BRIEFING</span><button class="x" id="bClose" aria-label="Close briefing">✕</button></div>
+    <div class="bbody2">
+      <h3 class="btitle" id="bTitle"></h3>
+      <div class="bword" id="bWord"></div>
+      <span class="bkind" id="bKind"></span>
+      <div class="btype" id="bType" role="button" tabindex="0" aria-label="Mission text. Tap to show it all."><span id="bText"></span><span class="caret"></span></div>
+      <div class="bskip" id="bSkip">Tap the screen to show it all</div>
+      <div class="bstage wait" id="bStage">
+        <div class="bchoose" role="group" aria-label="Create physical or create digital">
+          <button class="bchoice" data-bm="physical" aria-pressed="true">✎ CREATE PHYSICAL<small>Hands on: paper, tools, people</small></button>
+          <button class="bchoice" data-bm="digital" aria-pressed="false">▣ CREATE DIGITAL<small>On screen: apps and devices</small></button>
+        </div>
+        <div class="bdetail" id="bDetail"></div>
+        <details class="blesson" id="bLesson"><summary id="bLessonT"></summary><div id="bLessonB"></div></details>
+        <button class="btn got bgo" id="bGo">ACCEPT MISSION<small>ミッション開始 · let's go</small></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="tshield" id="tshield" hidden></div>
+<div class="tspot" id="tspot" hidden></div>
+<div class="tpop" id="tpop" hidden role="dialog" aria-live="polite">
+  <div class="step" id="tStep"></div>
+  <h4 id="tTitle"></h4>
+  <p id="tText"></p>
+  <div class="row">
+    <button class="skip" id="tSkip">Skip tour</button>
+    <button id="tBack">◀ BACK</button>
+    <button class="go" id="tNext">NEXT ▶</button>
+  </div>
+</div>
+
+<div class="win" id="win" hidden>
+  <div class="box">
+    <h3>HENSHIN!</h3>
+    <div class="jp">変身完了</div>
+    <p>Transformation complete. Every file in this deck is yours.</p>
+    <button class="btn got" id="reset" style="width:100%">RUN IT BACK</button>
+  </div>
+</div>
+
+<script>
+const WORDS = [
+ {k:"怪獣",r:"kaijū",kana:"かいじゅう",t:"culture",en:"Strange beast. A giant monster.",
+  parts:[["怪","strange, mysterious"],["獣","beast"]],
+  note:"The word for the giant monsters of Japanese film. The genre took off with the 1954 film Godzilla (Gojira in Japanese).",
+  hero:"Every monster in a tokusatsu show is a kaijū. Now you can name the enemy."},
+ {k:"変身",r:"henshin",kana:"へんしん",t:"culture",en:"Transformation. Changing into your hero form.",
+  parts:[["変","change"],["身","body"]],
+  note:"Kamen Rider (1971) made shouting \"Henshin!\" with a pose into a playground ritual across Japan.",
+  hero:"Strike a pose and say it out loud. That is how every Rider suits up."},
+ {k:"宇宙",r:"uchū",kana:"うちゅう",t:"culture",en:"The universe. Outer space.",
+  parts:[["宇","all of space"],["宙","all of time"]],
+  note:"An old Chinese text, the Huainanzi, defines 宇 as the four directions plus up and down, and 宙 as past to present. Put together: all space and all time.",
+  hero:"Space Sheriff Gavan (1982) was called 宇宙刑事ギャバン, Uchū Keiji Gavan."},
+ {k:"必殺技",r:"hissatsu-waza",kana:"ひっさつわざ",t:"culture",en:"Finishing move. A signature special attack.",
+  parts:[["必","certain"],["殺","kill, defeat"],["技","technique"]],
+  note:"Heroes shout the name of their finishing move as they launch it, and fans learn every one by heart.",
+  hero:"Ultraman's finisher is the Specium Ray, スペシウム光線."},
+ {k:"ありがとう",r:"arigatō",kana:"ありがとう",t:"culture",en:"Thank you.",
+  parts:[["有","to exist"],["難","difficult"]],
+  note:"Usually written in kana, but the kanji form is 有り難う: \"hard to exist.\" Thanks comes from something being rare and precious.",
+  hero:"Add ございます (gozaimasu) to make it polite: arigatō gozaimasu."},
+ {k:"いただきます",r:"itadakimasu",kana:"いただきます",t:"culture",en:"\"I humbly receive.\" Said before eating.",
+  parts:[["頂","receive humbly (頂きます)"]],
+  note:"Hands together, then say it. It gives thanks to the food, the people who made it, and the life it came from. After the meal: ごちそうさまでした, gochisōsama deshita.",
+  hero:"Even a hero refuels. Say it before every meal."},
+ {k:"頑張って",r:"ganbatte",kana:"がんばって",t:"culture",en:"Do your best! Hang in there!",
+  parts:[["頑","stubborn, firm"],["張","stretch, stand strong"]],
+  note:"Said to friends before a test, a game, a big day. It means push through and don't give up.",
+  hero:"When the crowd cheers the hero on, they shout the stronger form: がんばれ, ganbare!"},
+ {k:"桜",r:"sakura",kana:"さくら",t:"culture",en:"Cherry blossom.",
+  parts:[["桜","cherry tree"]],
+  note:"In spring people gather under the blossoms for 花見, hanami, flower-viewing picnics. The blooms last only about a week or two.",
+  hero:"Sakura petals drifting past a battle scene: a classic shot."},
+ {k:"祭り",r:"matsuri",kana:"まつり",t:"culture",en:"Festival.",
+  parts:[["祭","festival, worship"]],
+  note:"Portable shrines called mikoshi carried through the streets, taiko drums, and food stalls called yatai.",
+  hero:"Hero shows love a summer matsuri episode, yukata and all."},
+ {k:"可愛い",r:"kawaii",kana:"かわいい",t:"culture",en:"Cute. Adorable.",
+  parts:[["可","can, able"],["愛","love"]],
+  note:"The kanji read as \"lovable,\" but they were fitted to a word that already existed. Most people just write it in kana.",
+  hero:"Even the scariest kaiju ends up as a kawaii plush toy."},
+ {k:"生き甲斐",r:"ikigai",kana:"いきがい",t:"deep",en:"Your reason for being. What makes life worth living.",
+  parts:[["生","life, living"],["甲斐","worth, value"]],
+  note:"Not a big abstract purpose. Often small and daily: your craft, your people, the thing that gets you up in the morning.",
+  hero:"A hero's ikigai is why they keep getting back up."},
+ {k:"侘び寂び",r:"wabi-sabi",kana:"わびさび",t:"deep",en:"Beauty in things that are imperfect, simple, and aging.",
+  parts:[["侘","quiet simplicity"],["寂","patina, stillness"]],
+  note:"A cracked tea bowl, moss on stone, a worn wooden step. The marks of time are part of the beauty.",
+  hero:"The battle-scarred suit tells a better story than a shiny new one."},
+ {k:"物の哀れ",r:"mono no aware",kana:"もののあわれ",t:"deep",en:"The gentle ache of knowing that all things pass.",
+  parts:[["物","things"],["哀れ","deep feeling, pathos"]],
+  note:"The scholar Motoori Norinaga (1730 to 1801) made this idea central to reading The Tale of Genji. Falling sakura are its symbol.",
+  hero:"The end of the episode, when the kaiju walks back into the sea."},
+ {k:"一期一会",r:"ichigo ichie",kana:"いちごいちえ",t:"deep",en:"One time, one meeting. This moment will never happen again.",
+  parts:[["一","one"],["期","lifetime"],["一","one"],["会","meeting"]],
+  note:"Comes from the tea ceremony: treat every gathering as the only one, because it is.",
+  hero:"Every encounter in the story is once in a lifetime. Show up fully."},
+ {k:"金継ぎ",r:"kintsugi",kana:"きんつぎ",t:"deep",en:"Golden joinery. Repairing broken pottery with gold.",
+  parts:[["金","gold"],["継","join, mend"]],
+  note:"Cracks are filled with urushi lacquer dusted with powdered gold, so the break becomes the most beautiful part of the bowl.",
+  hero:"The robot that got smashed comes back rebuilt and stronger."}
+];
+
+// example sentence [japanese, romaji, english] + reflection question, same order as WORDS
+const EXTRA = [
+ ["怪獣だ！","Kaijū da!","It's a kaiju!","If you designed a kaiju, what would it protect, and why?"],
+ ["変身！","Henshin!","Transform!","What will your hero form be great at that you are still building now?"],
+ ["宇宙は広い。","Uchū wa hiroi.","Space is vast.","If 宇宙 means all space and all time, where would you go first?"],
+ ["必殺技を出せ！","Hissatsu-waza o dase!","Use your finishing move!","What is your real-life special move, the skill you are best at?"],
+ ["ありがとうございます。","Arigatō gozaimasu.","Thank you very much.","Who is someone rare in your life you haven't thanked yet?"],
+ ["いただきます！","Itadakimasu!","Let's eat! (I humbly receive.)","How many people helped make your last meal possible?"],
+ ["頑張って！","Ganbatte!","You've got this!","Who needs a 'ganbatte' from you this week?"],
+ ["桜がきれい。","Sakura ga kirei.","The cherry blossoms are beautiful.","What good thing in your life is short, so you should enjoy it now?"],
+ ["夏祭りに行こう！","Natsu matsuri ni ikō!","Let's go to the summer festival!","What would a festival for your neighborhood celebrate?"],
+ ["この怪獣、可愛い！","Kono kaijū, kawaii!","This kaiju is cute!","Can something be scary and cute at the same time? Name one."],
+ ["絵を描くことが私の生き甲斐です。","E o kaku koto ga watashi no ikigai desu.","Drawing is my ikigai.","What do you do that makes you lose track of time?"],
+ ["この古いお茶碗に侘び寂びを感じる。","Kono furui ochawan ni wabi-sabi o kanjiru.","I feel wabi-sabi in this old tea bowl.","What object do you love because it is worn or broken in?"],
+ ["散る桜に物の哀れを感じる。","Chiru sakura ni mono no aware o kanjiru.","I feel mono no aware in the falling cherry blossoms.","What ending made you feel sad and grateful at the same time?"],
+ ["一期一会を大切に。","Ichigo ichie o taisetsu ni.","Treasure every once-in-a-lifetime meeting.","Who will you meet today, and how can you be fully there?"],
+ ["金継ぎで直そう。","Kintsugi de naosō.","Let's fix it with kintsugi.","What mistake taught you something that made you stronger?"]
+];
+EXTRA.forEach((e,i)=>Object.assign(WORDS[i],{ex:e[0],exr:e[1],exen:e[2],q:e[3]}));
+// v1.7: 4 new main words, plus the Kamen Rider, Creator, and Numbers decks
+const NEW = [{"k": "先生", "r": "sensei", "kana": "せんせい", "t": "culture", "en": "Teacher. Someone who came before you and guides you.", "parts": [["先", "before, ahead"], ["生", "life, born"]], "note": "Literally “born before.” Used for teachers, doctors, and masters of an art. It goes after a name: Tanaka-sensei.", "hero": "Every hero has a sensei. In the first Kamen Rider, Tobei Tachibana was Takeshi Hongo’s racing mentor.", "ex": "先生、ありがとう！", "exr": "Sensei, arigatō!", "exen": "Thank you, teacher!", "q": "Who is a sensei in your life, even if they aren’t a teacher?", "sig": {"draw": "Draw your own sensei character: what do they teach, and what do they wear?", "story": "A student is sure they know better than their sensei. In panel 3, the twist shows why the sensei was right.", "speak": "se-n-se-i: four beats, and the n is its own beat. Say it with a small bow."}, "pals": [["生徒", "seito", "student (partner word)"]]}, {"k": "元気", "r": "genki", "kana": "げんき", "t": "culture", "en": "Full of energy. Healthy and lively.", "parts": [["元", "origin, source"], ["気", "energy, spirit"]], "note": "お元気ですか (o-genki desu ka) means “How are you?” Literally: is your energy good?", "hero": "A genki hero bounces back up after every hit.", "ex": "今日は元気です。", "exr": "Kyō wa genki desu.", "exen": "I’m doing great today.", "q": "What gives you genki when you’re running low?", "sig": {"draw": "Draw a meter that shows your genki level right now, from empty to overflowing.", "story": "A hero with zero genki left finds one thing that powers them back up.", "speak": "gen-ki: say it bright and bouncy. Then ask someone: o-genki desu ka?"}, "forms": [["元気です", "genki desu", "I’m well (polite)"], ["元気だった", "genki datta", "was well"], ["元気じゃない", "genki ja nai", "not well"], ["お元気ですか", "o-genki desu ka", "How are you?"]], "pals": [["元気がない", "genki ga nai", "low on energy (opposite)"]]}, {"k": "勇気", "r": "yūki", "kana": "ゆうき", "t": "culture", "en": "Courage. Bravery.", "parts": [["勇", "brave"], ["気", "spirit, energy"]], "note": "It shares 気 (spirit) with genki. 勇気を出して (yūki o dashite) means “Find your courage!”", "hero": "In video games, the hero is often called 勇者 (yūsha), “the brave one.”", "ex": "勇気を出して！", "exr": "Yūki o dashite!", "exen": "Be brave!", "q": "When did you feel scared and do it anyway?", "sig": {"draw": "Draw a small hero facing a giant kaiju. Show their courage in how they stand.", "story": "The smallest character in the story is the one who finds the courage.", "speak": "yū-ki: the ū is long, so it’s yuu-ki. Say it like a pep talk."}, "pals": [["勇者", "yūsha", "hero, the brave one"], ["怖い", "kowai", "scary (what courage beats)"]]}, {"k": "七転び八起き", "r": "nana korobi ya oki", "kana": "ななころびやおき", "t": "deep", "en": "Fall down seven times, get up eight.", "parts": [["七", "seven"], ["転", "fall, roll"], ["八", "eight"], ["起", "get up, rise"]], "note": "A Japanese proverb about never giving up: you always get up one more time than you fall. The round daruma doll, which rocks back up when you push it over, is a symbol of this spirit.", "hero": "Every Rider gets knocked down. The episode is about getting back up.", "ex": "七転び八起きの精神で頑張ろう。", "exr": "Nana korobi ya oki no seishin de ganbarō.", "exen": "Let’s keep going with a fall-seven, rise-eight spirit.", "q": "What is something you failed at more than once before you got it?", "sig": {"draw": "Draw a daruma doll, the round doll that always rocks back up. Give it your own face.", "story": "A hero fails 7 times across panels 1 to 3. Panel 4: the 8th try.", "speak": "na-na ko-ro-bi ya o-ki. Say it slow, then say it like a battle cry."}, "tile": "転"}, {"k": "仮面ライダー", "r": "kamen raidā", "kana": "かめんライダー", "t": "rider", "en": "Masked Rider. The hero, and the whole series.", "parts": [["仮", "temporary, false"], ["面", "face, mask"], ["ライダー", "rider (from English)"]], "note": "Created by manga artist Shotaro Ishinomori. The first series premiered April 3, 1971, and ran 98 episodes. Its hero was grasshopper-themed.", "hero": "The eras: Shōwa (1971 to 1989), Heisei (starting with Kamen Rider Kuuga in 2000), and Reiwa (starting with Kamen Rider Zero-One in 2019).", "ex": "仮面ライダーが大好きです。", "exr": "Kamen Raidā ga daisuki desu.", "exen": "I love Kamen Rider.", "q": "If you were a Rider, what would your power be based on, and why?", "sig": {"draw": "Design your own Rider: the mask, the belt, and the creature or idea they’re based on.", "story": "Yonkoma: the first day someone becomes a Rider.", "speak": "ka-me-n ra-i-dā: the dā is long. Say it like the opening of an episode."}}, {"k": "特撮", "r": "tokusatsu", "kana": "とくさつ", "t": "rider", "en": "Special effects shows and films. The genre of Kamen Rider, Super Sentai, and Ultraman.", "parts": [["特", "special"], ["撮", "to film, shoot"]], "note": "Short for 特殊撮影 (tokushu satsuei), “special filming”: suits, miniatures, and practical effects.", "hero": "Its 撮 is the same kanji as in 撮影 (satsuei, filming) in the Creator deck.", "ex": "特撮が大好き！", "exr": "Tokusatsu ga daisuki!", "exen": "I love tokusatsu!", "q": "Why do real suits and real explosions feel different from computer effects?", "sig": {"draw": "Design a kaiju suit a real actor could wear. Show where they would see out.", "story": "Behind the scenes: the suit breaks right before the big fight scene.", "speak": "to-ku-sa-tsu: the u in ku is almost silent, so it sounds like tok-sa-tsu."}}, {"k": "変身ベルト", "r": "henshin beruto", "kana": "へんしんベルト", "t": "rider", "en": "Transformation belt. The device a Rider uses to transform.", "parts": [["変身", "transformation"], ["ベルト", "belt (from English)"]], "note": "ベルト is written in katakana because it comes from English. Bandai sold more than 14 million Kamen Rider transformation belts between 2000 and 2021.", "fact": "The original belt is the Typhoon (タイフーン), worn by both Rider 1 and Rider 2. Windmills inside it catch the wind and send power to the Converter Lung in the Rider’s chest. At first, Rider 1 needed real wind to transform, so he rode his Cyclone motorcycle to build it up.", "hero": "Each series designs its own belt, and the toy versions let fans transform at home with lights and sound.", "ex": "ベルトを着けて、変身！", "exr": "Beruto o tsukete, henshin!", "exen": "Put on the belt, and transform!", "q": "If your belt had one button, what would it do?", "sig": {"draw": "Design your own transformation belt. Label every button and light.", "story": "The belt won’t work. In panel 3, the hero figures out why.", "speak": "be-ru-to: Japanese adds vowels to English words, so belt becomes beruto. Say it both ways."}, "tile": "ベ"}, {"k": "1号・2号", "r": "ichigō nigō", "kana": "いちごう・にごう", "t": "rider", "en": "Number 1 and Number 2: fans’ names for Kamen Rider 1 and Kamen Rider 2.", "parts": [["1号", "Number 1"], ["2号", "Number 2"], ["号", "number, title"]], "note": "Rider 1 was Takeshi Hongo. Rider 2 was Hayato Ichimonji. Together they were called the Double Riders.", "hero": "Ichigō (1号) has a long ō. Ichigo with a short o means strawberry. Same sounds, different words.", "fact": "Hiroshi Fujioka, who played Takeshi Hongo, did his own stunts. During early filming, a motorcycle stunt went wrong and shattered his leg. So the show created Hayato Ichimonji, Kamen Rider 2, played by Takeshi Sasaki, starting in episode 14. When Fujioka recovered, the two Riders fought Shocker together as the Double Riders.", "ex": "1号と2号、ダブルライダーだ！", "exr": "Ichigō to Nigō, Daburu Raidā da!", "exen": "Number 1 and Number 2: the Double Riders!", "q": "What is something that went wrong and ended up making a story better?", "sig": {"draw": "Draw Ichigō and Nigō side by side, each wearing a Typhoon belt.", "story": "A hero gets hurt, and a new hero has to step in. By panel 4, they fight side by side.", "speak": "i-chi-gō, ni-gō: hold the ō in both. Then say ichigo, strawberry, and hear the difference."}, "tile": "号"}, {"k": "改造人間", "r": "kaizō ningen", "kana": "かいぞうにんげん", "t": "rider", "en": "Modified human. A person rebuilt with machine or creature parts.", "parts": [["改造", "remodel, rebuild"], ["人間", "human being"]], "note": "In the first series, the evil organization Shocker turned Takeshi Hongo into a cyborg. He escaped just before they could brainwash him.", "hero": "The big idea of the whole franchise: a Rider’s power often comes from the same source as the villains’. What matters is how you use it.", "ex": "彼は改造人間だ。", "exr": "Kare wa kaizō ningen da.", "exen": "He’s a modified human.", "q": "If your power came from the villain, would it still be yours? Why?", "sig": {"draw": "Draw a regular person, and the same person rebuilt. Keep one thing human.", "story": "A modified human escapes the lab. What is the first thing they do with their freedom?", "speak": "ka-i-zō ni-n-ge-n: hold the ō. Eight even beats in all."}}, {"k": "悪の組織", "r": "aku no soshiki", "kana": "あくのそしき", "t": "rider", "en": "Evil organization. The villains’ secret group.", "parts": [["悪", "evil, bad"], ["組織", "organization"]], "note": "In the first series, the evil organization was Shocker, and its goal was world domination.", "hero": "Almost every series has one. Learning their goal is how the hero stops them.", "ex": "悪の組織を止めろ！", "exr": "Aku no soshiki o tomero!", "exen": "Stop the evil organization!", "q": "What makes an organization evil: its goal, or how it treats people?", "sig": {"draw": "Design the logo of an evil organization. Then design the hero team’s logo that fights it.", "story": "A member of the evil organization starts to doubt the mission.", "speak": "a-ku no so-shi-ki: short and sharp. Say it like a villain reveal."}}, {"k": "怪人", "r": "kaijin", "kana": "かいじん", "t": "rider", "en": "Monster-man. A villain creature, often the monster of the week.", "parts": [["怪", "strange, mysterious"], ["人", "person"]], "note": "In the first series, Shocker’s monsters were humans enhanced with animal DNA and machine parts.", "hero": "Same 怪 as in kaijū (strange beast). Kaijū are giants. Kaijin are closer to human size.", "ex": "怪人が現れた！", "exr": "Kaijin ga arawareta!", "exen": "A monster appeared!", "q": "Can a kaijin be good? What would change them?", "sig": {"draw": "Mix a person with one animal and one machine part to create a kaijin.", "story": "Monster of the week: a kaijin shows up with a plan. What is it?", "speak": "ka-i-ji-n: four beats. Say kaijū and kaijin back to back."}, "tile": "人"}, {"k": "正義", "r": "seigi", "kana": "せいぎ", "t": "rider", "en": "Justice. What is right.", "parts": [["正", "right, correct"], ["義", "righteousness, duty"]], "note": "The opposite is 悪 (aku), evil. 正義の味方 (seigi no mikata), “ally of justice,” is a classic way to describe a hero.", "hero": "Heroes fight for justice. The best stories ask what justice really means.", "ex": "正義のために戦う。", "exr": "Seigi no tame ni tatakau.", "exen": "I fight for justice.", "q": "Is justice the same as following the rules? When is it different?", "sig": {"draw": "Design a symbol for justice that could go on a hero’s chest.", "story": "Two heroes both think they are fighting for justice, and they are on opposite sides.", "speak": "se-i-gi: three beats. Then say seigi no mikata like a hero intro."}, "pals": [["悪", "aku", "evil (opposite)"], ["正義の味方", "seigi no mikata", "ally of justice, a hero"]]}, {"k": "敵", "r": "teki", "kana": "てき", "t": "rider", "en": "Enemy. Opponent.", "parts": [["敵", "enemy, opponent"]], "note": "The opposite is 味方 (mikata), an ally, someone on your side.", "hero": "In many hero stories, an enemy becomes an ally. Watch for it.", "ex": "敵か味方か？", "exr": "Teki ka mikata ka?", "exen": "Enemy or ally?", "q": "Have you ever turned a rival into a friend? How?", "sig": {"draw": "Draw a hero and their enemy back to back. Make them mirror each other.", "story": "Enemies are forced to team up in panel 2. By panel 4, what are they?", "speak": "te-ki: two quick beats. Say teki ka mikata ka? like a cliffhanger."}, "pals": [["味方", "mikata", "ally (opposite)"], ["ライバル", "raibaru", "rival"]]}, {"k": "任務", "r": "ninmu", "kana": "にんむ", "t": "rider", "en": "Mission. A duty you’ve been given.", "parts": [["任", "entrust, duty"], ["務", "task, work"]], "note": "ミッション (misshon), from English, is also used, especially in games.", "hero": "Every episode is a mission: find the kaijin, protect the people, stop the plan.", "ex": "任務完了！", "exr": "Ninmu kanryō!", "exen": "Mission complete!", "q": "What is a mission you’ve given yourself this year?", "sig": {"draw": "Design a mission file: the target, the location, and the rules.", "story": "The mission goes wrong in panel 2. Improvise the rest.", "speak": "ni-n-mu: three beats, and the n is its own beat. Shout ninmu kanryō! when you finish something."}}, {"k": "戦う", "r": "tatakau", "kana": "たたかう", "t": "rider", "en": "To fight. To battle.", "parts": [["戦", "battle, war"]], "note": "戦 is the same kanji as in 戦隊 (sentai), as in Super Sentai.", "hero": "Rider stories aren’t only about fighting. They’re about why you fight.", "ex": "一緒に戦おう！", "exr": "Issho ni tatakaō!", "exen": "Let’s fight together!", "q": "What is worth fighting for? What isn’t?", "sig": {"draw": "Draw a fight in 3 frames: the wind-up, the hit, and the landing.", "story": "A hero refuses to fight. How do they win anyway?", "speak": "ta-ta-ka-u: four even beats. Then try the forms below."}, "forms": [["戦います", "tatakaimasu", "fight (polite)"], ["戦った", "tatakatta", "fought"], ["戦って", "tatakatte", "fight, and... (-te form)"], ["戦わない", "tatakawanai", "don’t fight"], ["戦おう", "tatakaō", "let’s fight"]]}, {"k": "守る", "r": "mamoru", "kana": "まもる", "t": "rider", "en": "To protect. To defend. To keep a promise.", "parts": [["守", "protect, guard"]], "note": "約束を守る (yakusoku o mamoru) means “keep a promise.” Protecting people and keeping your word use the same verb.", "hero": "A Rider’s real job: protect the people who can’t protect themselves.", "ex": "みんなを守る！", "exr": "Minna o mamoru!", "exen": "I’ll protect everyone!", "q": "Who do you protect, and who protects you?", "sig": {"draw": "Draw a shield that protects one specific person. Put their symbol on it.", "story": "A hero has to choose: win the fight, or protect someone. What do they pick?", "speak": "ma-mo-ru: one light tap on the r. Say minna o mamoru! like a promise."}, "forms": [["守ります", "mamorimasu", "protect (polite)"], ["守った", "mamotta", "protected"], ["守って", "mamotte", "protect, and... / please protect"], ["守らない", "mamoranai", "don’t protect"]], "pals": [["約束を守る", "yakusoku o mamoru", "keep a promise"]]}, {"k": "仲間", "r": "nakama", "kana": "なかま", "t": "rider", "en": "Comrades. Your crew. The people on your team.", "parts": [["仲", "relationship, bond"], ["間", "between, space"]], "note": "Closer than just teammates. Nakama are the people you would go through anything with.", "hero": "In the first series, Takeshi Hongo and Hayato Ichimonji became Rider 1 and Rider 2.", "ex": "仲間がいるから強い。", "exr": "Nakama ga iru kara tsuyoi.", "exen": "I’m strong because I have my crew.", "q": "Who is in your nakama? What does each person bring?", "sig": {"draw": "Draw your nakama as a hero team. Give each one a color and a role.", "story": "The team splits up in panel 2. What brings them back together?", "speak": "na-ka-ma: three even beats, none louder than the others."}, "pals": [["友達", "tomodachi", "friend"], ["チーム", "chīmu", "team"]]}, {"k": "家族", "r": "kazoku", "kana": "かぞく", "t": "rider", "en": "Family.", "parts": [["家", "house, home"], ["族", "family, clan"]], "note": "Family doesn’t have to mean blood. Hero stories often build a family out of the team.", "hero": "Many hero shows have a home base where the team gathers like a family.", "ex": "家族を守りたい。", "exr": "Kazoku o mamoritai.", "exen": "I want to protect my family.", "q": "What makes someone family to you?", "sig": {"draw": "Draw your family as a tokusatsu team, with each person’s special power.", "story": "Yonkoma: a normal family dinner (起), and one person at the table is secretly a hero (転).", "speak": "ka-zo-ku: three light, even beats."}}, {"k": "主人公", "r": "shujinkō", "kana": "しゅじんこう", "t": "rider", "en": "The main character. The protagonist.", "parts": [["主", "main, master"], ["人", "person"], ["公", "public, lord"]], "note": "Used for any story: shows, movies, games, and books.", "hero": "The first Rider’s shujinkō was Takeshi Hongo.", "ex": "主人公は僕だ。", "exr": "Shujinkō wa boku da.", "exen": "I’m the main character.", "q": "If your life were a series, what would the main character’s arc be this season?", "sig": {"draw": "Draw yourself as the shujinkō on the title card of your own series.", "story": "The side character secretly thinks they are the shujinkō. Tell it from their side.", "speak": "shu-ji-n-kō: hold the ō at the end. Five beats."}}, {"k": "第一話", "r": "dai ichi wa", "kana": "だいいちわ", "t": "rider", "en": "Episode 1.", "parts": [["第", "number ... (for order)"], ["一", "one"], ["話", "story, talk"]], "note": "Japanese shows count episodes as 第○話: 第二話 (dai ni wa) is Episode 2. The first Kamen Rider series ran 98 episodes.", "hero": "A first episode has one job: show who the hero is, and why they fight.", "ex": "第一話を見た？", "exr": "Dai ichi wa o mita?", "exen": "Did you watch Episode 1?", "q": "What is the best first episode you’ve ever seen? What made it work?", "sig": {"draw": "Draw the title card for Episode 1 of your own series.", "story": "Plan your own first episode in 4 panels: the hero before, the incident, the transformation, the promise.", "speak": "da-i i-chi wa. Count up: dai ichi wa, dai ni wa, dai san wa."}, "pals": [["最終回", "saishūkai", "final episode"]]}, {"k": "劇場版", "r": "gekijōban", "kana": "げきじょうばん", "t": "rider", "en": "Movie version. A theatrical film of a series.", "parts": [["劇場", "theater"], ["版", "edition, version"]], "note": "Tokusatsu series often get 劇場版 movies. Shin Kamen Rider (2023), written and directed by Hideaki Anno, reimagined the original series for its 50th anniversary.", "hero": "A movie is a bigger mission: a bigger villain, and bigger stakes.", "ex": "劇場版を見に行こう！", "exr": "Gekijōban o mi ni ikō!", "exen": "Let’s go see the movie!", "q": "What would a movie version of your biggest moment look like?", "sig": {"draw": "Design the poster for a movie version of your own series.", "story": "Plot a movie in 4 panels: the threat, the team-up, the darkest moment, the win.", "speak": "ge-ki-jō-ba-n: hold the ō, and the n is its own beat."}}, {"k": "監督", "r": "kantoku", "kana": "かんとく", "t": "creator", "en": "Director. Also a sports coach or manager.", "parts": [["監", "oversee, watch over"], ["督", "command, lead"]], "note": "The same word is used for a film director and a soccer coach.", "hero": "Every episode of a tokusatsu show has a director in charge of the shoot.", "ex": "僕は監督です。", "exr": "Boku wa kantoku desu.", "exen": "I’m the director.", "q": "What makes a great director: a strong vision, or listening to the crew?", "sig": {"draw": "Draw yourself in the director’s chair on set. Add your crew.", "story": "The director has one day to shoot everything. What goes wrong first?", "speak": "ka-n-to-ku: the n is its own beat. Then call out akushon! (action) and katto! (cut)."}, "pals": [["アクション！", "akushon!", "Action!"], ["カット！", "katto!", "Cut!"]]}, {"k": "撮影", "r": "satsuei", "kana": "さつえい", "t": "creator", "en": "Filming. A photo or video shoot.", "parts": [["撮", "to film, shoot"], ["影", "image, shadow"]], "note": "The verb is 撮る (toru): to take a photo or shoot video.", "hero": "Same 撮 as in 特撮 (tokusatsu), “special filming.”", "ex": "明日、撮影があります。", "exr": "Ashita, satsuei ga arimasu.", "exen": "I have a shoot tomorrow.", "q": "What is the hardest shot you’ve ever tried to get?", "sig": {"draw": "Draw a storyboard frame: where the camera is, and what it sees.", "story": "The weather ruins every plan for the shoot. How does the crew save the video?", "speak": "sa-tsu-e-i: four beats. Then the verb forms below."}, "forms": [["撮る", "toru", "to shoot (photo or video)"], ["撮ります", "torimasu", "shoot (polite)"], ["撮った", "totta", "shot, filmed"], ["撮って", "totte", "shoot, and... / please film"]]}, {"k": "編集", "r": "henshū", "kana": "へんしゅう", "t": "creator", "en": "Editing.", "parts": [["編", "compile, weave"], ["集", "gather, collect"]], "note": "The verb is 編集する (henshū suru), to edit. Don’t mix it up with 変身 (henshin, transform). They sound close!", "hero": "Editing is its own transformation: raw footage becomes a story.", "ex": "動画を編集した。", "exr": "Dōga o henshū shita.", "exen": "I edited the video.", "q": "What is one thing you cut from a video that made it better?", "sig": {"draw": "Draw a timeline of clips, then circle the one you would cut.", "story": "4 panels: the raw footage, the cut, the music, the upload.", "speak": "he-n-shū, then he-n-shi-n. Say both back to back until they sound clearly different."}, "forms": [["編集します", "henshū shimasu", "edit (polite)"], ["編集した", "henshū shita", "edited"], ["編集して", "henshū shite", "edit, and..."], ["編集しない", "henshū shinai", "don’t edit"]]}, {"k": "動画", "r": "dōga", "kana": "どうが", "t": "creator", "en": "Video. Online videos, like on YouTube.", "parts": [["動", "move"], ["画", "picture"]], "note": "Literally “moving picture.” 動画 is the everyday word for online videos.", "hero": "A tokusatsu fan channel is 動画 about 特撮.", "ex": "新しい動画をアップした！", "exr": "Atarashii dōga o appu shita!", "exen": "I uploaded a new video!", "q": "What video do you want to make that nobody has made yet?", "sig": {"draw": "Design a thumbnail for your next video: big text, one strong image.", "story": "A video’s life in 4 panels: the idea, the shoot, the edit, the first comment.", "speak": "dō-ga: hold the ō. Say it like you’re introducing your channel."}}, {"k": "映画", "r": "eiga", "kana": "えいが", "t": "creator", "en": "Movie. Film.", "parts": [["映", "project, reflect"], ["画", "picture"]], "note": "Same 画 (picture) as in 動画. 映画館 (eigakan) is a movie theater.", "hero": "A 劇場版 is a 映画 made from a series.", "ex": "映画を作りたい。", "exr": "Eiga o tsukuritai.", "exen": "I want to make a movie.", "q": "What movie changed how you see something?", "sig": {"draw": "Draw a theater screen showing the first frame of your movie.", "story": "4 panels: the lights go down, the first scene, the twist, the audience’s reaction.", "speak": "e-i-ga: three beats. Then eigakan, the movie theater."}}, {"k": "ゲーム", "r": "gēmu", "kana": "ゲーム", "t": "creator", "en": "Game. Video game.", "parts": [["ゲーム", "game (from English)"]], "note": "Written in katakana because it comes from English. The long mark ー stretches the sound before it: gē-mu.", "hero": "Many of the biggest video game series in the world were made in Japan.", "ex": "ゲームをしよう！", "exr": "Gēmu o shiyō!", "exen": "Let’s play a game!", "q": "What game taught you something real?", "sig": {"draw": "Design a level for a Kotoba Kaiju game. Where are the words hidden?", "story": "A game character realizes they are inside a game.", "speak": "gē-mu: the ー means hold it. Say game, then gēmu."}, "pals": [["ゲーマー", "gēmā", "gamer"]], "tile": "ゲ"}, {"k": "ゲーマー", "r": "gēmā", "kana": "ゲーマー", "t": "creator", "en": "Gamer.", "parts": [["ゲーマー", "gamer (from English)"]], "note": "Katakana again, with two long marks: gē-mā. Many gaming words come into Japanese from English this way.", "hero": "In games, the hero is often 勇者 (yūsha), the brave one.", "ex": "僕はゲーマーです。", "exr": "Boku wa gēmā desu.", "exen": "I’m a gamer.", "q": "What kind of gamer are you: explorer, speedrunner, builder, or fighter?", "sig": {"draw": "Draw your gaming setup as a hero’s home base.", "story": "A gamer gets pulled into their favorite game for real.", "speak": "gē-mā: two long sounds. Say it like a player name announcement."}, "tile": "ゲマ"}, {"k": "再生回数", "r": "saisei kaisū", "kana": "さいせいかいすう", "t": "creator", "en": "View count. How many times a video has been played.", "parts": [["再生", "playback"], ["回数", "number of times"]], "note": "百万回再生 (hyakuman-kai saisei) means “1 million views.”", "hero": "ZEEK GOJI X passed 1 million lifetime views: 百万回再生!", "ex": "再生回数が百万を超えた！", "exr": "Saisei kaisū ga hyakuman o koeta!", "exen": "The view count passed a million!", "q": "What would you want a million people to see?", "sig": {"draw": "Design a trophy for a million views.", "story": "4 panels: the first upload, 10 views, 1,000 views, 1,000,000.", "speak": "sa-i-se-i ka-i-sū: hold the ū. Then say hyakuman-kai saisei: a million views!"}}, {"k": "一", "r": "ichi", "kana": "いち", "t": "num", "en": "One. 1.", "parts": [["一", "one"]], "note": "The simplest kanji: one line. When counting things, one is also said hitotsu.", "hero": "Episode 1 is 第一話: dai ichi wa.", "ex": "一つください。", "exr": "Hitotsu kudasai.", "exen": "One, please.", "q": "What is one thing you would never give up?", "sig": {"draw": "Draw 一 as a laser beam across the whole page.", "story": "One hero, one chance: tell it in 4 panels.", "speak": "i-chi: two quick beats. Count on your fingers: ichi!"}}, {"k": "二", "r": "ni", "kana": "に", "t": "num", "en": "Two. 2.", "parts": [["二", "two"]], "note": "Two lines for two. In the first series, Hayato Ichimonji became Kamen Rider 2.", "hero": "Rider 1 and Rider 2 fought side by side in the first series.", "ex": "二人で行こう。", "exr": "Futari de ikō.", "exen": "Let’s go, the two of us.", "q": "Who is your number two, the person you team up with?", "sig": {"draw": "Draw two heroes back to back, one for each line of 二.", "story": "Two rivals, one prize.", "speak": "ni: one short beat. Snap it: ni!"}}, {"k": "三", "r": "san", "kana": "さん", "t": "num", "en": "Three. 3.", "parts": [["三", "three"]], "note": "Three lines. The numbers 1, 2, and 3 are just lines stacked up.", "hero": "A 3-panel strip is the short version of a yonkoma.", "ex": "三時に会おう。", "exr": "Sanji ni aō.", "exen": "Let’s meet at three o’clock.", "q": "What are the three most important things in your life?", "sig": {"draw": "Draw a kaiju with three heads, one for each line of 三.", "story": "Tell a story in exactly 3 panels, one for each line of 三.", "speak": "sa-n: the n is its own beat. san!"}}, {"k": "四", "r": "yon", "kana": "よん", "t": "num", "en": "Four. 4.", "parts": [["四", "four"]], "note": "Also read shi, but people often say yon instead, because shi sounds like 死 (death). That is why 4 is considered unlucky in Japan.", "hero": "Yonkoma means four frames. Its yon is this 四.", "ex": "四コマ漫画を描こう。", "exr": "Yonkoma manga o kakō.", "exen": "Let’s draw a yonkoma.", "q": "Is there a number you think is lucky or unlucky? Why?", "sig": {"draw": "Draw four panels, and hide a 四 somewhere in panel 4.", "story": "A yonkoma where the number 4 tries to prove it isn’t unlucky.", "speak": "yo-n: two beats. Then the other reading: shi."}}, {"k": "五", "r": "go", "kana": "ご", "t": "num", "en": "Five. 5.", "parts": [["五", "five"]], "note": "Every sakura flower has five petals.", "hero": "Five-hero teams are a classic of Super Sentai.", "ex": "五人のヒーロー。", "exr": "Gonin no hīrō.", "exen": "Five heroes.", "q": "Name five people who helped you get where you are.", "sig": {"draw": "Design a five-hero team, each with their own color.", "story": "Five heroes, one argument, one mission.", "speak": "go: one beat. Go!"}}, {"k": "六", "r": "roku", "kana": "ろく", "t": "num", "en": "Six. 6.", "parts": [["六", "six"]], "note": "Watch the sound change: 六百 (600) is roppyaku, not rokuhyaku.", "hero": "Sound-change power-up: roku plus hyaku becomes roppyaku.", "ex": "六時に起きる。", "exr": "Rokuji ni okiru.", "exen": "I get up at six.", "q": "What would you do with six extra hours a week?", "sig": {"draw": "Draw a six-legged kaiju.", "story": "Six hours until the deadline: four panels, one clock.", "speak": "ro-ku: one light tap on the r. Then roppyaku, 600."}}, {"k": "七", "r": "nana", "kana": "なな", "t": "num", "en": "Seven. 7.", "parts": [["七", "seven"]], "note": "Also read shichi. Seven is in 七転び八起き: fall seven times, get up eight.", "hero": "Seven falls, eight rises. Hero math.", "ex": "七回転んだ。", "exr": "Nanakai koronda.", "exen": "I fell seven times.", "q": "What is something you would try seven times?", "sig": {"draw": "Draw seven stars arranged in the shape of 七.", "story": "A hero falls 7 times across the panels. The 8th time, they rise.", "speak": "na-na, then shi-chi: two readings, same number."}}, {"k": "八", "r": "hachi", "kana": "はち", "t": "num", "en": "Eight. 8.", "parts": [["八", "eight"]], "note": "Considered lucky in Japan: 八 spreads wider at the bottom, like good fortune growing. That idea has a name: 末広がり (suehirogari). Watch the sound changes: 八百 is happyaku (800), 八千 is hassen (8,000).", "hero": "The eighth rise in 七転び八起き.", "ex": "八時です。", "exr": "Hachiji desu.", "exen": "It’s eight o’clock.", "q": "What is something you feel lucky to have?", "sig": {"draw": "Draw 八 as a mountain, wide at the bottom, with your hero on top.", "story": "The number 8 brings good luck to someone who needs it.", "speak": "ha-chi. Then happyaku (800) and hassen (8,000). Hear the sound change."}}, {"k": "九", "r": "kyū", "kana": "きゅう", "t": "num", "en": "Nine. 9.", "parts": [["九", "nine"]], "note": "Also read ku, but ku can sound like 苦 (suffering), so kyū is common. For clock time, though, nine o’clock is 九時, kuji.", "hero": "Count down to the transformation: kyū, hachi, nana...", "ex": "九時に始まる。", "exr": "Kuji ni hajimaru.", "exen": "It starts at nine.", "q": "What will you be doing nine years from now?", "sig": {"draw": "Draw a nine-tailed kaiju.", "story": "A countdown story: panel 1 starts at 9.", "speak": "kyū: one smooth sound, kyuu. Then kuji, nine o’clock."}}, {"k": "十", "r": "jū", "kana": "じゅう", "t": "num", "en": "Ten. 10.", "parts": [["十", "ten"]], "note": "Tens are easy: say the number, then jū. 二十 (nijū) is 20, 三十 (sanjū) is 30.", "hero": "Count to ten, then keep going by tens.", "ex": "十まで数えて。", "exr": "Jū made kazoete.", "exen": "Count to ten.", "q": "What is one skill you would rate 10 out of 10?", "sig": {"draw": "Draw 十 as a hero’s crossed swords.", "story": "Ten seconds before the explosion: four panels.", "speak": "jū: hold the ū. Then count by tens: jū, nijū, sanjū."}, "forms": [["二十", "nijū", "20"], ["三十", "sanjū", "30"], ["五十", "gojū", "50"], ["九十九", "kyūjūkyū", "99"]]}, {"k": "百", "r": "hyaku", "kana": "ひゃく", "t": "num", "en": "Hundred. 100.", "parts": [["百", "hundred"]], "note": "Sound changes: 三百 sanbyaku (300), 六百 roppyaku (600), 八百 happyaku (800).", "hero": "百 plus 万 makes 百万: one million.", "ex": "百点！", "exr": "Hyaku ten!", "exen": "100 points!", "q": "What would you practice 100 times to get good at?", "sig": {"draw": "Draw a 100-point score screen for a game you invent.", "story": "A hero needs 100 of something by sundown.", "speak": "hya-ku: hya is one sound. Then sanbyaku, roppyaku, happyaku."}, "forms": [["二百", "nihyaku", "200"], ["三百", "sanbyaku", "300"], ["六百", "roppyaku", "600"], ["八百", "happyaku", "800"]]}, {"k": "千", "r": "sen", "kana": "せん", "t": "num", "en": "Thousand. 1,000.", "parts": [["千", "thousand"]], "note": "Sound changes: 三千 sanzen (3,000), 八千 hassen (8,000).", "hero": "千羽鶴 (senbazuru): a thousand paper cranes, folded together for a wish.", "ex": "千円です。", "exr": "Sen’en desu.", "exen": "It’s 1,000 yen.", "q": "What would you fold a thousand cranes for?", "sig": {"draw": "Fold or draw one paper crane, and start your thousand.", "story": "1,000 people show up to watch the hero’s fight.", "speak": "se-n: the n is its own beat. Then sanzen and hassen."}, "forms": [["二千", "nisen", "2,000"], ["三千", "sanzen", "3,000"], ["八千", "hassen", "8,000"]]}, {"k": "万", "r": "man", "kana": "まん", "t": "num", "en": "Ten thousand. 10,000.", "parts": [["万", "ten thousand"]], "note": "The big idea: Japanese counts big numbers in groups of 10,000, not 1,000. 一万 (ichiman) is 10,000, and you always say the ichi.", "hero": "万 is the building block of big numbers: 十万 is 100,000, and 百万 is 1,000,000.", "ex": "一万円です。", "exr": "Ichiman’en desu.", "exen": "It’s 10,000 yen.", "q": "What is something that takes 10,000 hours to master?", "sig": {"draw": "Draw a crowd of 10,000 fans using tiny dots.", "story": "A hero has 10,000 steps to reach the kaiju.", "speak": "ma-n: two beats. For 10,000, it’s always ichiman."}, "forms": [["一万", "ichiman", "10,000"], ["十万", "jūman", "100,000"], ["百万", "hyakuman", "1,000,000"]]}, {"k": "百万", "r": "hyakuman", "kana": "ひゃくまん", "t": "num", "en": "One million. 1,000,000.", "parts": [["百", "hundred"], ["万", "ten thousand"]], "note": "100 × 10,000 = 1,000,000. So a million is “a hundred ten-thousands.”", "hero": "ZEEK GOJI X: 百万回再生, a million lifetime views!", "ex": "百万回再生おめでとう！", "exr": "Hyakuman-kai saisei omedetō!", "exen": "Congrats on a million views!", "q": "What does a million of something look like? Try to picture it.", "sig": {"draw": "Design a celebration banner for a million views.", "story": "4 panels: 1 view, 100 views, 10,000 views, 1,000,000 views.", "speak": "hya-ku-ma-n: four beats. Shout it: hyakuman!"}, "tile": "百万"}];
+NEW.forEach(w=>WORDS.push(w));
+// v1.9: 42 more words to reach 100, including the Travel deck
+const N19 = [{"k": "祝う", "r": "iwau", "kana": "いわう", "t": "culture", "en": "To celebrate.", "parts": [["祝", "celebrate, bless"]], "note": "お祝い (oiwai) means a celebration, or a gift for one.", "hero": "Say it big for big moments: a birthday, a win, a milestone.", "ex": "百万回再生、祝え！", "exr": "Hyakuman-kai saisei, iwae!", "exen": "A million views. Rejoice!", "q": "What is something you did this year that deserves a celebration?", "sig": {"draw": "Design a celebration banner for someone you know.", "story": "A hero plans a surprise celebration, and a kaijin crashes it.", "speak": "i-wa-u: three even beats. Then shout the command: iwae!"}, "forms": [["祝います", "iwaimasu", "celebrate (polite)"], ["祝った", "iwatta", "celebrated"], ["祝おう", "iwaō", "let's celebrate"], ["祝え！", "iwae!", "Rejoice! (command)"]], "pals": [["お祝い", "oiwai", "a celebration"], ["おめでとう", "omedetō", "congratulations"]], "tile": "祝"}, {"k": "友達", "r": "tomodachi", "kana": "ともだち", "t": "culture", "en": "Friend.", "parts": [["友", "friend"], ["達", "plural (more than one)"]], "note": "達 used to mark more than one person, but today tomodachi means one friend or many.", "hero": "Fourze’s whole theme was making friends.", "ex": "友達になろう！", "exr": "Tomodachi ni narō!", "exen": "Let’s be friends!", "q": "What makes someone a real friend?", "sig": {"draw": "Draw you and a friend as a tag-team duo.", "story": "Two strangers become friends in 4 panels.", "speak": "to-mo-da-chi: four even beats."}, "pals": [["仲間", "nakama", "crew, comrades"], ["親友", "shin’yū", "best friend"]], "tile": "友"}, {"k": "漫画", "r": "manga", "kana": "まんが", "t": "culture", "en": "Comics. Manga.", "parts": [["漫", "whimsical, free"], ["画", "picture"]], "note": "The artist Hokusai used the word in the title of his famous sketchbooks, Hokusai Manga, starting in 1814.", "hero": "Kamen Rider started as a manga by Shotaro Ishinomori, drawn alongside the TV show.", "ex": "漫画を描くのが好き。", "exr": "Manga o kaku no ga suki.", "exen": "I like drawing manga.", "q": "What would your manga be about?", "sig": {"draw": "Draw the cover of your own manga series.", "story": "Make a yonkoma manga about your day.", "speak": "ma-n-ga: three beats, and the n is its own beat."}, "tile": "漫"}, {"k": "お土産", "r": "omiyage", "kana": "おみやげ", "t": "culture", "en": "Souvenir. A gift you bring back from a trip.", "parts": [["お", "polite prefix"], ["土産", "local product (土 earth + 産 product)"]], "note": "In Japan, bringing omiyage back for family, friends, and coworkers is an important custom.", "hero": "A sofubi from Japan is the ultimate omiyage.", "ex": "お土産を買いたい。", "exr": "Omiyage o kaitai.", "exen": "I want to buy souvenirs.", "q": "Who would you bring an omiyage back for, and what would you pick?", "sig": {"draw": "Design the perfect omiyage box from your city.", "story": "A hero travels the world and brings back one strange omiyage.", "speak": "o-mi-ya-ge: four beats. Say it at the gift shop."}, "tile": "土"}, {"k": "寿司", "r": "sushi", "kana": "すし", "t": "culture", "en": "Sushi.", "parts": [["寿", "long life, celebration"], ["司", "to rule, manage"]], "note": "The kanji were picked for their sound and lucky meaning, not to describe the food.", "hero": "Conveyor-belt sushi is called 回転寿司 (kaiten-zushi), spinning sushi.", "ex": "お寿司が食べたい！", "exr": "O-sushi ga tabetai!", "exen": "I want to eat sushi!", "q": "What food from another country would you try first?", "sig": {"draw": "Draw a sushi kaiju.", "story": "A piece of sushi escapes the conveyor belt.", "speak": "su-shi: the u is almost silent, so it sounds like s’shi."}, "tile": "寿"}, {"k": "花火", "r": "hanabi", "kana": "はなび", "t": "culture", "en": "Fireworks.", "parts": [["花", "flower"], ["火", "fire"]], "note": "Literally “fire flowers.” Summer festivals often end with a big fireworks show.", "hero": "Tokusatsu fights end with explosions, and festivals end with hanabi.", "ex": "花火がきれい！", "exr": "Hanabi ga kirei!", "exen": "The fireworks are beautiful!", "q": "What moment in your life would you celebrate with fireworks?", "sig": {"draw": "Draw a fireworks show where each firework is a different kanji.", "story": "The fireworks show goes wrong in the best way.", "speak": "ha-na-bi: three light beats."}, "tile": "花"}, {"k": "木漏れ日", "r": "komorebi", "kana": "こもれび", "t": "deep", "en": "Sunlight filtering through the leaves of trees.", "parts": [["木", "tree"], ["漏れ", "leak, slip through"], ["日", "sun, sunlight"]], "note": "One word for a feeling English needs a whole sentence for.", "hero": "Look up next time you’re under a tree on a sunny day.", "ex": "木漏れ日が気持ちいい。", "exr": "Komorebi ga kimochi ii.", "exen": "The sunlight through the trees feels nice.", "q": "Where is a place that makes you feel calm?", "sig": {"draw": "Draw sunlight coming through leaves using only dots and dashes.", "story": "A kaiju stops mid-rampage because of komorebi.", "speak": "ko-mo-re-bi: four soft beats. Say it slowly."}, "tile": "木"}, {"k": "我慢", "r": "gaman", "kana": "がまん", "t": "deep", "en": "Enduring something hard with patience and dignity.", "parts": [["我", "self"], ["慢", "pride"]], "note": "It started as a Buddhist word for stubborn self-pride. Today gaman means holding on through tough times without giving up or losing your cool.", "hero": "Heroes show gaman when they keep going through pain.", "ex": "もう少し我慢しよう。", "exr": "Mō sukoshi gaman shiyō.", "exen": "Let’s hang on a little longer.", "q": "When did you have to be patient for something you wanted?", "sig": {"draw": "Draw a hero holding up something heavy, calm in the face.", "story": "A hero waits for exactly the right moment to strike.", "speak": "ga-ma-n: three beats. Say it calmly, like you mean it."}, "tile": "我"}, {"k": "初心", "r": "shoshin", "kana": "しょしん", "t": "deep", "en": "Beginner’s mind. Staying open and curious, like it’s your first time.", "parts": [["初", "first, beginning"], ["心", "heart, mind"]], "note": "The Noh master Zeami taught 初心忘るべからず (shoshin wasuru bekarazu): never forget your beginner’s mind.", "hero": "Even Rider 1 was a beginner once.", "ex": "初心を忘れない。", "exr": "Shoshin o wasurenai.", "exen": "I won’t forget my beginner’s mind.", "q": "What is something you’re an expert at that you could see with fresh eyes again?", "sig": {"draw": "Draw the very first drawing you remember making, from memory.", "story": "A master hero learns something new from a beginner.", "speak": "sho-shi-n: three beats. sho is one sound."}, "tile": "初"}, {"k": "希望", "r": "kibō", "kana": "きぼう", "t": "rider", "en": "Hope.", "parts": [["希", "hope, rare"], ["望", "wish, look toward"]], "note": "The opposite is 絶望 (zetsubō), despair.", "hero": "When times get hard, heroes carry hope for everyone else.", "ex": "希望を持って！", "exr": "Kibō o motte!", "exen": "Hold on to hope!", "q": "What gives you hope when things feel hard?", "sig": {"draw": "Draw hope as a creature. What does it look like?", "story": "A city loses hope. How does one hero bring it back?", "speak": "ki-bō: hold the ō. Say it like a promise."}, "pals": [["絶望", "zetsubō", "despair (opposite)"], ["夢", "yume", "dream"]], "tile": "希", "fact": "After the 2011 earthquake and tsunami in Japan, heroes turned to hope. Kamen Rider Fourze’s producer added a school setting and a friendship theme because he wanted kids to go out and make friends. In Super Sentai, actor Teruaki Ogawa (NinjaRed) started a page where past Sentai heroes wrote messages of encouragement to kids. So many past actors wanted to help that Kaizoku Sentai Gokaiger filled its second half with legend cameos."}, {"k": "ライダーキック", "r": "raidā kikku", "kana": "ライダーキック", "t": "rider", "en": "Rider Kick. The signature finishing move of Kamen Rider.", "parts": [["ライダー", "rider"], ["キック", "kick"]], "note": "Both words come from English, so they’re written in katakana.", "hero": "A Rider Kick is the classic 必殺技 (hissatsu-waza), the finishing move.", "ex": "ライダーキック！", "exr": "Raidā kikku!", "exen": "Rider Kick!", "q": "If you had one signature move in real life, what would it be?", "sig": {"draw": "Draw a Rider Kick in 3 frames: the jump, the flip, the hit.", "story": "A hero’s Rider Kick misses. What now?", "speak": "ra-i-dā ki-k-ku: the kk is a tiny pause. Shout it!"}, "tile": "キ"}, {"k": "バイク", "r": "baiku", "kana": "バイク", "t": "rider", "en": "Motorcycle.", "parts": [["バイク", "bike (from English)"]], "note": "In Japanese, バイク usually means a motorcycle. A bicycle is 自転車 (jitensha).", "hero": "Rider 1’s motorcycle was the Cyclone. He rode it to catch the wind he needed to transform.", "ex": "バイクに乗る。", "exr": "Baiku ni noru.", "exen": "I ride a motorcycle.", "q": "If you could design any vehicle, what would it do?", "sig": {"draw": "Design your own Rider Machine motorcycle.", "story": "A chase scene in 4 panels, on two wheels.", "speak": "ba-i-ku: three beats. Then jitensha, bicycle."}, "pals": [["自転車", "jitensha", "bicycle"]], "tile": "バイ"}, {"k": "変身ポーズ", "r": "henshin pōzu", "kana": "へんしんポーズ", "t": "rider", "en": "Transformation pose.", "parts": [["変身", "transformation"], ["ポーズ", "pose (from English)"]], "note": "The original Rider 1 had no transformation call at first. Kamen Rider 2 was the first to shout “Henshin!”", "hero": "Every Rider has their own pose. Fans copy them everywhere.", "ex": "変身ポーズを決めろ！", "exr": "Henshin pōzu o kimero!", "exen": "Nail your transformation pose!", "q": "What pose would you strike before a big moment?", "sig": {"draw": "Draw your own transformation pose in 3 steps.", "story": "A hero forgets their pose at the worst moment.", "speak": "he-n-shi-n pō-zu: hold the ō. Do the pose while you say it."}, "tile": "ポ"}, {"k": "最終回", "r": "saishūkai", "kana": "さいしゅうかい", "t": "rider", "en": "The final episode.", "parts": [["最終", "last, final"], ["回", "time, episode"]], "note": "The first Kamen Rider’s final episode was episode 98.", "hero": "Every 最終回 is the end of one story and the start of the next series.", "ex": "最終回、泣いた。", "exr": "Saishūkai, naita.", "exen": "I cried at the final episode.", "q": "What is the best ending of any show you’ve watched?", "sig": {"draw": "Draw the last frame of your series’ final episode.", "story": "Plan a final episode in 4 panels: the last battle, the loss, the win, the goodbye.", "speak": "sa-i-shū-ka-i: hold the ū. Five beats... then one more for the goodbye."}, "tile": "最", "fact": "Super Sentai’s final series, No.1 Sentai Gozyuger, ended February 8, 2026, after about 50 years. It is widely believed the show ended because of falling toy sales. During that final series, the role of Gozyu Unicorn was recast mid-series, and Kohaku Shida took over from episode 40."}, {"k": "平成・令和", "r": "Heisei, Reiwa", "kana": "へいせい・れいわ", "t": "rider", "en": "Heisei and Reiwa: the names of Japan’s eras since 1989 and 2019.", "parts": [["平成", "Heisei era (1989 to 2019)"], ["令和", "Reiwa era (2019 to now)"]], "note": "Japan names its eras. Rider fans group the shows by era: Shōwa Riders, Heisei Riders, and Reiwa Riders.", "hero": "Heisei Riders start with Kuuga (2000). Reiwa Riders start with Zero-One (2019).", "ex": "平成ライダーが好き。", "exr": "Heisei raidā ga suki.", "exen": "I like the Heisei Riders.", "q": "If your life so far had eras, what would you name them?", "sig": {"draw": "Design a poster with one hero from each era.", "story": "Heroes from two eras meet for the first time.", "speak": "he-i-se-i, re-i-wa: say both, then shout your favorite."}, "tile": "令", "fact": "Kamen Rider Zi-O (2018) was the 20th and final series of the Heisei era. Its title means “King of Time,” and each tribute episode honors a past Heisei Rider series and a year tied to it. That is why the whole show is about time and clocks. Its character Woz shouts “祝え！” (iwae!), “Rejoice!” every time the hero gains a new power."}, {"k": "台本", "r": "daihon", "kana": "だいほん", "t": "creator", "en": "Script.", "parts": [["台", "stand, stage"], ["本", "book"]], "note": "脚本 (kyakuhon) also means script or screenplay.", "hero": "Every episode starts as a 台本 before a single frame is filmed.", "ex": "台本を書いた。", "exr": "Daihon o kaita.", "exen": "I wrote the script.", "q": "What is a line you would write for a hero to say?", "sig": {"draw": "Write and draw one page of a script for your hero’s first scene.", "story": "The actor changes the script at the last second.", "speak": "da-i-ho-n: four beats."}, "pals": [["脚本", "kyakuhon", "screenplay"]], "tile": "台"}, {"k": "絵コンテ", "r": "ekonte", "kana": "えコンテ", "t": "creator", "en": "Storyboard.", "parts": [["絵", "picture, drawing"], ["コンテ", "continuity (from English)"]], "note": "Directors draw ekonte to plan every shot before filming or animating.", "hero": "Your yonkoma panels are a mini ekonte.", "ex": "絵コンテを描こう。", "exr": "Ekonte o kakō.", "exen": "Let’s draw a storyboard.", "q": "What shot in a movie do you wish you had planned?", "sig": {"draw": "Draw a 6-frame storyboard for a Rider Kick.", "story": "Storyboard a scene where the camera follows a kaiju’s footstep.", "speak": "e-ko-n-te: four beats."}, "tile": "絵"}, {"k": "チャンネル登録", "r": "channeru tōroku", "kana": "チャンネルとうろく", "t": "creator", "en": "Subscribe to a channel.", "parts": [["チャンネル", "channel"], ["登録", "register, sign up"]], "note": "The people who subscribe are 登録者 (tōrokusha), subscribers.", "hero": "YouTubers in Japan often say チャンネル登録お願いします: please subscribe!", "ex": "チャンネル登録お願いします！", "exr": "Channeru tōroku onegai shimasu!", "exen": "Please subscribe!", "q": "What would make someone subscribe to your channel?", "sig": {"draw": "Design a subscribe button with a kaiju on it.", "story": "A kaiju becomes a YouTuber. 4 panels.", "speak": "cha-n-ne-ru tō-ro-ku: hold the ō. Say it like an end-of-video outro."}, "pals": [["登録者", "tōrokusha", "subscribers"]], "tile": "登"}, {"k": "配信", "r": "haishin", "kana": "はいしん", "t": "creator", "en": "Streaming. Broadcasting online.", "parts": [["配", "distribute, deliver"], ["信", "message, signal"]], "note": "生配信 (nama haishin) means a live stream.", "hero": "Streaming lets fans all over the world watch at the same time.", "ex": "今夜、生配信します！", "exr": "Kon’ya, nama haishin shimasu!", "exen": "I’m going live tonight!", "q": "What would you stream live if you could?", "sig": {"draw": "Design the screen layout for your live stream.", "story": "A live stream where everything goes wrong, live.", "speak": "ha-i-shi-n: four beats."}, "tile": "配", "fact": "Kamen Rider Zeztz (2025) was the first series in the franchise’s more than 50 years to stream live around the world, at the same time as the Japanese broadcast."}, {"k": "声優", "r": "seiyū", "kana": "せいゆう", "t": "creator", "en": "Voice actor.", "parts": [["声", "voice"], ["優", "actor, excellent"]], "note": "In Japan, voice actors are big stars. Many tokusatsu actors also do voice work.", "hero": "In tokusatsu, a suit actor often performs the fight scenes, while the main actor records the hero’s voice.", "ex": "声優になりたい。", "exr": "Seiyū ni naritai.", "exen": "I want to be a voice actor.", "q": "Whose voice would you want for your hero?", "sig": {"draw": "Draw a recording booth with your favorite character on the screen.", "story": "A voice actor has to voice a hero and a villain in the same scene.", "speak": "se-i-yū: hold the ū. Try saying one line in three different voices."}, "tile": "声"}, {"k": "零", "r": "rei", "kana": "れい", "t": "num", "en": "Zero. 0.", "parts": [["零", "zero"]], "note": "People often say ゼロ (zero), from English, too. Both are correct.", "hero": "Kamen Rider Zero-One started the Reiwa era.", "ex": "ゼロから始めよう。", "exr": "Zero kara hajimeyō.", "exen": "Let’s start from zero.", "q": "What is something you started from zero and built up?", "sig": {"draw": "Draw 零 hidden inside a circle.", "story": "A hero with zero power finds a way.", "speak": "re-i: two beats. Then zero, the English-style way."}, "pals": [["ゼロ", "zero", "zero (from English)"]], "tile": "零"}, {"k": "いくつ", "r": "ikutsu", "kana": "いくつ", "t": "num", "en": "How many? Also: how old?", "parts": [["いくつ", "how many (written in kana)"]], "note": "いくつですか (ikutsu desu ka) can ask how many things there are, or how old someone is.", "hero": "Count the Riders on screen: ikutsu?", "ex": "いくつありますか？", "exr": "Ikutsu arimasu ka?", "exen": "How many are there?", "q": "How many hobbies do you have? Name them all.", "sig": {"draw": "Draw a pile of kaiju and hide a number in it.", "story": "Someone asks a hero, “Ikutsu desu ka?” and the answer surprises everyone.", "speak": "i-ku-tsu: three beats, and tsu is one quick sound."}, "tile": "つ"}, {"k": "助けて！", "r": "tasukete!", "kana": "たすけて！", "t": "travel", "en": "Help!", "parts": [["助", "help, rescue"]], "note": "Shout it in an emergency. The polite form is 助けてください (tasukete kudasai). In Japan, call 110 for the police and 119 for fire or an ambulance.", "hero": "Point to yourself and say it loud. People will come.", "ex": "誰か、助けて！", "exr": "Dareka, tasukete!", "exen": "Somebody, help!", "q": "Who would you call first in an emergency?", "sig": {"draw": "Make a safety card with 助けて, 110, and 119 on it. Keep it in your bag.", "story": "A hero is the one who needs help this time.", "speak": "ta-su-ke-te: the u in su is almost silent: tas-ke-te. Practice it loud."}, "pals": [["110", "hyaku-tō-ban", "police"], ["119", "hyaku-jū-kyū-ban", "fire and ambulance"]], "tile": "助"}, {"k": "こんにちは", "r": "konnichiwa", "kana": "こんにちは", "t": "travel", "en": "Hello. Good afternoon.", "parts": [["こんにちは", "hello (written in kana)"]], "note": "The last kana is written は but said wa.", "hero": "Say it with a small bow.", "ex": "こんにちは！", "exr": "Konnichiwa!", "exen": "Hello!", "q": "How do you greet people you meet for the first time?", "sig": {"draw": "Draw a hero greeting a kaiju politely.", "story": "Two rivals meet, and the first word is konnichiwa.", "speak": "ko-n-ni-chi-wa: five beats. The n before ni is its own beat."}, "pals": [["おはようございます", "ohayō gozaimasu", "good morning"], ["こんばんは", "konbanwa", "good evening"]], "tile": "こん"}, {"k": "すみません", "r": "sumimasen", "kana": "すみません", "t": "travel", "en": "Excuse me. I’m sorry.", "parts": [["すみません", "excuse me (written in kana)"]], "note": "The most useful word in Japan: to get someone’s attention, to say sorry, or even to say thanks.", "hero": "Raise a hand a little and say it to call a server.", "ex": "すみません、ちょっといいですか？", "exr": "Sumimasen, chotto ii desu ka?", "exen": "Excuse me, do you have a moment?", "q": "When is it hard for you to say sorry?", "sig": {"draw": "Draw three scenes where sumimasen works: bumping, calling, thanking.", "story": "A kaiju bumps into a building and says sumimasen.", "speak": "su-mi-ma-se-n: five beats, light on the first u."}, "tile": "すみ"}, {"k": "道に迷いました", "r": "michi ni mayoimashita", "kana": "みちにまよいました", "t": "travel", "en": "I’m lost.", "parts": [["道", "road, way"], ["迷", "lost, confused"]], "note": "Show the person your map or address and say it. Then listen for directions.", "hero": "Pair it with すみません first: Sumimasen, michi ni mayoimashita.", "ex": "すみません、道に迷いました。", "exr": "Sumimasen, michi ni mayoimashita.", "exen": "Excuse me, I’m lost.", "q": "When was the last time you got lost? How did you find your way?", "sig": {"draw": "Draw a map of your neighborhood with your house marked.", "story": "A hero gets lost in a city made of kanji.", "speak": "mi-chi ni ma-yo-i-ma-shi-ta. Break it into two parts, then put them together."}, "tile": "道"}, {"k": "駅はどこですか？", "r": "eki wa doko desu ka?", "kana": "えきはどこですか？", "t": "travel", "en": "Where is the train station?", "parts": [["駅", "station"], ["どこ", "where"]], "note": "Swap in any place: トイレはどこですか? Where’s the bathroom? どこ means where.", "hero": "You might hear: あそこです (asoko desu), it’s over there.", "ex": "あそこです。", "exr": "Asoko desu.", "exen": "It’s over there.", "q": "What would you want to see first at a train station in Japan?", "sig": {"draw": "Draw a subway map for a city you invent.", "story": "A yonkoma set on a train, where someone finds their stop just in time.", "speak": "e-ki wa do-ko de-su ka: the u in desu is almost silent."}, "pals": [["電車", "densha", "train"], ["地下鉄", "chikatetsu", "subway"]], "tile": "駅"}, {"k": "バス停はどこですか？", "r": "basutei wa doko desu ka?", "kana": "バスていはどこですか？", "t": "travel", "en": "Where is the bus stop?", "parts": [["バス", "bus"], ["停", "stop"], ["どこ", "where"]], "note": "バス comes from English. 停 means stop.", "hero": "Point toward the road while you ask.", "ex": "バス停はあの角です。", "exr": "Basutei wa ano kado desu.", "exen": "The bus stop is at that corner.", "q": "What is your favorite way to get around?", "sig": {"draw": "Draw a bus stop for kaiju.", "story": "A kaiju waits for the bus. Nobody wants to sit next to it.", "speak": "ba-su-te-i: four beats. The u in su is light."}, "tile": "停"}, {"k": "右・左・まっすぐ", "r": "migi, hidari, massugu", "kana": "みぎ・ひだり・まっすぐ", "t": "travel", "en": "Right, left, straight ahead.", "parts": [["右", "right"], ["左", "left"], ["まっすぐ", "straight"]], "note": "The three words you need to follow directions. Point as you listen.", "hero": "Directions often sound like: まっすぐ行って、右です (massugu itte, migi desu). Go straight, then it’s on the right.", "ex": "まっすぐ行って、右です。", "exr": "Massugu itte, migi desu.", "exen": "Go straight, and it’s on the right.", "q": "If you could only turn left, how would you get home?", "sig": {"draw": "Draw arrows labeled 右, 左, and まっすぐ on a treasure map.", "story": "A hero follows directions that keep getting stranger.", "speak": "mi-gi, hi-da-ri, ma-s-su-gu: the ss is a tiny pause."}, "tile": "右"}, {"k": "お腹が空きました", "r": "onaka ga sukimashita", "kana": "おなかがすきました", "t": "travel", "en": "I’m hungry.", "parts": [["お腹", "stomach"], ["空", "empty"]], "note": "Literally: my stomach got empty. With friends: お腹すいた (onaka suita).", "hero": "Rub your stomach while you say it. Everyone will get it.", "ex": "お腹すいた！", "exr": "Onaka suita!", "exen": "I’m starving!", "q": "What food would you want to try first in Japan?", "sig": {"draw": "Draw a kaiju with a giant empty stomach.", "story": "A hungry hero has to finish the mission before lunch.", "speak": "o-na-ka ga su-ki-ma-shi-ta: the u in su is light."}, "tile": "腹"}, {"k": "一番近いレストランはどこですか？", "r": "ichiban chikai resutoran wa doko desu ka?", "kana": "いちばんちかいレストランはどこですか？", "t": "travel", "en": "Where is the nearest restaurant?", "parts": [["一番", "number one, the most"], ["近い", "close, near"], ["レストラン", "restaurant"]], "note": "一番 (ichiban) means number one or the most. 一番近い is the closest.", "hero": "Swap レストラン for コンビニ (konbini), a convenience store.", "ex": "一番近いコンビニはどこですか？", "exr": "Ichiban chikai konbini wa doko desu ka?", "exen": "Where is the nearest convenience store?", "q": "What is the number one best meal you’ve ever had?", "sig": {"draw": "Draw the menu for a kaiju restaurant.", "story": "A hero and a kaiju end up at the same restaurant.", "speak": "i-chi-ba-n chi-ka-i re-su-to-ra-n. Say it in three chunks."}, "pals": [["コンビニ", "konbini", "convenience store"]], "tile": "近"}, {"k": "ソフビはどこで買えますか？", "r": "sofubi wa doko de kaemasu ka?", "kana": "ソフビはどこでかえますか？", "t": "travel", "en": "Where can I buy sofubi?", "parts": [["ソフビ", "sofubi, soft vinyl toys"], ["どこで", "where (at)"], ["買", "buy"]], "note": "ソフビ is short for ソフトビニール, soft vinyl, the material of classic kaiju and hero toys.", "hero": "Swap ソフビ for anything: お土産はどこで買えますか? Where can I buy souvenirs?", "ex": "ソフビはどこで買えますか？", "exr": "Sofubi wa doko de kaemasu ka?", "exen": "Where can I buy sofubi?", "q": "If you could design one sofubi, what would it be?", "sig": {"draw": "Design your own sofubi toy, front and back.", "story": "A sofubi comes to life in the toy shop.", "speak": "so-fu-bi: three beats. fu is soft, almost like hu."}, "tile": "ソ"}, {"k": "トイレはどこですか？", "r": "toire wa doko desu ka?", "kana": "トイレはどこですか？", "t": "travel", "en": "Where is the bathroom?", "parts": [["トイレ", "toilet, bathroom"], ["どこ", "where"]], "note": "Very useful, very polite, and everyone will understand.", "hero": "The station or the konbini usually has one.", "ex": "トイレはあちらです。", "exr": "Toire wa achira desu.", "exen": "The bathroom is that way.", "q": "What is the strangest bathroom you’ve ever seen?", "sig": {"draw": "Design a futuristic bathroom sign.", "story": "A hero needs a bathroom in the middle of a battle.", "speak": "to-i-re: three beats, light tap on the r."}, "tile": "ト"}, {"k": "いくらですか？", "r": "ikura desu ka?", "kana": "いくらですか？", "t": "travel", "en": "How much is it?", "parts": [["いくら", "how much"]], "note": "Prices in Japan are in yen (円, en). Listen for the numbers from the Numbers deck.", "hero": "Point at the item while you ask.", "ex": "千円です。", "exr": "Sen’en desu.", "exen": "It’s 1,000 yen.", "q": "If you had 10,000 yen to spend in Japan, what would you buy?", "sig": {"draw": "Draw a price tag for your own sofubi.", "story": "A hero haggles with a kaiju shopkeeper.", "speak": "i-ku-ra de-su ka: the u in desu is almost silent."}, "pals": [["円", "en", "yen"]], "tile": "くら"}, {"k": "これをください", "r": "kore o kudasai", "kana": "これをください", "t": "travel", "en": "This one, please.", "parts": [["これ", "this"], ["ください", "please give me"]], "note": "Point and say it. It works in shops and restaurants.", "hero": "Two of them: これを二つください (kore o futatsu kudasai).", "ex": "これを二つください。", "exr": "Kore o futatsu kudasai.", "exen": "Two of these, please.", "q": "What is one thing you would point at and buy right now?", "sig": {"draw": "Draw a shop counter with three items and price tags.", "story": "A hero orders the wrong thing and it saves the day.", "speak": "ko-re o ku-da-sa-i: five beats after kore."}, "tile": "これ"}, {"k": "英語を話せますか？", "r": "eigo o hanasemasu ka?", "kana": "えいごをはなせますか？", "t": "travel", "en": "Do you speak English?", "parts": [["英語", "English (language)"], ["話", "speak, talk"]], "note": "日本語 (nihongo) is Japanese. 少し (sukoshi) means a little.", "hero": "A great answer to hear: 少し (sukoshi), a little.", "ex": "日本語を少し話せます。", "exr": "Nihongo o sukoshi hanasemasu.", "exen": "I can speak a little Japanese.", "q": "What language would you like to speak next?", "sig": {"draw": "Draw a hero speaking three languages at once.", "story": "Two heroes who don’t share a language have to team up.", "speak": "e-i-go o ha-na-se-ma-su ka."}, "pals": [["日本語", "nihongo", "Japanese (language)"], ["少し", "sukoshi", "a little"]], "tile": "英"}, {"k": "わかりません", "r": "wakarimasen", "kana": "わかりません", "t": "travel", "en": "I don’t understand.", "parts": [["わかりません", "I don’t understand (written in kana)"]], "note": "The opposite is わかりました (wakarimashita): I understand, got it.", "hero": "It’s okay not to understand. Say it, then ask for help.", "ex": "すみません、わかりません。", "exr": "Sumimasen, wakarimasen.", "exen": "Sorry, I don’t understand.", "q": "When is it brave to say you don’t understand?", "sig": {"draw": "Draw a question-mark kaiju.", "story": "A misunderstanding in 4 panels, fixed in panel 4.", "speak": "wa-ka-ri-ma-se-n: six beats."}, "pals": [["わかりました", "wakarimashita", "I understand / got it"]], "tile": "わか"}, {"k": "もう一度お願いします", "r": "mō ichido onegai shimasu", "kana": "もういちどおねがいします", "t": "travel", "en": "One more time, please.", "parts": [["もう一度", "one more time"], ["お願いします", "please"]], "note": "Perfect when someone speaks too fast. Add ゆっくり (yukkuri), slowly: ゆっくりお願いします.", "hero": "Pair it with わかりません.", "ex": "ゆっくりお願いします。", "exr": "Yukkuri onegai shimasu.", "exen": "Slowly, please.", "q": "What is something you’d like to experience one more time?", "sig": {"draw": "Draw a rewind button for a moment you’d replay.", "story": "A hero gets one more try at the same moment.", "speak": "mō i-chi-do o-ne-ga-i shi-ma-su: hold the ō in mō."}, "pals": [["ゆっくり", "yukkuri", "slowly"]], "tile": "もう"}, {"k": "大丈夫です", "r": "daijōbu desu", "kana": "だいじょうぶです", "t": "travel", "en": "I’m okay. It’s fine. (Also: no, thank you.)", "parts": [["大丈夫", "okay, all right"]], "note": "Ask someone: 大丈夫ですか? (Daijōbu desu ka?) Are you okay? It can also politely mean no thanks.", "hero": "Heroes ask it after every rescue.", "ex": "大丈夫ですか？", "exr": "Daijōbu desu ka?", "exen": "Are you okay?", "q": "How do you check on a friend who seems down?", "sig": {"draw": "Draw a hero helping someone up after a fall.", "story": "A kaiju keeps saying daijōbu, but it clearly isn’t.", "speak": "da-i-jō-bu: hold the ō. Say it calm and kind."}, "tile": "大"}, {"k": "写真を撮ってもいいですか？", "r": "shashin o totte mo ii desu ka?", "kana": "しゃしんをとってもいいですか？", "t": "travel", "en": "May I take a photo?", "parts": [["写真", "photo"], ["撮って", "take (a photo)"]], "note": "Always ask before taking photos of people, and in shops or museums.", "hero": "撮る is the same verb as in the Creator deck’s 撮影.", "ex": "はい、どうぞ。", "exr": "Hai, dōzo.", "exen": "Yes, go ahead.", "q": "What is a photo you’d want to take in Japan?", "sig": {"draw": "Draw the photo you’d take at your dream spot in Japan.", "story": "A tourist asks to take a photo with a kaiju.", "speak": "sha-shi-n o to-t-te mo i-i de-su ka: the tt is a tiny pause."}, "tile": "写"}, {"k": "おすすめは何ですか？", "r": "osusume wa nan desu ka?", "kana": "おすすめはなんですか？", "t": "travel", "en": "What do you recommend?", "parts": [["おすすめ", "recommendation"], ["何", "what"]], "note": "Great at restaurants and toy shops. Then point and say これをください.", "hero": "You might hear: これが人気です (kore ga ninki desu), this one is popular.", "ex": "これが人気です。", "exr": "Kore ga ninki desu.", "exen": "This one is popular.", "q": "What would you recommend to someone visiting your city?", "sig": {"draw": "Draw a recommendation poster for your favorite thing.", "story": "A shopkeeper recommends the strangest sofubi in the store.", "speak": "o-su-su-me wa na-n de-su ka."}, "tile": "すす"}, {"k": "お会計お願いします", "r": "okaikei onegai shimasu", "kana": "おかいけいおねがいします", "t": "travel", "en": "The check, please.", "parts": [["お会計", "the bill, the check"], ["お願いします", "please"]], "note": "In Japan, you usually pay at the counter, and you don’t leave a tip.", "hero": "Say it with a small wave to the staff.", "ex": "ごちそうさまでした。", "exr": "Gochisōsama deshita.", "exen": "Thank you for the meal.", "q": "What is a custom from another country that surprised you?", "sig": {"draw": "Draw a receipt for a kaiju’s giant meal.", "story": "A hero realizes they forgot their wallet.", "speak": "o-ka-i-ke-i o-ne-ga-i shi-ma-su."}, "tile": "会"}];
+N19.forEach(w=>WORDS.push(w));
+// forms and partner words for the original words
+const OLDX = {
+  "kawaii":{forms:[["可愛かった","kawaikatta","was cute"],["可愛くない","kawaikunai","not cute"],["可愛く","kawaiku","cutely"]], pals:[["怖い","kowai","scary (sounds close!)"]]},
+  "ganbatte":{forms:[["頑張る","ganbaru","to try hard"],["頑張ります","ganbarimasu","I\u2019ll do my best (polite)"],["頑張った","ganbatta","tried hard"],["頑張れ！","ganbare!","Go for it! (the cheer)"],["頑張ろう","ganbarō","let\u2019s do our best"]]},
+  "itadakimasu":{forms:[["いただく","itadaku","to humbly receive"],["いただきました","itadakimashita","received (polite)"]], pals:[["ごちそうさまでした","gochisōsama deshita","thank you for the meal (after eating)"]]},
+  "henshin":{forms:[["変身する","henshin suru","to transform"],["変身します","henshin shimasu","transform (polite)"],["変身した","henshin shita","transformed"],["変身して","henshin shite","transform, and..."]]},
+  "arigatō":{forms:[["ありがとうございます","arigatō gozaimasu","thank you (polite)"],["ありがとうございました","arigatō gozaimashita","thank you (for something done)"]], pals:[["どういたしまして","dō itashimashite","you\u2019re welcome"]]},
+  "uchū":{pals:[["宇宙人","uchūjin","alien (space person)"],["宇宙船","uchūsen","spaceship"]]},
+  "kaijū":{pals:[["怪人","kaijin","monster-man"],["怪獣映画","kaijū eiga","monster movie"]]},
+  "matsuri":{pals:[["夏祭り","natsu matsuri","summer festival"],["花火","hanabi","fireworks"]]}
+};
+(function(){ const w=WORDS.find(x=>x.r==="ichigo ichie"); if(w) w.tile="期"; })();
+// franchise tag for each of Zeek's factoids (shown instead of the deck name)
+WORDS.forEach(w=>{ if(w.fact) w.ftag = ({"saishūkai":"SUPER SENTAI","kibō":"KAMEN RIDER + SUPER SENTAI"})[w.r] || "KAMEN RIDER"; });
+["eki wa doko desu ka?","basutei wa doko desu ka?","migi, hidari, massugu","toire wa doko desu ka?","ikura desu ka?","shashin o totte mo ii desu ka?","osusume wa nan desu ka?"].forEach(r=>{ const w=WORDS.find(x=>x.r===r); if(w) w.exl="What you might hear back"; });
+WORDS.forEach(w=>{ const x=OLDX[w.r]; if(x){ if(x.forms&&!w.forms) w.forms=x.forms; if(x.pals&&!w.pals) w.pals=x.pals; } });
+(function(){ const j=WORDS.find(w=>w.r==="seigi"); if(j) j.fact="Kamen Rider Kuuga and Agito were planned as the whole revival: producer Shinichiro Shirakura meant to move on to something new after Agito. Then, after the September 11 attacks in 2001, TV Asahi sent a memo saying \u201cnow more than ever, we need to teach kids about justice.\u201d That led to Kamen Rider Ryuki (2002), the first series with evil Kamen Riders, and a story about how hard justice is to pin down."; })();
+// stable ids (plain letters) for saving and progress codes
+WORDS.forEach(w=>{ w.id=w.r.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/\s+/g,"-").replace(/[^a-z0-9-]/g,""); });
+const DECKS = [
+  {id:"culture", name:"CULTURE", jp:"文化", desc:"everyday words from Japanese life and hero shows", color:"#F2283A", ink:"#FFF4DE"},
+  {id:"deep", name:"DEEP", jp:"深い", desc:"words that hold big ideas", color:"#35E4FF", ink:"#140F2E"},
+  {id:"rider", name:"KAMEN RIDER", jp:"仮面ライダー", desc:"the words that build the genre: heroes and villains, teams and families, missions, episodes, and movies", color:"#FFD319", ink:"#140F2E"},
+  {id:"creator", name:"CREATOR", jp:"創作", desc:"directing, filming, editing, videos, movies, and games", color:"#8CF25A", ink:"#140F2E"},
+  {id:"num", name:"NUMBERS", jp:"数字", desc:"0 to 10, then tens, hundreds, thousands, ten thousands, one million, and how many", color:"#FFF4DE", ink:"#F2283A"},
+  {id:"travel", name:"TRAVEL", jp:"旅", desc:"everyday phrases for Japan: greetings, getting help, directions, food, and shopping", color:"#FF8A1F", ink:"#140F2E"}
+];
+const D = Object.fromEntries(DECKS.map(d=>[d.id,d]));
+const countOf = id => WORDS.filter(w=>w.t===id).length;
+(function buildDeckUI(){
+  const box=document.getElementById("deckChips");
+  const mk=(f,label)=>{ const b=document.createElement("button"); b.className="chip"; b.dataset.f=f; b.setAttribute("aria-pressed", f==="all"); b.textContent=label; box.appendChild(b); };
+  mk("all",`ALL ${WORDS.length}`); DECKS.forEach(d=>mk(d.id,`${d.name} · ${countOf(d.id)}`));
+  document.getElementById("manualDecks").innerHTML = `<li><b>ALL ${WORDS.length}:</b> every word.</li>` +
+    DECKS.map(d=>`<li><b>${d.name} ${countOf(d.id)}:</b> ${d.desc}.</li>`).join("") + `<li>Each deck charges its own power meter.</li>`;
+})();
+
+const PATHS = {
+  speak:{name:"SPEAKER 話す"},
+  draw:{name:"ARTIST 描く"},
+  story:{name:"STORYTELLER 語る"},
+  think:{name:"THINKER 考える"}
+};
+// how to do it, and what to grab, for each path in each mode
+const HOW = {
+  speak:{physical:"Say it out loud to a mirror or to a person.", digital:"Record yourself, then play it back next to Sensei's PLAY button. Do they match?"},
+  draw:{physical:"Make it on paper.", digital:"Make it in a drawing app, then save it to your gallery."},
+  story:{physical:"Fold your paper into panels, or draw the boxes with a ruler.", digital:"Build it in a comic or storyboard app, one frame per panel."},
+  think:{physical:"Write it in your notebook, or talk it over with someone.", digital:"Type it in a notes app, or record your answer."}
+};
+const TOOLS = {
+  speak:{physical:["Your voice","A mirror","A friend or family member (optional)"], digital:["A voice recorder app, like Voice Memos","Headphones (optional)"]},
+  draw:{physical:["Paper","A pencil","Colored pencils","A thick black marker","An eraser"], digital:["A tablet, phone, or computer","A drawing app","A stylus (optional)"]},
+  story:{physical:["Paper","A pencil","Colored pencils","A ruler for panel lines","A black pen for inking"], digital:["A tablet, phone, or computer","A comic, storyboard, or slideshow app"]},
+  think:{physical:["A notebook","A pencil","A person to talk with (optional)"], digital:["A notes app or a voice recorder"]}
+};
+// Sensei's lessons: the craft behind each path
+const LESSONS = {
+  speak:{t:"SENSEI'S LESSON · JAPANESE SOUNDS 音", h:`<ul>
+    <li>Japanese has 5 vowels: <b>a, i, u, e, o</b>. Each one always sounds the same.</li>
+    <li>A line over a vowel (<b>ū, ō</b>) means hold it twice as long. kaijū is kai-juu.</li>
+    <li>Japanese counts beats, not syllables. <b>ん (n)</b> is its own beat: he-n-shi-n is four beats.</li>
+    <li>A double letter (<b>tt, ss</b>) is a tiny pause, like a hiccup.</li>
+    <li>Japanese <b>r</b> is one light tap of the tongue, somewhere between r, l, and d.</li></ul>`},
+  draw:{t:"SENSEI'S LESSON · HOW KANJI ARE BUILT 漢字", h:`<ul>
+    <li>Kanji are written stroke by stroke, in a set order.</li>
+    <li>Two rules cover most strokes: <b>top before bottom</b>, and <b>left before right</b>. There are exceptions, so check a stroke-order guide when you want it perfect.</li>
+    <li>Many kanji are built from smaller parts. <b>休</b> (rest) is <b>亻</b> person + <b>木</b> tree: a person resting against a tree.</li>
+    <li>Every card's <b>Kanji breakdown</b> shows you the parts of that word.</li></ul>`},
+  story:{t:"SENSEI'S LESSON · YONKOMA 4コマ漫画", h:`<ul>
+    <li><b>Yonkoma</b> means "four frames." It is the classic Japanese comic strip, usually four panels stacked top to bottom.</li>
+    <li>It follows a 4-part structure called <b>kishōtenketsu (起承転結)</b>:</li></ul>
+    <div class="kstl"><span class="kk">起</span><span><b>ki · Setup.</b> Meet the characters and the place.</span>
+    <span class="kk">承</span><span><b>shō · Development.</b> The situation moves forward.</span>
+    <span class="kk">転</span><span><b>ten · Twist.</b> Something unexpected changes everything.</span>
+    <span class="kk">結</span><span><b>ketsu · Ending.</b> Show how it all lands.</span></div>
+    <ul><li>The structure comes from classical Chinese poetry. In Japan it shapes manga, stories, and even school essays.</li>
+    <li>The story doesn't need a fight. In kishōtenketsu, <b>the twist does the work</b>.</li>
+    <li>Short on time? Try <b>3 panels</b>: beginning, middle, end.</li></ul>`},
+  think:{t:"SENSEI'S LESSON · HANSEI 反省", h:`<ul>
+    <li><b>Hansei (反省)</b> means looking back at what you did so you can grow.</li>
+    <li>In Japan it is practiced in schools and workplaces as a habit, not as a punishment.</li>
+    <li>Ask yourself three things: <b>What went well? What didn't? What will I try next time?</b></li>
+    <li>There are no wrong answers on the Thinker path. There are only honest ones.</li></ul>`}
+};
+// Signature missions: one per word, per path (Thinker uses each word's question)
+const SIG = {
+ "kaijū":{draw:"Design your own kaiju by mashing up 3 animals. Label its one weakness.",
+   story:"Yonkoma: a kaiju shows up in your neighborhood (起). It heads for your block (承). It turns out it's lost (転). You help it get home (結).",
+   speak:"The ū is long, so hold it: kai-juu. Announce it like breaking news: \"KAIJŪ SPOTTED!\""},
+ "henshin":{draw:"Draw a before and after: you on the left, your hero form on the right. Show what changed.",
+   story:"A kid tries to transform, and it keeps going wrong. In panel 4 it finally works, but not the way they expected.",
+   speak:"ん is its own beat, so henshin has four: he-n-shi-n. Say it with a transformation pose."},
+ "uchū":{draw:"Draw a planet no one has ever seen. Hide 宇 (space) and 宙 (time) somewhere in the picture.",
+   story:"Your first day on a space station. Save the big surprise for what you see out the window in panel 3.",
+   speak:"Short u at the start, long ū at the end: u-chuu. Say it slow, like you're floating."},
+ "hissatsu-waza":{draw:"Draw your hero mid-finishing move, with the move's name in huge block letters across the page.",
+   story:"A hero invents a brand-new finishing move. What do they name it, and why? Show the first time they use it.",
+   speak:"The double s is a tiny pause: hi-(stop)-sa-tsu. Catch your breath for one beat, then shout the whole move."},
+ "arigatō":{draw:"Design a thank-you card for someone rare in your life. Put ありがとう on the front.",
+   story:"Someone helps a stranger. In the last panel, the stranger says ありがとう in a way nobody expected.",
+   speak:"Stretch the ō at the end: a-ri-ga-too. Say it casual, then polite: arigatō gozaimasu."},
+ "itadakimasu":{draw:"Draw your favorite meal as a kaiju. The food is the monster.",
+   story:"Tell the story of one meal, from the farm to the table. End it with hands together: itadakimasu.",
+   speak:"The last u is almost silent: i-ta-da-ki-mas. Hands together, then say it before your next meal."},
+ "ganbatte":{draw:"Draw a hero who is losing but refuses to quit. Show it in the face and the fists.",
+   story:"A teammate is about to give up. Someone shouts がんばれ! What happens next?",
+   speak:"The n sounds like m before b, and tt is a tiny pause: gam-ba-(stop)-te. Cheer it for someone."},
+ "sakura":{draw:"Draw one cherry branch with five blossoms. Every sakura flower has five petals.",
+   story:"Tell the life of one petal, from bud to the ground, in four panels.",
+   speak:"Japanese r is one light tap of the tongue: sa-ku-ra. Tap it, don't roll it."},
+ "matsuri":{draw:"Design a festival mask for your own kaiju festival.",
+   story:"A kaiju tries to join a summer festival without scaring anyone.",
+   speak:"tsu is one quick sound, like the end of \"cats\": ma-tsu-ri."},
+ "kawaii":{draw:"Draw the scariest kaiju you can. Then draw it again as kawaii. Same monster, two versions.",
+   story:"The city's cutest mascot turns out to be its most powerful creature.",
+   speak:"Two i's means hold the i a little longer: ka-wa-ii. Say it to something actually cute."},
+ "ikigai":{draw:"Draw yourself doing the thing that makes you lose track of time. Add your tools around you.",
+   story:"A retired hero finds a brand-new reason to get up in the morning.",
+   speak:"Four even beats, none louder than the others: i-ki-ga-i."},
+ "wabi-sabi":{draw:"Draw an old object you own exactly as it is: every scratch, chip, and stain.",
+   story:"A hero's suit is old and scratched. Why won't they replace it?",
+   speak:"Say it like a drum pattern: wa-bi, sa-bi. Four even beats."},
+ "mono no aware":{draw:"Draw the last petal about to fall from a sakura branch.",
+   story:"The last day of a great summer. Show how it feels without anyone saying it.",
+   speak:"Here aware is three beats, a-wa-re, not the English word \"aware\": mo-no no a-wa-re."},
+ "ichigo ichie":{draw:"Draw a meeting that will only happen once: two characters, one moment.",
+   story:"Two travelers meet once, trade one thing, and never meet again.",
+   speak:"i-chi-go i-chi-e. Fun fact: ichigo on its own also means strawberry (苺). Same sound, different word."},
+ "kintsugi":{draw:"Draw something, tear it into 3 pieces, tape it back together, and trace the cracks in yellow or gold.",
+   story:"A robot breaks in battle. Show how it gets rebuilt stronger, with golden seams.",
+   speak:"kin-tsu-gi: the n is its own beat before tsu. Say it slow, then fast."}
+};
+// Remix pool: general missions mixed in at random ({r} romaji, {k} kanji)
+const POOL = {
+  draw:["Draw {k} using only straight lines.","Draw {k} with your eyes closed, then again with them open. Compare.","Turn {k} into a building, a robot, or a vehicle.",
+    "Draw a kaiju whose whole body is shaped like {k}.","Draw {k} three times: tiny, medium, and as big as the page.","Design a hero emblem using {k}.",
+    "Draw {k} in graffiti style, with a 3D block and a drop shadow.","Draw what {r} means without writing any letters.","Fill a whole page with a pattern made from {k}.","Draw {k} using only three colors."],
+  story:["Yonkoma where {r} is the very last word in panel 4.","3 panels: someone learns the word {r} and uses it by the end.","A kaiju and a hero argue about what {r} means.",
+    "4 panels, no words at all, only pictures, about {r}.","Breaking news: {r} spotted downtown. Tell the story in 4 panels.","Your family in a tokusatsu episode where {r} saves the day.",
+    "A yonkoma set on the subway, where {r} changes everything.","Draw panel 4 first, then work backward to panel 1. The word is {r}.","3 panels where the twist is the meaning of {r}.","A villain learns the word {r} and switches sides."],
+  speak:["Say {r} like a hero shouting it mid-battle.","Whisper {r}, then say it normally, then shout it.","Teach {r} to someone and have them say it back to you.",
+    "Say {r} five times fast.","Say the example sentence without looking, then check yourself.","Say {r} and its meaning in one breath.",
+    "Clap once for each beat while you say {r}.","Say {r} in a movie-trailer voice.","Use {r} in a real conversation today.","Say {r} now, then try to say it from memory in an hour."],
+  think:["Where did you see {r} in your life this week?","Explain {r} to a 6-year-old in one sentence.","Is there an English word as good as {r}? Why or why not?",
+    "What would the world be like without {r}?","Who in your life is the best example of {r}?","How would a kaiju explain {r}?",
+    "Connect {r} to another word in this deck. How are they related?","What would you ask someone in Japan about {r}?",
+    "Rate how well you know {r} from 1 to 5, and say why.","What does {r} teach you that a textbook can't?"]
+};
+let mode="physical";
+const current={}, lastPool={};
+const sigSeen=new Set();
+function fill(t,w,html){ return t.replace(/\{r\}/g, html?`<b>${w.r}</b>`:w.r).replace(/\{k\}/g, html?`<b>${w.k}</b>`:w.k); }
+// First time: the word's signature mission. After that: a random mix of signature and remix missions.
+function pickMission(i,p){
+  const w=WORDS[i], key=i+"|"+p, sig = p==="think" ? w.q : (w.sig||SIG[w.r])[p];
+  let m;
+  if(!sigSeen.has(key) || Math.random()<.35){ m={t:sig, sig:true}; sigSeen.add(key); }
+  else { const pool=POOL[p]; let n; do{ n=Math.floor(Math.random()*pool.length); }while(pool.length>1 && n===lastPool[key]); lastPool[key]=n; m={t:pool[n], sig:false}; }
+  if(current[key] && current[key].t===m.t && m.sig){ const pool=POOL[p]; const n=Math.floor(Math.random()*pool.length); lastPool[key]=n; m={t:pool[n], sig:false}; }
+  current[key]=m; return m;
+}
+function missionFor(i,p){ return current[i+"|"+p] || pickMission(i,p); }
+const P = () => ({cue:`Your ${PATHS[path].name.split(" ")[0].toLowerCase()} mission: ${fill(missionFor(queue[pos],path).t, WORDS[queue[pos]], false)}`});
+const HYPE = ["You're building your power, one word at a time.","Every hero starts as a beginner.","Your brain just leveled up.",
+  "Say it out loud. Your voice is your power.","Mistakes are training, not failure.","You're closer than you think.",
+  "That word is yours now. Use it.","Kaiju grow by eating new words. So do you."];
+const AGAIN = ["No problem. Heroes train. It'll come back around.","Good call. Practice makes power.","It's back in the deck. You'll get it next time."];
+const pick = a => a[Math.floor(Math.random()*a.length)];
+
+const $ = id => document.getElementById(id);
+const card=$("card"), front=$("front"), back=$("back");
+let filter="all", dir="kanji", path="speak", voiceOn=true, gestured=false, done=new Set(), queue=[], pos=0, angle=0;
+
+// ---- voice ----
+const canSpeak = "speechSynthesis" in window;
+let voices=[];
+function loadVoices(){ try{ voices=speechSynthesis.getVoices()||[]; }catch(e){} try{ fillVoiceMenus(); }catch(e){} }
+if(canSpeak){ loadVoices(); try{ speechSynthesis.addEventListener("voiceschanged",loadVoices); }catch(e){} }
+// Voices come from the device. Score them so the default is the best one available,
+// then let the learner override with the Sensei Voice menus.
+const vnorm = v => (v.lang||"").toLowerCase().replace("_","-");
+const NOVELTY=/albert|bad news|bahh|bells|boing|bubbles|cellos|deranged|good news|hysterical|jester|junior|organ|princess|ralph|superstar|trinoids|whisper|wobble|zarvox|fred|kathy/i;
+const ELOQ=/eddy|flo\b|grandma|grandpa|reed|rocko|sandy|shelley/i;
+function vscore(v,l){
+  const n=(v.name||"")+" "+(v.voiceURI||""); let s=0;
+  if(/premium/i.test(n)) s+=6;
+  if(/enhanced|natural|neural/i.test(n)) s+=5;
+  if(/siri/i.test(n)) s+=4;
+  if(/google/i.test(n)) s+=3;
+  if(l==="en" && /samantha|ava|zoe|allison|susan|karen|daniel|serena|moira|tessa|aria|jenny/i.test(n)) s+=2;
+  if(l==="ja" && /kyoko|o-ren|otoya|hattori|nanami|haruka|ayumi/i.test(n)) s+=2;
+  if(l==="en" && vnorm(v)==="en-us") s+=1;
+  if(NOVELTY.test(n)) s-=10;
+  if(ELOQ.test(n)) s-=4;
+  if(/compact/i.test(n)) s-=2;
+  return s;
+}
+function voicesFor(l){ return voices.filter(v=>vnorm(v).startsWith(l)).sort((a,b)=>vscore(b,l)-vscore(a,l)); }
+let voiceEn="", voiceJa="";
+function pickVoice(l){
+  const name = l==="ja" ? voiceJa : voiceEn;
+  if(name){ const v=voices.find(x=>x.name===name); if(v) return v; }
+  return voicesFor(l)[0] || null;
+}
+const escH = t => String(t).replace(/[&<>"]/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+function fillVoiceMenus(){
+  const en=document.getElementById("vEn"), ja=document.getElementById("vJa"); if(!en||!ja) return;
+  const E=voicesFor("en"), J=voicesFor("ja");
+  const opt=(v,extra)=>`<option value="${escH(v.name)}">${escH(v.name)}${extra||""}</option>`;
+  en.innerHTML=`<option value="">Best available${E[0]?" ("+escH(E[0].name)+")":""}</option>`+E.map(v=>opt(v)).join("")+
+    (J.length?`<optgroup label="Japanese voice for English too">${J.map(v=>opt(v," · Japanese accent")).join("")}</optgroup>`:"");
+  ja.innerHTML=`<option value="">Best available${J[0]?" ("+escH(J[0].name)+")":""}</option>`+J.map(v=>opt(v)).join("");
+  en.value=voiceEn; if(en.value!==voiceEn) en.value="";
+  ja.value=voiceJa; if(ja.value!==voiceJa) ja.value="";
+  document.getElementById("voicePanel").hidden = !canSpeak || (!E.length && !J.length);
+  document.getElementById("voiceNote").textContent = J.length ? "Pick by ear. Voices come from your device, so every phone, tablet, and computer has different ones."
+    : "No Japanese voice was found on this device, so Japanese words may sound off. Voices come from your device.";
+}
+function coach(text){ $("coachText").textContent=text; }
+function say(parts,append){ // parts: [[text, "ja"|"en"], ...]
+  if(!canSpeak||!voiceOn) return;
+  try{
+    if(!append) speechSynthesis.cancel();
+    const box=document.querySelector(".coach");
+    parts.forEach(([t,l],idx)=>{
+      const u=new SpeechSynthesisUtterance(t);
+      u.rate = l==="ja" ? .8 : 1;
+      const v = pickVoice(l);
+      if(v){ u.voice=v; u.lang=v.lang; } else u.lang = l==="ja" ? "ja-JP" : "en-US";
+      if(idx===0) u.onstart=()=>box.classList.add("talk");
+      if(idx===parts.length-1){ u.onend=()=>box.classList.remove("talk"); u.onerror=()=>box.classList.remove("talk"); }
+      speechSynthesis.speak(u);
+    });
+  }catch(e){}
+}
+function showingBack(){ return Math.abs(Math.round(angle/180))%2===1; }
+function onReveal(){
+  const w=WORDS[queue[pos]], hype=pick(HYPE), cue=P().cue;
+  const clean = w.en.replace(/"/g,"");
+  const first = (clean.match(/^[^.!?]+[.!?]/)||[clean])[0];
+  coach(`${w.r}: ${first} ${hype} ${cue}`);
+  say([[w.kana,"ja"],[`${first} ${hype} ${cue}`,"en"]]);
+}
+
+function pool(){ return WORDS.map((w,i)=>i).filter(i=>filter==="all"||WORDS[i].t===filter); }
+function rebuild(shuffle){
+  queue = pool().filter(i=>!done.has(i));
+  if(shuffle) for(let i=queue.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[queue[i],queue[j]]=[queue[j],queue[i]];}
+  pos=0; render();
+}
+function kanjiSize(s){ const n=[...s].length; return n<=1?"clamp(120px,40vw,190px)":n===2?"clamp(96px,30vw,150px)":n===3?"clamp(72px,22vw,110px)":n===4?"clamp(58px,18vw,88px)":n===5?"clamp(46px,13vw,66px)":n===6?"clamp(36px,10.5vw,52px)":n<=11?"clamp(28px,7.6vw,38px)":"clamp(22px,6.2vw,30px)"; }
+
+function faceFront(w,i){
+  front.className="face front "+w.t;
+  let big, tag;
+  if(dir==="meaning"){
+    big=`<div class="kanji" style="font-size:clamp(28px,8vw,40px);-webkit-text-stroke:2px #000;text-shadow:4px 4px 0 #000;padding:0 8px;text-wrap:balance">${w.en}</div>`;
+    tag="Say it in Japanese";
+  } else if(dir==="listen"){
+    big=`<div class="listen"><div class="q">？？？</div><button data-listen>▶ HEAR THE WORD</button></div>`;
+    tag="Listen. What does it mean?";
+  } else {
+    const lng=[...w.k].length>6, ktxt = lng ? w.k.replace(/(は|を|が|に|で|、|・)/g,"$1<wbr>").replace(/(お願い|ください)/g,"<wbr>$1") : w.k;
+    big=`<div class="kanji" style="font-size:${kanjiSize(w.k)}${lng?";word-break:keep-all;line-height:1.25;-webkit-text-stroke:2px #000;text-shadow:4px 4px 0 #000;padding:0 14px":""}">${ktxt}</div>`;
+    tag="What does it mean?";
+  }
+  front.innerHTML=`<div class="burst"></div><div class="halftone"></div>
+   <div class="ftop"><span class="file">FILE ${String(i+1).padStart(2,"0")}/${WORDS.length}</span><span class="rank">${D[w.t].name} · ${D[w.t].jp}</span></div>
+   <div class="kanjiwrap">${big}</div>
+   <div class="fbot"><span class="tag">${tag}</span><span class="tap">TAP TO FLIP ▶</span></div>`;
+  const lb=front.querySelector("[data-listen]");
+  if(lb){ lb.addEventListener("pointerdown",e=>e.stopPropagation());
+    lb.addEventListener("click",e=>{e.stopPropagation();gestured=true;coach("Listen close. Guess the meaning, then flip.");say([[w.kana,"ja"]]);}); }
+}
+function missionBox(w){
+  const i=WORDS.indexOf(w), m=missionFor(i,path);
+  return `<div class="mission"><span class="label">${PATHS[path].name} · ${m.sig?"SIGNATURE":"REMIX"} · ${mode==="physical"?"PHYSICAL ✎":"DIGITAL ▣"}</span>${fill(m.t,w,true)}
+    <div class="how2">${HOW[path][mode]}</div>
+    <div class="tools"><b>${mode==="physical"?"TOOLS":"APPS"}</b> ${TOOLS[path][mode].join(" · ")}</div>
+    <button class="brbtn" data-brief>▶ MISSION BRIEFING</button></div>`;
+}
+function faceBack(w){
+  back.innerHTML=`<div class="bhead"><div class="romaji">${dir!=="kanji"?w.k+" · ":""}${w.r}</div>
+    <div class="kana">${w.kana}<button class="say" data-say="w">▶ HEAR IT</button></div></div>
+   <div class="bbody"><div class="meaning">${w.en}</div>
+    ${missionBox(w)}
+    <div><div class="label">${w.exl||"Say it in a sentence"}</div>
+     <div class="ex"><div class="jp">${w.ex}<button class="say" data-say="ex">▶ PLAY</button></div><div class="rm">${w.exr}</div><div class="rm">${w.exen}</div></div></div>
+    ${w.forms?`<div><div class="label">Forms · tenses · tap to hear</div><div class="forms">${w.forms.map((f,n)=>`<button class="frow" data-sayf="${n}"><b>${f[0]}</b><span>${f[1]}</span><span>${f[2]}</span></button>`).join("")}</div></div>`:""}
+    ${w.pals?`<div><div class="label">Partner words · synonyms and opposites</div><div class="parts">${w.pals.map(q=>`<div class="part"><span>${q[0]}</span>${q[1]} · ${q[2]}</div>`).join("")}</div></div>`:""}
+    <div><div class="label">${/[\u4e00-\u9faf]/.test(w.parts.map(q=>q[0]).join(""))?"Kanji breakdown":"Word breakdown"}</div><div class="parts">${w.parts.map(p=>`<div class="part"><span>${p[0]}</span>${p[1]}</div>`).join("")}</div></div>
+    <div><div class="label">Culture file</div><p class="note">${w.note}</p></div>
+    <div class="hero"><span class="label">${w.t==="travel"?"Travel tip":"Hero link"}</span>${w.hero}</div>
+    ${w.fact?`<div class="zfact"><span class="label">⚡ ZEEK'S FACTOID · ${w.ftag||"KAMEN RIDER"}</span>${w.fact}</div>`:""}</div>`;
+  const bb=back.querySelector("[data-brief]");
+  bb.addEventListener("pointerdown",e=>e.stopPropagation());
+  bb.addEventListener("click",e=>{ e.stopPropagation(); openBrief(false); });
+  back.querySelectorAll("[data-sayf]").forEach(b=>{
+    b.addEventListener("pointerdown",e=>e.stopPropagation());
+    b.addEventListener("click",e=>{ e.stopPropagation(); const was=voiceOn; voiceOn=true; say([[w.forms[+b.dataset.sayf][0],"ja"]]); voiceOn=was; });
+  });
+  back.querySelectorAll("[data-say]").forEach(b=>{
+    if(!canSpeak) b.hidden=true;
+    b.addEventListener("pointerdown",e=>e.stopPropagation());
+    b.addEventListener("click",e=>{e.stopPropagation(); const wasOff=!voiceOn; voiceOn=true;
+      say(b.dataset.say==="ex"?[[w.ex,"ja"]]:[[w.kana,"ja"]]); if(wasOff) voiceOn=false;});
+  });
+}
+
+function render(){
+  const p=pool();
+  const total=p.length, got=p.filter(i=>done.has(i)).length;
+  $("pct").textContent=`${got} / ${total}`;
+  $("fill").style.width=(total?got/total*100:0)+"%";
+  $("meter").classList.toggle("full",got===total&&total>0);
+  $("left").textContent=`${total-got} left`;
+  $("mstatus").innerHTML = got===total ? "<b>FULL POWER.</b> Transformation complete." :
+    got===0 ? "Charge the meter to transform." : `<b>${Math.round(got/total*100)}%</b> charged. Keep going.`;
+  renderTree(); save();
+  if(!queue.length){ if(total&&!booting) showWin(); return; }
+  if(pos>=queue.length) pos=0;
+  const i=queue[pos], w=WORDS[i];
+  angle=0; setAngle(0,0,false);
+  faceFront(w,i); faceBack(w);
+  if(dir==="listen"&&gestured) say([[w.kana,"ja"]],true);
+  document.querySelectorAll(".tile").forEach(t=>{
+    const ti=+t.dataset.i;
+    t.classList.toggle("done",done.has(ti));
+    t.classList.toggle("cur",ti===i);
+  });
+  DECKS.forEach(d=>{ const h=$("rh-"+d.id); if(!h) return; const all=WORDS.filter(w=>w.t===d.id).length, got=WORDS.filter((w,j)=>w.t===d.id&&done.has(j)).length;
+    h.querySelector(".rcount").textContent=`${got}/${all}`; });
+  if(!Object.keys(groupOpen).length) setGroup(w.t,true); // first view: open the current card's group
+}
+function setAngle(a,tilt,snap){
+  card.classList.toggle("snap",!!snap);
+  card.style.transform=`rotateY(${a}deg) rotateX(${tilt||0}deg)`;
+  watchFaces(snap ? 900 : 60);
+}
+// Some browsers (Safari especially) let animated parts of the front show through, mirrored,
+// when the card is turned around. So we check which way the card really faces, frame by frame,
+// and hide the side that points away. The front still flashes by while the card spins.
+function syncFaces(){
+  let c=1;
+  const m=getComputedStyle(card).transform;
+  if(m && m!=="none"){ const v=m.match(/matrix(?:3d)?\(([^)]+)\)/); if(v) c=parseFloat(v[1].split(",")[0]); }
+  const backUp = c < 0;
+  front.style.visibility = backUp ? "hidden" : "visible";
+  back.style.visibility  = backUp ? "visible" : "hidden";
+}
+let watchUntil=0, watching=false;
+function watchFaces(ms){
+  watchUntil=Math.max(watchUntil, performance.now()+ms);
+  if(watching) return; watching=true;
+  const loop=()=>{ syncFaces(); if(performance.now()<watchUntil) requestAnimationFrame(loop); else watching=false; };
+  requestAnimationFrame(loop);
+}
+function flip(){
+  gestured=true;
+  angle = Math.round(angle/180)*180 + 180;
+  setAngle(angle,0,true); burst();
+  if(showingBack()) onReveal(); else if(canSpeak) try{speechSynthesis.cancel();}catch(e){}
+}
+function burst(){ const f=$("flash"); f.classList.remove("go"); void f.offsetWidth; f.classList.add("go"); }
+
+// drag to spin, tap to flip
+let drag=null;
+card.addEventListener("pointerdown",e=>{
+  drag={x:e.clientX,y:e.clientY,a:angle,moved:false};
+  card.setPointerCapture(e.pointerId);
+});
+card.addEventListener("pointermove",e=>{
+  if(!drag) return;
+  const dx=e.clientX-drag.x, dy=e.clientY-drag.y;
+  if(Math.abs(dx)>6||Math.abs(dy)>6) drag.moved=true;
+  if(drag.moved){ angle=drag.a+dx*0.7; setAngle(angle,Math.max(-18,Math.min(18,-dy*0.15)),false); }
+});
+function endDrag(){
+  if(!drag) return;
+  if(!drag.moved){ flip(); }
+  else { gestured=true; const was=Math.round(drag.a/180); angle=Math.round(angle/180)*180; setAngle(angle,0,true);
+    if(Math.round(angle/180)!==was){ burst(); if(showingBack()) onReveal(); } }
+  drag=null;
+}
+card.addEventListener("pointerup",endDrag);
+card.addEventListener("pointercancel",endDrag);
+
+function dirPrompt(){ return dir==="kanji" ? "Read the kanji, guess the meaning." : dir==="meaning" ? "Read the meaning, say the Japanese word." : "Listen to the word, guess the meaning."; }
+function nextCard(){ gestured=true; if(queue.length){pos=(pos+1)%queue.length; render(); coach(dirPrompt());} }
+function prevCard(){ gestured=true; if(queue.length){pos=(pos-1+queue.length)%queue.length; render(); coach(dirPrompt());} }
+function gotIt(){
+  if(!queue.length) return; gestured=true;
+  const w=WORDS[queue[pos]]; done.add(queue[pos]); queue.splice(pos,1); roar();
+  const p=pool(), got=p.filter(i=>done.has(i)).length;
+  if(got<p.length){ const t=`Power up! ${got} of ${p.length}. ${w.r} is in your arsenal.`; coach(t); say([[t,"en"]]); }
+  else { const t="Full power! Henshin complete!"; coach(t); say([["変身！","ja"],[t,"en"]]); }
+  render();
+}
+function again(){
+  if(!queue.length) return; gestured=true;
+  const [i]=queue.splice(pos,1); queue.push(i); if(pos>=queue.length) pos=0;
+  const t=pick(AGAIN); coach(t); say([[t,"en"]]); render();
+}
+function speak(){ if(queue.length){ gestured=true; const was=voiceOn; voiceOn=true; say([[WORDS[queue[pos]].kana,"ja"]]); voiceOn=was; } }
+$("got").onclick=gotIt; $("again").onclick=again; $("next").onclick=nextCard; $("prev").onclick=prevCard;
+$("shuffle").onclick=()=>rebuild(true);
+$("voice").onclick=e=>{
+  voiceOn=!voiceOn; gestured=true; save();
+  const b=e.currentTarget; b.setAttribute("aria-pressed",voiceOn);
+  b.textContent = voiceOn ? "🔊 VOICE ON" : "🔇 VOICE OFF";
+  if(voiceOn){ say([["Voice on. Let's train.","en"]]); coach("Voice on. Let's train."); }
+  else { try{ speechSynthesis.cancel(); }catch(_){} document.querySelector(".coach").classList.remove("talk"); coach("Voice off. I'll keep coaching here in writing."); }
+};
+// no speech engine on this device: hide the voice-only controls
+if(!canSpeak){ $("voice").hidden=true; document.querySelector('[data-d="listen"]').hidden=true; }
+document.querySelectorAll("[data-p]").forEach(b=>b.onclick=()=>{
+  path=b.dataset.p; document.querySelectorAll("[data-p]").forEach(x=>x.setAttribute("aria-pressed",x===b)); save();
+  gestured=true; openBrief(true);
+});
+document.querySelectorAll("[data-d]").forEach(b=>b.onclick=()=>{
+  dir=b.dataset.d; document.querySelectorAll("[data-d]").forEach(x=>x.setAttribute("aria-pressed",x===b)); gestured=true; render();
+  const t = dirPrompt();
+  coach(t); if(dir!=="listen") say([[t,"en"]]);
+});
+document.querySelectorAll("[data-f]").forEach(b=>b.onclick=()=>{
+  filter=b.dataset.f; document.querySelectorAll("[data-f]").forEach(x=>x.setAttribute("aria-pressed",x===b)); if(D[filter]) setGroup(filter,true); rebuild(false);
+});
+$("reset").onclick=()=>{ $("win").hidden=true; pool().forEach(i=>done.delete(i)); gestured=true; rebuild(true); coach("New round. Power is at zero. Let's charge it back up."); };
+function showWin(){ $("win").hidden=false; roar(); }
+
+document.addEventListener("keydown",e=>{
+  if(e.key==="Escape"){ if(tourOn) endTour(); else if(!$("brief").hidden) closeBrief(); else if(!$("manual").hidden) closeManual(); return; }
+  if(!$("brief").hidden){ if((e.key===" "||e.key==="Enter") && e.target===$("bType")){ e.preventDefault(); finishType(); } return; }
+  if(tourOn){ if(e.key==="ArrowRight"||e.key==="Enter"){e.preventDefault();tourGo(1);} else if(e.key==="ArrowLeft"){e.preventDefault();tourGo(-1);} return; }
+  if(!$("win").hidden||!$("manual").hidden) return;
+  if(/^(SELECT|INPUT|TEXTAREA)$/.test(e.target.tagName)) return;
+  if(e.target.tagName==="BUTTON"&&(e.key===" "||e.key==="Enter")) return;
+  if(e.key===" "){e.preventDefault();flip();}
+  else if(e.key==="ArrowRight") nextCard();
+  else if(e.key==="ArrowLeft") prevCard();
+  else if(e.key==="g"||e.key==="G") gotIt();
+  else if(e.key==="a"||e.key==="A") again();
+  else if(e.key==="s"||e.key==="S") speak();
+});
+
+// roster
+const roster=$("roster");
+const groupOpen={};
+DECKS.forEach(d=>{
+  const g=document.createElement("div"); g.className="rgroup"; g.dataset.deck=d.id;
+  const h=document.createElement("button"); h.className="rhead"; h.id="rh-"+d.id;
+  h.setAttribute("aria-expanded","false"); h.setAttribute("aria-controls","rb-"+d.id);
+  h.innerHTML=`<i style="background:${d.color}"></i><span class="rname">${d.name} ${d.jp}</span><span class="rcount"></span><span class="chev" aria-hidden="true">▾</span>`;
+  const body=document.createElement("div"); body.className="rbody"; body.id="rb-"+d.id; body.hidden=true;
+  body.setAttribute("role","group"); body.setAttribute("aria-labelledby","rh-"+d.id);
+  h.onclick=()=>setGroup(d.id, body.hidden);
+  g.append(h,body); roster.appendChild(g);
+});
+function setGroup(id,open){ groupOpen[id]=open; const b=$("rb-"+id), h=$("rh-"+id); if(!b) return; b.hidden=!open; h.setAttribute("aria-expanded",open); }
+WORDS.forEach((w,i)=>{
+  const t=document.createElement("button");
+  const tl = w.tile || [...w.k][0];
+  t.className="tile "+w.t+([...tl].length>1?" two":""); t.dataset.i=i;
+  t.textContent=tl; t.title=w.r;
+  t.setAttribute("aria-label",`Jump to ${w.r}`);
+  t.onclick=()=>{
+    if(!pool().includes(i)){ filter="all"; document.querySelectorAll("[data-f]").forEach(x=>x.setAttribute("aria-pressed",x.dataset.f==="all")); }
+    queue=pool().filter(j=>!done.has(j));
+    if(done.has(i)) queue.unshift(i); // review a mastered word without losing its power
+    gestured=true; pos=queue.indexOf(i); setGroup(w.t,true); render();
+  };
+  $("rb-"+w.t).appendChild(t);
+});
+
+// mascot: eye follows pointer, tap to roar (spins around)
+const pupil=$("pupil"), mascot=$("mascot"), mbody=$("mbody");
+document.addEventListener("pointermove",e=>{
+  const r=mascot.getBoundingClientRect(); const cx=r.left+r.width*.49, cy=r.top+r.height*.46;
+  const a=Math.atan2(e.clientY-cy,e.clientX-cx); pupil.setAttribute("cx",49+Math.cos(a)*5); pupil.setAttribute("cy",46+Math.sin(a)*5);
+});
+const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
+function roar(){
+  if(reduce||!mbody.animate) return;
+  mbody.animate([{transform:"rotateY(0) scale(1)"},{transform:"rotateY(180deg) scale(1.15)"},{transform:"rotateY(360deg) scale(1)"}],
+    {duration:650,easing:"cubic-bezier(.2,1.4,.4,1)"});
+}
+mbody.style.transformOrigin="50% 50%"; mbody.style.transformBox="fill-box";
+mascot.addEventListener("click",e=>{ roar(); if(e.pointerType!=="" && e.detail>0) mascot.blur(); });
+mascot.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();e.stopPropagation();roar();}});
+
+// starfield
+const cv=$("stars"), cx=cv.getContext("2d"); let S=[];
+function size(){ cv.width=innerWidth*devicePixelRatio; cv.height=innerHeight*devicePixelRatio;
+  S=Array.from({length:140},()=>({x:Math.random()*cv.width,y:Math.random()*cv.height,z:Math.random()*1.6+.3,c:Math.random()<.08?"#FFD319":Math.random()<.08?"#35E4FF":"#FFF4DE"})); }
+function tick(){
+  cx.clearRect(0,0,cv.width,cv.height);
+  for(const s of S){ if(!reduce){ s.y+=s.z*.5*devicePixelRatio; if(s.y>cv.height){s.y=0;s.x=Math.random()*cv.width;} }
+    cx.fillStyle=s.c; cx.globalAlpha=.35+s.z*.35; const d=s.z*devicePixelRatio*1.3; cx.fillRect(s.x,s.y,d,d); }
+  cx.globalAlpha=1; if(!reduce) requestAnimationFrame(tick);
+}
+addEventListener("resize",()=>{size(); if(reduce) tick();});
+size(); tick();
+
+// ---------- manual ----------
+let lastFocus=null;
+function openManual(tab){
+  lastFocus=document.activeElement; renderTree(); setTab(tab||"play");
+  $("manual").hidden=false; $("manual").scrollTop=0; $("closeManual").focus();
+}
+function closeManual(){ $("manual").hidden=true; if(lastFocus&&lastFocus.focus) lastFocus.focus(); }
+function setTab(t){
+  document.querySelectorAll("[data-tab]").forEach(b=>b.setAttribute("aria-selected",b.dataset.tab===t));
+  document.querySelectorAll(".tabpane").forEach(x=>x.hidden = x.id!=="tab-"+t);
+  if(t==="zeek") renderZeek();
+}
+$("openManual").onclick=()=>openManual("play");
+$("closeManual").onclick=closeManual;
+$("manual").addEventListener("click",e=>{ if(e.target===$("manual")) closeManual(); });
+document.querySelectorAll("[data-tab]").forEach(b=>b.onclick=()=>{ setTab(b.dataset.tab); $("manual").scrollTop=0; });
+
+// ---------- Zeek's Factoids ----------
+function renderZeek(){
+  const box=$("zlist"); if(!box) return;
+  box.innerHTML = WORDS.map((w,i)=>w.fact?`<div class="zcard"><div class="zh"><span class="zk">${w.k}</span><span class="zr">${w.r} · ${w.ftag||"KAMEN RIDER"}</span></div><p>${w.fact}</p><button data-zopen="${i}">OPEN CARD ▶</button></div>`:"").join("");
+  box.querySelectorAll("[data-zopen]").forEach(b=>b.onclick=()=>{ closeManual(); const t=document.querySelector(`.tile[data-i="${b.dataset.zopen}"]`); if(t) t.click(); });
+}
+
+// ---------- word tree: one leaf per word, grows with GOT IT ----------
+const SVGNS="http://www.w3.org/2000/svg";
+const shown=new Set();
+function el(tag,attrs,text){ const n=document.createElementNS(SVGNS,tag); for(const k in attrs) n.setAttribute(k,attrs[k]); if(text!=null) n.textContent=text; return n; }
+function renderTree(){
+  const svg=$("tree"); if(!svg) return;
+  while(svg.firstChild) svg.removeChild(svg.firstChild);
+  const N=WORDS.length, cx=170, cy=112, rx=152, ry=96, top={x:170,y:176}, sc=Math.max(.74,Math.min(1,Math.sqrt(15/N)*1.4));
+  // ground + trunk
+  svg.appendChild(el("ellipse",{cx:170,cy:280,rx:130,ry:10,fill:"#17123D"}));
+  svg.appendChild(el("path",{d:"M154 282 C159 240 162 205 166 174 L174 174 C178 205 181 240 186 282 Z",fill:"#8B5A2B",stroke:"#000","stroke-width":3,"stroke-linejoin":"round"}));
+  const pts=WORDS.map((w,i)=>{ const r=.32+.68*Math.sqrt((i+.5)/N), th=i*2.39996+.6; return {w,i,x:cx+r*rx*Math.cos(th), y:cy+r*ry*Math.sin(th)}; });
+  // branches first so leaves sit on top
+  pts.forEach(p=>{ const g=done.has(p.i);
+    svg.appendChild(el("path",{d:`M${top.x} ${top.y} Q${(top.x+p.x)/2} ${Math.max(p.y,top.y-10)} ${p.x.toFixed(1)} ${p.y.toFixed(1)}`,
+      fill:"none",stroke:g?"#8B5A2B":"#2A2560","stroke-width":g?3:1.2,"stroke-linecap":"round"})); });
+  let grown=0;
+  pts.forEach(p=>{
+    const g=done.has(p.i), dk=D[p.w.t], ang=Math.atan2(p.y-top.y,p.x-top.x)*180/Math.PI;
+    const leaf=el("g",{transform:`translate(${p.x.toFixed(1)} ${p.y.toFixed(1)})`});
+    const body=el("g",{});
+    body.appendChild(el("ellipse",{cx:0,cy:0,rx:17*sc,ry:11*sc,transform:`rotate(${ang.toFixed(0)})`,
+      fill:g?dk.color:"none",stroke:g?"#000":"#6A5FA8","stroke-width":g?3:1.5,"stroke-dasharray":g?"":"3 3"}));
+    if(g){ grown++;
+      body.appendChild(el("text",{x:0,y:(5*sc).toFixed(1),"text-anchor":"middle","font-size":(14*sc).toFixed(1),"font-family":"Dela Gothic One, sans-serif",fill:dk.ink},[...(p.w.tile||p.w.k)][0]));
+      body.appendChild(el("title",{},`${p.w.k} · ${p.w.r}`));
+      if(!shown.has(p.i)){ body.setAttribute("class","newleaf"); shown.add(p.i); }
+    } else { shown.delete(p.i); }
+    leaf.appendChild(body); svg.appendChild(leaf);
+  });
+  $("treeCount").innerHTML=`<b>${grown}</b> of ${N} leaves grown`;
+  $("treeNext").textContent = grown===N ? "Full tree. Every word is yours." : grown===0 ? "Tap GOT IT to grow your first leaf." : "Keep feeding the kaiju.";
+  const list=$("leafList"); list.innerHTML="";
+  WORDS.forEach((w,i)=>{ if(done.has(i)){ const c=document.createElement("div"); c.className="leafchip "+w.t; c.innerHTML=`<span>${w.k}</span>${w.r}`; list.appendChild(c);} });
+  if(!grown){ const c=document.createElement("div"); c.style.cssText="font-size:14px;color:#4A4280"; c.textContent="No leaves yet. Your first GOT IT grows one."; list.appendChild(c); }
+}
+
+// ---------- Sensei's Tour ----------
+const TOUR=[
+  {sel:"#scene", t:"THE CARD", x:"Drag it to spin it. Tap it to flip it. The back has the answer and your mission."},
+  {sel:".controls", t:"SCORE IT", x:"GOT IT if you know it. AGAIN to see it later. The arrows just look around."},
+  {sel:".coach", t:"SENSEI", x:"This is me. Everything I say also shows up in this box."},
+  {sel:".paths", t:"CHOOSE YOUR PATH", x:"Tap a path to open its Mission Briefing. Then choose Create Physical for hands-on tools, or Create Digital for apps."},
+  {sel:".dirs", t:"DIRECTION", x:"Change what's on the front: the kanji, the English, or sound only."},
+  {sel:"#voicePanel", t:"SENSEI VOICE", x:"Pick my English and Japanese voices by ear. Tap the play buttons to hear each one."},
+  {sel:"#meter", t:"HENSHIN POWER", x:"Every GOT IT charges this meter. Fill it to transform."},
+  {sel:"#roster", t:"KAIJU FILES", x:"Your words, grouped by deck. Tap a deck to open it, then tap a tile to jump to that word. A green check means you mastered it."},
+  {sel:".bar", t:"DECKS AND VOICE", x:"Pick a deck, shuffle the cards, or turn my voice on and off."},
+  {sel:"#openManual", t:"THE MANUAL", x:"Everything is in here, plus the story of the word kotoba and your growing word tree. Now go train!"}
+];
+let tourOn=false, tourI=0, tourDir=1;
+function seen(v){ try{ if(v) localStorage.setItem("kk-tour","1"); return localStorage.getItem("kk-tour")==="1"; }catch(e){ return false; } }
+function startTour(){
+  if(!$("manual").hidden) closeManual();
+  tourOn=true; tourI=0; seen(true); $("tourBtn").classList.remove("nudge");
+  $("tshield").hidden=false; $("tspot").hidden=false; $("tpop").hidden=false; showStep();
+}
+function endTour(){
+  tourOn=false; ["tshield","tspot","tpop"].forEach(id=>$(id).hidden=true);
+  try{ speechSynthesis.cancel(); }catch(e){}
+  coach("Tour done. Flip the card and let's train."); $("tourBtn").focus();
+}
+function tourGo(d){ tourDir=d; const n=tourI+d; if(n<0){ tourGo(1); return; } if(n>=TOUR.length){ endTour(); return; } tourI=n; showStep(); }
+function showStep(){
+  let s=TOUR[tourI], tgt=document.querySelector(s.sel);
+  if(!tgt || tgt.closest("[hidden]")){ tourGo(tourDir); return; } // skip anything hidden on this device
+  $("tStep").textContent=`SENSEI'S TOUR · ${tourI+1} of ${TOUR.length}`;
+  $("tTitle").textContent=s.t; $("tText").textContent=s.x;
+  $("tBack").disabled = tourI===0; $("tBack").style.opacity = tourI===0 ? .4 : 1;
+  $("tNext").textContent = tourI===TOUR.length-1 ? "LET'S GO!" : "NEXT ▶";
+  coach(s.x); if(voiceOn) say([[s.x,"en"]]);
+  tgt.scrollIntoView({block:"center",behavior:reduce?"auto":"smooth"});
+  setTimeout(placeTour, reduce?0:380);
+  $("tNext").focus({preventScroll:true});
+}
+function placeTour(){
+  if(!tourOn) return;
+  const tgt=document.querySelector(TOUR[tourI].sel), r=tgt.getBoundingClientRect(), pad=8, sp=$("tspot"), pop=$("tpop");
+  Object.assign(sp.style,{left:(r.left-pad)+"px",top:(r.top-pad)+"px",width:(r.width+pad*2)+"px",height:(r.height+pad*2)+"px"});
+  const pw=pop.offsetWidth, ph=pop.offsetHeight, W=innerWidth, H=innerHeight;
+  let top = r.bottom+pad+14; if(top+ph>H-12) top = r.top-pad-14-ph; if(top<12) top = Math.max(12, H-ph-12);
+  let left = r.left + r.width/2 - pw/2; left=Math.max(16,Math.min(W-pw-16,left));
+  pop.style.top=top+"px"; pop.style.left=left+"px";
+}
+$("tourBtn").onclick=()=>{ gestured=true; startTour(); };
+$("tNext").onclick=()=>tourGo(1); $("tBack").onclick=()=>tourGo(-1); $("tSkip").onclick=endTour;
+$("tshield").onclick=()=>tourGo(1);
+addEventListener("resize",placeTour); addEventListener("scroll",placeTour,{passive:true});
+
+// ---------- Mission Briefing ----------
+let typeTimer=null, typeFull="", briefFocus=null;
+function openBrief(fresh){
+  if(!queue.length) return;
+  const i=queue[pos], w=WORDS[i];
+  const m = fresh ? pickMission(i,path) : missionFor(i,path);
+  briefFocus=document.activeElement;
+  $("bTitle").textContent=PATHS[path].name;
+  $("bWord").innerHTML=`<span class="k">${w.k}</span><span class="r">${w.r} · ${w.en.replace(/"/g,"").match(/^[^.!?]+/)[0]}</span>`;
+  $("bKind").textContent = m.sig ? "SIGNATURE MISSION · made for this word" : "REMIX MISSION · a random challenge";
+  $("bKind").classList.toggle("remix",!m.sig);
+  $("bLessonT").textContent=LESSONS[path].t; $("bLessonB").innerHTML=`<div class="lesson">${LESSONS[path].h}</div>`;
+  $("bLesson").open = path==="story";
+  syncBriefMode();
+  $("brief").hidden=false; $("brief").scrollTop=0;
+  typeOut(fill(m.t,w,false));
+  const t=`${PATHS[path].name.split(" ")[0].toLowerCase()} mission. ${fill(m.t,w,false)}`;
+  coach(t.charAt(0).toUpperCase()+t.slice(1)); say([[t,"en"]]);
+  $("bType").focus({preventScroll:true});
+  if(queue.length) faceBack(w);
+}
+function typeOut(text){
+  clearInterval(typeTimer); typeFull=text;
+  const el=$("bText"), box=$("bType"); box.classList.remove("done"); $("bStage").classList.add("wait"); $("bSkip").hidden=false;
+  if(reduce){ finishType(); return; }
+  let n=0; el.textContent="";
+  typeTimer=setInterval(()=>{ n+=1; el.textContent=typeFull.slice(0,n); if(n>=typeFull.length) finishType(); }, 28);
+}
+function finishType(){
+  clearInterval(typeTimer); $("bText").textContent=typeFull; $("bType").classList.add("done");
+  $("bStage").classList.remove("wait"); $("bSkip").hidden=true;
+}
+function syncBriefMode(){
+  document.querySelectorAll("[data-bm]").forEach(x=>x.setAttribute("aria-pressed",x.dataset.bm===mode));
+  const tl=TOOLS[path][mode].map((t,n)=>`<li><label for="tool-${n}"><input type="checkbox" id="tool-${n}"><span>${t}</span></label></li>`).join("");
+  $("bDetail").innerHTML=`<p class="how">${HOW[path][mode]}</p><span class="label">${mode==="physical"?"GRAB YOUR TOOLS · tap each one as you get it":"WHAT YOU NEED"}</span><ul class="tlist">${tl}</ul>`;
+}
+function closeBrief(){ clearInterval(typeTimer); $("brief").hidden=true; try{ speechSynthesis.cancel(); }catch(e){} if(briefFocus&&briefFocus.focus) briefFocus.focus(); }
+$("bType").addEventListener("click",finishType);
+$("bClose").onclick=closeBrief;
+$("brief").addEventListener("click",e=>{ if(e.target===$("brief")) closeBrief(); });
+document.querySelectorAll("[data-bm]").forEach(b=>b.onclick=()=>{
+  mode=b.dataset.bm; save(); syncBriefMode(); if(queue.length) faceBack(WORDS[queue[pos]]);
+  const t = mode==="physical" ? `Create physical. Grab: ${TOOLS[path].physical.join(", ")}.` : `Create digital. You'll need: ${TOOLS[path].digital.join(", ")}.`;
+  coach(t); say([[t,"en"]]);
+});
+$("bGo").onclick=()=>{ closeBrief(); coach(`Mission accepted. ${HOW[path][mode]} Flip the card any time to see your mission.`); say([["Mission accepted. Let's go!","en"]]); };
+$("manualLessons").innerHTML = Object.keys(LESSONS).map(k=>`<h4>${LESSONS[k].t.replace("SENSEI'S LESSON · ","")}</h4><div class="lesson">${LESSONS[k].h}</div>`).join("");
+
+// ---------- Sensei Voice menus ----------
+$("vEn").onchange=()=>{ voiceEn=$("vEn").value; save(); previewVoice("en"); };
+$("vJa").onchange=()=>{ voiceJa=$("vJa").value; save(); previewVoice("ja"); };
+function previewVoice(l){ gestured=true; const was=voiceOn; voiceOn=true;
+  say([[l==="ja" ? "こんにちは。先生です。変身！" : "Hi, I'm Sensei. Let's train. Your mission: say it three times.", l]]); voiceOn=was; }
+$("pEn").onclick=()=>previewVoice("en"); $("pJa").onclick=()=>previewVoice("ja");
+if(!canSpeak) $("voicePanel").hidden=true;
+
+// ---------- progress code: carry the word tree to a new version ----------
+function progressCode(){ return "KK1:"+[...done].sort((a,b)=>a-b).map(i=>WORDS[i].id).join("."); }
+$("codeBtn").onclick=()=>{ const o=$("codeOut"); o.value=progressCode(); o.hidden=false; $("copyCode").hidden=false; o.focus(); o.select(); $("codeMsg").textContent=`Your code holds ${done.size} ${done.size===1?"leaf":"leaves"}.`; };
+$("copyCode").onclick=()=>{ const o=$("codeOut");
+  try{ navigator.clipboard.writeText(o.value).then(()=>{ $("codeMsg").textContent="Copied. Paste it into the new version with LOAD CODE."; },()=>{ o.select(); $("codeMsg").textContent="Your code is selected. Copy it from here."; }); }
+  catch(e){ o.select(); $("codeMsg").textContent="Your code is selected. Copy it from here."; } };
+$("codeLoad").onclick=()=>{
+  const m=$("codeIn").value.trim().match(/^KK1:([a-z0-9.\-]*)$/i);
+  if(!m){ $("codeMsg").textContent="That code doesn't look right. It should start with KK1: and come from the GET MY PROGRESS CODE button."; return; }
+  let added=0, unknown=0;
+  m[1].split(".").filter(Boolean).forEach(id=>{ const i=WORDS.findIndex(w=>w.id===id.toLowerCase()); if(i<0) unknown++; else if(!done.has(i)){ done.add(i); added++; } });
+  rebuild(false);
+  $("codeMsg").textContent=`Code loaded. ${added} new ${added===1?"leaf":"leaves"} grown.`+(unknown?` ${unknown} ${unknown===1?"word in the code isn't":"words in the code aren't"} in this version.`:"");
+  coach(`Progress loaded. Your tree has ${done.size} ${done.size===1?"leaf":"leaves"}.`);
+};
+
+// ---------- saved progress (this device, this browser) ----------
+// Words are saved by name, not position, so adding new words later keeps old progress intact.
+const SAVE_KEY="kotoba-kaiju-progress-v1";
+let booting=true;
+function save(){
+  if(booting) return;
+  try{ localStorage.setItem(SAVE_KEY, JSON.stringify({v:1, done:[...done].map(i=>WORDS[i].id), path, mode, dir, filter, voiceOn, voiceEn, voiceJa})); }catch(e){}
+}
+function load(){
+  let d=null;
+  try{ d=JSON.parse(localStorage.getItem(SAVE_KEY)||"null"); }catch(e){ return 0; }
+  if(!d||typeof d!=="object") return 0;
+  if(Array.isArray(d.done)) d.done.forEach(r=>{ const i=WORDS.findIndex(w=>w.id===r||w.r===r); if(i>=0){ done.add(i); shown.add(i); } });
+  if(typeof d.voiceEn==="string") voiceEn=d.voiceEn;
+  if(typeof d.voiceJa==="string") voiceJa=d.voiceJa;
+  if(PATHS[d.path]) path=d.path;
+  if(d.mode==="physical"||d.mode==="digital") mode=d.mode;
+  if(["kanji","meaning","listen"].includes(d.dir) && (d.dir!=="listen"||canSpeak)) dir=d.dir;
+  if(d.filter==="all" || D[d.filter]) filter=d.filter;
+  if(typeof d.voiceOn==="boolean") voiceOn=d.voiceOn;
+  // show the restored settings on the buttons
+  document.querySelectorAll("[data-p]").forEach(x=>x.setAttribute("aria-pressed",x.dataset.p===path));
+  document.querySelectorAll("[data-d]").forEach(x=>x.setAttribute("aria-pressed",x.dataset.d===dir));
+  document.querySelectorAll("[data-f]").forEach(x=>x.setAttribute("aria-pressed",x.dataset.f===filter));
+  $("voice").setAttribute("aria-pressed",voiceOn); $("voice").textContent = voiceOn ? "🔊 VOICE ON" : "🔇 VOICE OFF";
+  return done.size;
+}
+$("resetBtn").onclick=()=>{ $("resetAsk").hidden=true; $("resetConfirm").hidden=false; $("resetNo").focus(); };
+$("resetNo").onclick=()=>{ $("resetConfirm").hidden=true; $("resetAsk").hidden=false; $("savedMsg").textContent="Progress kept."; $("resetBtn").focus(); };
+$("resetYes").onclick=()=>{
+  done.clear(); shown.clear(); rebuild(false);
+  $("resetConfirm").hidden=true; $("resetAsk").hidden=false; $("savedMsg").textContent="Progress erased. Fresh start.";
+  coach("Fresh start. Your tree is a seed again. Let's grow it."); $("resetBtn").focus();
+};
+
+$("loaded").textContent=WORDS.length;
+const restored = load();
+fillVoiceMenus();
+rebuild(false);
+booting=false; save();
+if(restored>0){
+  coach(`Welcome back! Your word tree has ${restored} ${restored===1?"leaf":"leaves"}. Let's grow more.`);
+} else if(!seen()){
+  $("tourBtn").classList.add("nudge"); coach("New here? Tap the ? button at the top for Sensei's Tour.");
+}
+</script>
+</body>
+</html>
