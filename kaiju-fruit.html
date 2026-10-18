@@ -24,13 +24,14 @@
   <p id="status">Opening KAIJU FRUIT...</p>
 </div>
 <script>
-/* Opens the newest vetted version that exists, checked in this order. Never the old v1-2. */
-const NEWEST = ["kaiju-fruit-v1-4.html","kaiju-fruit-v1.4.html","kaiju-fruit-v1-3.html","kaiju-fruit-v1.3.html"];
+/* Opens the newest vetted version that exists, checked in this order. Never the old v1-2. Covers v1.3 to v2.0, with dashes or dots. */
+const NEWEST = ["kaiju-fruit-v2-0.html","kaiju-fruit-v2.0.html","kaiju-fruit-v1-9.html","kaiju-fruit-v1.9.html","kaiju-fruit-v1-8.html","kaiju-fruit-v1.8.html","kaiju-fruit-v1-7.html","kaiju-fruit-v1.7.html","kaiju-fruit-v1-6.html","kaiju-fruit-v1.6.html","kaiju-fruit-v1-5.html","kaiju-fruit-v1.5.html","kaiju-fruit-v1-4.html","kaiju-fruit-v1.4.html","kaiju-fruit-v1-3.html","kaiju-fruit-v1.3.html"];
 (async function(){
-  for(const f of NEWEST){
-    try{ const r = await fetch(f, {method:"HEAD", cache:"no-store"}); if(r.ok){ location.replace(f); return; } }catch(e){}
-  }
-  soon();
+  /* Check every name at once (fast on phones), then open the newest one that exists. */
+  const ok = await Promise.all(NEWEST.map(f =>
+    fetch(f, {method:"HEAD", cache:"no-store"}).then(r => r.ok).catch(() => false)));
+  const i = ok.indexOf(true);
+  if(i >= 0){ location.replace(NEWEST[i]); } else { soon(); }
 })();
 function soon(){
   document.getElementById("box").innerHTML =
