@@ -1,0 +1,937 @@
+<!doctype html>
+<!--
+  INFOPILLZ v2.5 (Nov 4 2026): Spanish matches the reviewed print sheets (family tips 1, 4, 5, 9 and Klee's Picks #2).
+  INFOPILLZ v2.4 (Nov 4 2026): Home in the menu now goes to landing-pad.html, copyright line at the bottom.
+  INFOPILLZ v2.3 (Nov 4 2026): new pick PreK-5 Responsible EdTech Use (responsibletechuse.org, Perspective source), disclaimer line on not taking any organization's stance.
+  INFOPILLZ v2.2 (Nov 3 2026): Klee's Picks #2 section (Hard Questions, Calm Answers + The Bright Side), English and Spanish, with source links.
+  INFOPILLZ v2.1 (Nov 3 2026): Toku Ryder titles (FEEL THE PLANET, PRACTICE SAFETY, ALL CLEAR, plus Spanish), NYC clock under the INFOPILLZ title,
+    signup line "workshop/events updates", signup tag ARTOOLZ signup on every page.
+  INFOPILLZ v2.0 (Nov 3 2026): English/Spanish switch, site menu (Home, ARTOOLZ, INFOPILLZ), AI tips for families with sources,
+    Klee's Picks and Responsible AI on one line, transparency line updated, ARTOOLZ moved to its own page (artoolz.html), PNG logo backup for older iPads.
+-->
+
+<!--
+  INFOPILLZ v1.6 : Klee's Picks  (file: infopillz-v1-6.html)
+  Change log v1.6 (Oct 16 2026):
+  - Window light: one beam from the top right follows the real NYC sun (dawn violet, morning gold, midday sky,
+    golden hour orange, night moonlight); Play today's sky runs today's real sun in 20 seconds
+  - 34 windows: every pick card gets its own hard-edge mini beam, same angle, colored from its own hue family
+  - Card colors: juicy fades/solids (How AI Works, AI in Medicine, Harms Rights) and neon pastels, light to dark per section,
+    every card 6.2+ contrast; no muddy mixes
+  - Layout: Kaiju Fruit logo beside INFOPILLZ (KAIJU letters top-aligned with INFOPILLZ caps), Join the list under it,
+    ARTOOLZ and Feel the Planet jump buttons (instant snap); Klee's Picks moved up; then Feel the Planet, then ARTOOLZ
+  - ARTOOLZ block: title, subtitle, ARTOORO + Kotoba-kun, beta playtesting banner, all 8 apps with QR codes and Play links
+  - Feel the Planet: seismograph replaced by 3 thermal views (Thermal Earth, Thermal spectrogram, 24-hour heat grid), tap to cycle;
+    USGS Earthquake Hazards Program credit line
+  - Copy: sun line added, "Beta list, partnerships and workshop updates", Silk tag removed, Antlii link to antlii.work/Index
+  - Needs kaiju-fruit-logo.webp in the same folder
+  Change log v1.5 (Oct 16 2026):
+  - FEEL THE PLANET a bit smaller so it stays on one line on phones
+  - Signup box (first name + email) that sends to the same Google Apps Script as the play survey,
+    tagged source: "INFOPILLZ signup". Beta email stays as the backup.
+  Change log v1.4 (Oct 16 2026):
+  - INFOPILLZ title back to the original clean font
+  - Denizen letters now drawn as shapes inside this file (no font file to upload):
+    FEEL THE PLANET, PRACTICE / SAFETY (two lines, space between), ALL   CLEAR (wider gap)
+  - Files are numbered; infopillz.html forwards the QR code to the newest version
+  Change log v1.3 (Oct 16 2026):
+  - Denizen (SpazeCraft's original typeface) on the short impact titles only:
+    INFOPILLZ, Feel the Planet, PRACTICE SAFETY, ALL CLEAR
+  - Font ships as Denizen-Corporal.otf next to this file; if it fails to load, the old bold font shows
+  - Everything else (steps, links, disclaimer, numbers, countdown) unchanged
+  - Fix: floating quake labels now stay inside the seismograph on small screens
+  Change log v1.2 (Oct 16 2026):
+  - PRACTICE SAFETY takeover: full screen for 10 seconds, links locked, gentle shake (off with reduce motion),
+    real quake info with distance from NYC, Drop Cover Hold On steps (NIST and Great ShakeOut wording)
+  - Triggers: "Practice Safety" button anytime, plus one automatic run per visit for a magnitude 5+ quake
+  - Floating quake labels pop up at random spots on the seismograph
+  - Fix: "1 earthquake" singular when only one quake is in the feed
+  Change log v1.1 (Oct 16 2026, accuracy vet):
+  - MASAI: false alarms rose 1% per Lund University (was "without more false alarms")
+  - Rainforest Connection: alerts go to people protecting the forest, sounds listed per rfcx.org
+  - AI Incident Database: "everyone is invited" wording per its About page
+  - Glaze: described as the free style-protection tool its FAQ confirms
+
+  Kaiju Fruit Labs / Activ8 CellF / ARTOOLZ
+  Change log v1.0 (first build, Oct 16 2026):
+  - 33 verified links in 8 sections, 3 columns of 11 (stacks to 1 column on phones)
+  - Live header: NYC date and clock, real sunrise/sunset (computed in browser), sky color follows the real sun
+  - Live NYC temperature (Open-Meteo, hides itself if unreachable)
+  - Earth spin counter: distance NYC has rotated since the page opened
+  - Tremor meter: real USGS quakes from the past 24 hours, picked at random, drawn as a seismograph burst,
+    optional low rumble on tap (sound off by default)
+  - Transparency disclaimer, credits, beta list email, tagline
+  Not in this version (waiting on assets): app QR codes, app links, signup form.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>INFOPILLZ · Klee's Picks</title>
+<meta name="description" content="Klee's Picks: Responsible AI You Need to Know. A living list from Kaiju Fruit Labs and the Activ8 CellF ecosystem.">
+<style>
+  [hidden]{display:none!important}
+  :root{
+    --ink:#ffffff;
+    --ink-soft:#e9e4ff;
+    --card:rgba(10,8,30,.55);
+    --card-edge:rgba(255,255,255,.18);
+    --sky-top:#0b0a2a;
+    --sky-bot:#1d1250;
+    --acc:#ffd166;
+    --acc2:#7ef0c9;
+    --hot:#ff7aa8;
+    --tag-k:#7ef0c9;
+    --tag-t:#ffd166;
+    --tag-a:#a9c8ff;
+    --tag-p:#ffb37a;
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    margin:0;min-height:100vh;color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+    background:linear-gradient(180deg,var(--sky-top) 0%,var(--sky-bot) 100%) fixed;
+    background-color:#0b0a2a;
+    transition:background 2s ease;
+    overflow-x:hidden;
+  }
+  a{color:var(--ink);-webkit-tap-highlight-color:transparent}
+  button{-webkit-tap-highlight-color:transparent;font:inherit}
+  a:focus,button:focus{outline:none}
+  a:focus-visible,button:focus-visible{outline:2px solid var(--acc);outline-offset:3px}
+  .wrap{max-width:1240px;margin:0 auto;padding:20px 16px 48px}
+
+  /* Header */
+  .brands{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft);margin:0 0 6px}
+  h1{font-size:clamp(40px,9vw,84px);line-height:.95;margin:0;letter-spacing:-.02em;font-weight:900}
+  /* Denizen words drawn as shapes (SpazeCraft original typeface) */
+  .dtitle{display:inline-flex;flex-wrap:wrap;align-items:center;column-gap:.42em;row-gap:.28em;line-height:1;color:#fff}
+  .dw{height:1em;width:auto;display:block;fill:currentColor;overflow:visible}
+  .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+  .tremor h2 .dtitle{font-size:clamp(14px,5.1vw,22px);flex-wrap:nowrap}
+  .ps h2 .dtitle{font-size:clamp(30px,8vw,44px);flex-direction:column;align-items:flex-start;row-gap:.34em}
+  .ps h2{margin:0 0 14px}
+  .ps button .dtitle{font-size:22px;column-gap:.9em;justify-content:center;color:#14102e}
+  .ps button.clear{display:flex;justify-content:center;align-items:center}
+  h1 sup{font-size:.28em;vertical-align:top;position:relative;top:.4em;margin-left:2px;font-weight:700}
+  .sub{font-size:clamp(20px,4.2vw,30px);font-weight:800;margin:8px 0 2px;color:var(--acc)}
+  .tag{font-size:clamp(15px,3vw,19px);margin:0;color:var(--ink-soft)}
+
+  /* Live strip */
+  .live{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:22px 0 14px}
+  .tile{background:var(--card);border:1px solid var(--card-edge);border-radius:14px;padding:12px 14px;min-width:0}
+  .tile .k{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft);margin:0 0 4px}
+  .tile .v{font-size:20px;font-weight:800;margin:0;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+  .tile .s{font-size:13px;margin:4px 0 0;color:var(--ink-soft)}
+  @media (max-width:820px){.live{grid-template-columns:1fr 1fr}}
+  @media (max-width:430px){.tile .v{font-size:17px}}
+
+  /* Tremor */
+  .tremor{background:var(--card);border:1px solid var(--card-edge);border-radius:16px;padding:14px;margin:0 0 26px}
+  .tremor-head{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between}
+  .tremor h2{font-size:18px;margin:0}
+  .feel{background:var(--acc);color:#1a1240;border:0;border-radius:999px;padding:10px 16px;font-weight:800;cursor:pointer}
+  .feel[aria-pressed="true"]{background:var(--hot)}
+  canvas{display:block;width:100%;height:120px;margin:10px 0 8px;border-radius:10px;background:rgba(0,0,0,.35)}
+  .quake{font-size:15px;margin:0;font-weight:700}
+  .quake a{text-decoration:underline}
+  .note{font-size:12.5px;margin:6px 0 0;color:var(--ink-soft)}
+
+  /* Picks */
+  .cols{display:grid;grid-template-columns:1fr;gap:18px}
+  @media (min-width:900px){.cols{grid-template-columns:repeat(3,1fr)}}
+  .col{display:flex;flex-direction:column;gap:18px;min-width:0}
+  section h3{font-size:13px;letter-spacing:.14em;text-transform:uppercase;margin:0 0 8px;color:var(--acc2)}
+  ol{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+  li a.pick{display:block;text-decoration:none;background:var(--card);border:1px solid var(--card-edge);border-radius:12px;padding:10px 12px;transition:transform .15s ease,border-color .15s ease}
+  li a.pick:hover{border-color:var(--acc);transform:translateY(-1px)}
+  .row{display:flex;gap:8px;align-items:baseline;justify-content:space-between}
+  .n{font-weight:800;font-size:15.5px}
+  .num{font-size:12px;font-weight:800;color:var(--acc);margin-right:6px}
+  .ages{display:flex;gap:4px;flex-shrink:0}
+  .age{font-size:10.5px;font-weight:800;border-radius:6px;padding:2px 6px;color:#14102e}
+  .age.K{background:var(--tag-k)}.age.T{background:var(--tag-t)}.age.A{background:var(--tag-a)}.age.P{background:var(--tag-p)}
+  .d{font-size:13.5px;margin:4px 0 0;line-height:1.4;color:var(--ink-soft)}
+  .flag{display:inline-block;font-size:11.5px;font-weight:700;margin-top:6px;padding:2px 8px;border-radius:6px;background:rgba(255,122,168,.22);border:1px solid rgba(255,122,168,.6);color:#fff}
+  .legend{display:flex;flex-wrap:wrap;gap:10px;font-size:12.5px;margin:0 0 16px;align-items:center}
+  .legend span.age{margin-right:4px}
+
+  /* Floating quake labels */
+  .seiswrap{position:relative}
+  .float{position:absolute;pointer-events:none;font-size:12.5px;font-weight:800;color:#fff;background:rgba(10,8,30,.75);border:1px solid rgba(126,240,201,.7);border-radius:8px;padding:3px 8px;white-space:nowrap;animation:floatfade 6s ease forwards}
+  @keyframes floatfade{0%{opacity:0;transform:translateY(6px)}12%{opacity:1;transform:none}75%{opacity:1}100%{opacity:0;transform:translateY(-10px)}}
+  .tbtns{display:flex;flex-wrap:wrap;gap:8px}
+  .safe-btn{background:transparent;color:#fff;border:2px solid var(--acc);border-radius:999px;padding:8px 14px;font-weight:800;cursor:pointer}
+
+  /* PRACTICE SAFETY takeover */
+  .ps{position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(40,6,24,.92);touch-action:none}
+  .ps-box{max-width:560px;width:100%;background:#1a0f3a;border:2px solid var(--hot);border-radius:18px;padding:20px 18px;color:#fff}
+  .ps h2{font-size:clamp(30px,8vw,46px);margin:0;line-height:1;font-weight:900;letter-spacing:.02em}
+  .ps .ps-sub{margin:8px 0 14px;font-size:15px;color:var(--ink-soft)}
+  .ps .ps-q{margin:0 0 14px;font-size:16px;font-weight:700}
+  .ps ol{gap:10px;margin:0 0 14px}
+  .ps li{font-size:16px;line-height:1.4}
+  .ps li b{color:var(--acc);font-size:19px;letter-spacing:.04em}
+  .ps .ps-out{font-size:14px;margin:0 0 12px;color:var(--ink-soft)}
+  .ps .ps-src{font-size:12px;margin:0 0 14px;color:var(--ink-soft)}
+  .ps button{width:100%;border:0;border-radius:12px;padding:14px;font-weight:900;font-size:17px;background:var(--acc2);color:#14102e;cursor:pointer}
+  .ps button:disabled{background:rgba(255,255,255,.18);color:#fff;cursor:default}
+  body.shaking .wrap{animation:shake .5s linear infinite}
+  @keyframes shake{0%,100%{transform:translate(0,0)}25%{transform:translate(-4px,2px)}50%{transform:translate(3px,-2px)}75%{transform:translate(-2px,-3px)}}
+  @media (prefers-reduced-motion:reduce){body.shaking .wrap{animation:none}.float{animation:none}}
+  body.ps-open{overflow:hidden}
+
+  /* Footer */
+  .disc{margin:30px 0 0;background:var(--card);border:1px solid var(--card-edge);border-radius:16px;padding:16px;font-size:14px;line-height:1.55}
+  .disc h2{font-size:16px;margin:0 0 6px;color:var(--acc)}
+  .disc p{margin:0 0 8px}
+  .beta{margin-top:16px;font-size:15px}
+  .beta a{font-weight:800}
+  /* Signup */
+  .join{margin:16px 0 0;background:var(--card);border:1px solid var(--card-edge);border-radius:16px;padding:16px}
+  .join h2{font-size:18px;margin:0 0 4px;color:#fff}
+  .join p{margin:0 0 10px;font-size:14px;color:var(--ink-soft)}
+  .join form{display:flex;flex-wrap:wrap;gap:10px}
+  .join label{display:flex;flex-direction:column;gap:4px;font-size:13px;font-weight:700;color:#fff;flex:1 1 200px}
+  .join input{font:inherit;font-size:16px;font-weight:400;padding:12px;border-radius:10px;border:1px solid var(--card-edge);background:rgba(255,255,255,.08);color:#fff;min-width:0}
+  .join input::placeholder{color:rgba(255,255,255,.7)}
+  .join button{flex:1 1 100%;border:0;border-radius:12px;padding:14px;font-weight:900;font-size:16px;background:var(--acc2);color:#14102e;cursor:pointer}
+  .join button:disabled{background:rgba(255,255,255,.18);color:#fff}
+  .join .msg{margin:10px 0 0;font-weight:700;color:#fff}
+  .creed{margin:24px 0 4px;text-align:center;font-size:13px;letter-spacing:.2em;color:var(--ink-soft)}
+  .end{text-align:center;font-size:clamp(22px,5vw,34px);font-weight:900;margin:6px 0 0;color:var(--acc)}
+  .ver{text-align:center;font-size:12px;margin:10px 0 0;color:var(--ink-soft)}
+  @media (prefers-reduced-motion:reduce){body{transition:none}li a.pick{transition:none}}
+
+  /* PREVIEW v1-6 */
+  body{background:linear-gradient(180deg,#0e3c80 0%,#14688c 100%) fixed !important}
+  #beam{position:fixed;inset:0;overflow:hidden;pointer-events:none;z-index:0}
+  body.sky-playing #beam .shaft{transition:none}
+  #beam .shaft{position:absolute;top:-6vh;right:-4vw;width:240vmax;height:var(--bw,62vmax);transform-origin:100% 0;transform:rotate(calc(-1deg * var(--ang,40)));
+    clip-path:polygon(100% 0,100% 38%,0 100%,0 0);filter:blur(22.66px);mix-blend-mode:screen;
+    background:linear-gradient(to left, rgba(var(--bc),var(--ba)) 0%, rgba(var(--bc),calc(var(--ba) * .55)) 45%, rgba(var(--bc),0) 100%);transition:all 1.2s ease}
+  .wrap{position:relative;z-index:1}
+  li a.pick{border:0}
+  li a.pick.pastel .n,li a.pick.pastel .num,li a.pick.pastel .d{color:#2b0f4f}
+  li a.pick.pastel .flag{color:#2b0f4f;background:rgba(43,15,79,.10);border-color:rgba(43,15,79,.45)}
+  li a.pick.pastel .age{box-shadow:0 0 0 1px rgba(43,15,79,.35)}
+  li a.pick.juicy .n,li a.pick.juicy .num,li a.pick.juicy .d{color:#fff}
+  .tremor-head{flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:12px}
+  .tremor h2{width:100%;display:flex;justify-content:center}
+  .tremor h2 .dtitle{font-size:clamp(16px,5.6vw,34px) !important;justify-content:center;column-gap:.5em}
+  .tbtns{justify-content:center}
+  .playsky{margin-top:8px;background:transparent;color:#fff;border:2px solid var(--acc);border-radius:999px;padding:6px 12px;font-weight:800;font-size:13px}
+
+  li a.pick{position:relative;overflow:hidden;isolation:isolate}
+  li a.pick::before{content:"";position:absolute;right:calc(var(--cm) * -0.04);top:calc(var(--cm) * -0.06);width:calc(var(--cm) * 2.4);height:calc(var(--cm) * 0.62);transform-origin:100% 0;
+    transform:rotate(calc(-1deg * var(--ang,40)));clip-path:polygon(100% 0,100% 38%,0 100%,0 0);filter:none;
+    background:var(--st);z-index:-1;pointer-events:none}
+
+  /* ARTOOLZ apps block */
+  .artz{margin:0 0 26px;background:#fff;color:#2b0f4f;border-radius:18px;padding:18px 16px}
+  .artz-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+  .artz h2{font-size:clamp(34px,8vw,56px);line-height:.95;margin:0;font-weight:900;letter-spacing:-.02em;color:#2b0f4f}
+  .artz h2 sup{font-size:.28em;vertical-align:top;position:relative;top:.4em}
+  .artz .asub{margin:6px 0 0;font-weight:700;font-size:15px}
+  .artz .logo{width:min(46%,260px);height:auto}
+  .artz .beta{margin:14px 0;background:#2b0f4f;color:#fff;border-radius:12px;padding:10px 12px;text-align:center;font-size:14.5px;line-height:1.4}
+  .artz .beta b{color:#ffd166;letter-spacing:.08em}
+  .apps{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+  @media (min-width:700px){.apps{grid-template-columns:repeat(4,1fr)}}
+  .app{display:flex;flex-direction:column;align-items:center;gap:6px;background:#ffe9f6;border-radius:14px;padding:10px;text-decoration:none;color:#2b0f4f}
+  .aqr svg{width:110px;height:110px;display:block;background:#fff}
+  .an{font-weight:800;font-size:14px;text-align:center;line-height:1.2}
+  .ago{font-weight:800;font-size:13px;background:#2b0f4f;color:#fff;border-radius:999px;padding:5px 16px}
+  .src{font-size:12px;margin:6px 0 0}
+  .src a{color:#fff}
+  .join{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:0 16px;align-items:start}
+  .join>*{grid-column:1}
+  .join .kun{grid-column:2;grid-row:1 / span 4;width:120px}
+  .join .kun svg{width:100%;height:auto;display:block}
+  @media (max-width:520px){.join .kun{width:84px}}
+
+  .hdr{display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .hdr-txt{min-width:0}
+  .hlogo{width:min(38%,247px);height:auto;flex-shrink:0}
+  .jump{display:inline-block;margin-top:12px;background:var(--acc);color:#14102e;font-weight:800;text-decoration:none;border-radius:999px;padding:9px 18px;font-size:15px}
+  .artz h2{font-size:clamp(40px,9vw,84px) !important}
+  .artz .beta{margin:8px 0 14px !important}
+  .duo{display:flex;align-items:flex-end;gap:6px}
+  .duo .m1 svg{width:clamp(78px,16vw,130px);height:auto;display:block}
+  .duo .m2 svg{width:clamp(70px,14vw,116px);height:auto;display:block}
+  .join{display:block !important}
+
+  html{scroll-behavior:auto}
+  .hdr{align-items:flex-start !important}
+  .hdr-r{display:flex;flex-direction:column;align-items:flex-end;gap:10px;flex-shrink:0;width:min(38%,247px)}
+  .hdr-r .hlogo{width:100%}
+  .hdr-r .jump{margin-top:0}
+  .jumps{display:flex;justify-content:space-between;gap:10px;margin:14px 0 16px}
+  .j2{margin-top:0;background:transparent;color:#fff;border:2px solid var(--acc)}
+  .tremor,.artz{scroll-margin-top:12px}
+
+  /* Thermal views */
+  .vt{font-size:17px;margin:12px 0 8px;font-weight:800}
+  .seiswrap.viewer{cursor:pointer;-webkit-tap-highlight-color:transparent;border-radius:10px;overflow:hidden}
+  .seiswrap canvas.tv{display:none;width:100%%;aspect-ratio:1.9/1;height:auto;background:#0b0a2a}
+  .seiswrap canvas.tv.on{display:block}
+  .vb{font-size:13px;line-height:1.45;margin:8px 0 0;color:var(--ink-soft)}
+  .dots{display:flex;justify-content:center;gap:8px;margin:10px 0 2px}
+  .dot{width:12px;height:12px;border-radius:999px;border:2px solid #fff;background:transparent;padding:0;cursor:pointer}
+  .dot.on{width:28px;background:var(--acc);border-color:var(--acc)}
+  .hint{text-align:center;font-size:12.5px;margin:0 0 6px;color:var(--ink-soft)}
+
+  /* ---- v2 site: language switch, menu, subline, families ---- */
+  html[lang="es"] .en-only{display:none!important} html:not([lang="es"]) .es-only{display:none!important}
+  .lang{display:inline-flex;border:1px solid var(--card-edge);border-radius:999px;overflow:hidden}
+  .lang button{background:transparent;color:#fff;border:0;padding:8px 14px;font-weight:900;font-size:14px;cursor:pointer;min-width:48px;min-height:40px}
+  .lang button[aria-pressed="true"]{background:var(--acc);color:#14102e}
+  .hdr-r{display:flex;flex-direction:column;align-items:flex-end;gap:8px}
+  .subline{margin:8px 0 0;white-space:nowrap;font-size:clamp(13px,2.7vw,26px);font-weight:800;color:var(--acc)}
+  .subline span{color:var(--ink-soft);font-weight:700}
+  .menu{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 0}
+  .menu a{text-decoration:none;font-weight:900;font-size:15px;letter-spacing:.04em;padding:10px 16px;border-radius:999px;border:1px solid var(--card-edge);background:rgba(10,8,30,.4);min-height:44px;display:inline-flex;align-items:center}
+  .menu a[aria-current="page"]{background:#fff;color:#14102e}
+  .fam{margin:18px 0 22px;background:#fff;color:#2b0f4f;border-radius:18px;padding:18px 16px}
+  .fam h2{font-size:clamp(24px,5vw,34px);margin:0;font-weight:900;color:#2b0f4f}
+  .fam-sub{margin:4px 0 14px;font-weight:700}
+  .fcols{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+  .fcol{border-radius:14px;padding:12px}
+  .fcol.home{background:#dcfbe6} .fcol.kids{background:#fff3c2} .fcol.teens{background:#efe3ff}
+  .fcol h3{margin:0 0 8px;font-size:14px;letter-spacing:.1em;font-weight:900;color:#2b0f4f}
+  .tip{margin:0 0 10px;font-size:15px;line-height:1.45}
+  .tip .n{display:inline-block;width:22px;height:22px;border-radius:50%;background:#2b0f4f;color:#fff;font-size:12px;font-weight:800;text-align:center;line-height:22px;margin-right:6px}
+  .tip a.src{color:#0b4f87;font-weight:800;font-size:13px;white-space:nowrap}
+  .fam .crisis{margin:6px 0 0;background:#e3f1ff;border:2px solid #0b4f87;border-radius:12px;padding:10px 12px;text-align:center;font-weight:700}
+  @media (max-width:520px){.brands{font-size:10px;letter-spacing:.1em;white-space:nowrap} .hdr-r .jump{padding:8px 12px;font-size:13px;white-space:nowrap} .lang button{padding:6px 10px;min-height:38px;min-width:42px;font-size:13px}}
+  .nyc{margin:10px 0 0;display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 10px}
+  .nyc .nk{flex-basis:100%;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft)}
+  .nyc .nv{font-size:clamp(18px,3.4vw,26px);font-weight:800;font-variant-numeric:tabular-nums}
+  .nyc .nd{font-size:13px;color:var(--ink-soft)}
+  .live{grid-template-columns:repeat(auto-fit,minmax(220px,1fr)) !important}
+  .copyr{text-align:center;font-size:12px;color:var(--ink-soft);margin:22px 16px 30px}
+  .noai{margin:-4px 0 14px;text-align:center;font-size:14.5px;line-height:1.4}
+  @media (max-width:700px){.fcols{grid-template-columns:minmax(0,1fr)}}
+
+  .kp2 .kkp{margin:0;font-size:13px;letter-spacing:.14em;font-weight:900;color:#0b4f87}
+  .kp2 h2.kh2{margin-top:22px}
+  .kgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:12px}
+  .kc{border-radius:14px;padding:12px 14px}
+  .kc.c0{background:#dcfbe6}.kc.c1{background:#fff3c2}.kc.c2{background:#efe3ff}.kc.c3{background:#e3f1ff}.kc.c4{background:#ffe9f6}.kc.c5{background:#e6f7f5}
+  .kc h4{margin:0 0 6px;font-size:17px;line-height:1.25;font-weight:900;color:#2b0f4f}
+  .kc h4 .n{display:inline-block;width:22px;height:22px;border-radius:50%;background:#2b0f4f;color:#fff;font-size:12px;font-weight:800;text-align:center;line-height:22px;margin-right:6px;vertical-align:2px}
+  .kc p{margin:0 0 6px;font-size:15px;line-height:1.45}
+  .kc .lab{font-weight:900;color:#9c0455}
+  .kc .ks{font-size:13px;color:#4a3570;border-top:1.5px solid rgba(43,15,79,.15);padding-top:5px;margin-top:8px}
+  .kc .ks a{color:#0b4f87;font-weight:800}
+  .kp2 .kdisc{margin:14px 0 0;background:#2b0f4f;color:#fff;border-radius:12px;padding:12px 14px;font-size:14.5px;line-height:1.45}
+  .kp2 .kdisc b{color:#ffd166}
+  @media (max-width:700px){.kgrid{grid-template-columns:minmax(0,1fr)}}
+</style>
+</head>
+<body>
+<div id="beam"><div class="shaft"></div></div>
+<div class="wrap">
+
+  <header class="hdr">
+    <div class="hdr-txt">
+      <p class="brands">Kaiju Fruit Labs · Activ8 CellF</p>
+      <h1>INFOPILLZ<sup>™</sup></h1>
+      <p class="nyc"><span class="nk" data-i18n="live_now">NYC right now</span><span class="nv" id="clock">&nbsp;</span><span class="nd" id="date">&nbsp;</span></p>
+    </div>
+    <div class="hdr-r"><picture><source srcset="kaiju-fruit-logo.webp" type="image/webp"><img class="hlogo" id="hlogo" src="kaiju-fruit-logo.png" alt="KAIJU FRUIT"></picture>
+      <div class="lang" role="group" aria-label="Language / Idioma"><button type="button" data-lang="en" aria-pressed="true">EN</button><button type="button" data-lang="es" aria-pressed="false">ES</button></div>
+      <a class="jump" href="#join" data-i18n="join_btn">Join the list</a></div>
+  </header>
+  <p class="subline"><b>Klee's Picks</b> <span>· <span data-i18n="learn_tag">Responsible AI You Need to Know</span></span></p>
+  <nav class="menu" aria-label="Site"><a href="landing-pad.html" data-i18n="m_home">Home</a><a href="artoolz.html">ARTOOLZ</a><a href="infopillz.html" aria-current="page">INFOPILLZ</a></nav>
+  <nav class="jumps"><a class="jump j2" id="jumpFeel" href="#tremor" style="visibility:hidden" data-i18n="feel_jump">Feel the Planet</a></nav>
+
+  <div class="live" aria-live="off">
+    <div class="tile"><p class="k" data-i18n="live_sun">The real sun</p><p class="v" id="sunline">&nbsp;</p><p class="s" id="sunstate">&nbsp;</p></div>
+    <div class="tile" id="tempTile" hidden><p class="k" data-i18n="live_out">Outside in NYC</p><p class="v" id="temp"></p><p class="s" data-i18n="live_om">Live from Open-Meteo</p></div>
+    <div class="tile"><p class="k" data-i18n="live_spin">Earth spin</p><p class="v" id="spin">0.0 km</p><p class="s" data-i18n="live_spin_s">NYC has traveled this far around Earth's axis since you opened this page</p></div>
+  </div>
+
+  <section class="fam" id="families">
+    <h2 data-i18n="fam_h">AI tips for families</h2>
+    <p class="fam-sub" data-i18n="fam_sub">From the AI 101 workshop. Every tip is checked against its source.</p>
+    <div class="fcols"><div class="fcol home"><h3 data-i18n="g_home">AT HOME</h3><p class="tip"><span class="n">1</span><b data-i18n="t1a">AI is already in your phone.</b> <span data-i18n="t1b">Google Search often puts an AI-written answer at the top. Google itself says AI answers may include mistakes, so check important things in more than one place.</span> <a class="src" href="https://support.google.com/websearch/answer/16011537?hl=en" target="_blank" rel="noopener" data-i18n="src">Source</a></p><p class="tip"><span class="n">2</span><b data-i18n="t2a">Pick a family secret word.</b> <span data-i18n="t2b">Scammers can copy a voice with AI. The FBI says to make a secret word with your family. If a call sounds like a loved one in trouble, hang up and call them back directly.</span> <a class="src" href="https://www.ic3.gov/psa/2024/psa241203" target="_blank" rel="noopener" data-i18n="src">Source</a></p><p class="tip"><span class="n">3</span><b data-i18n="t3a">Keep private things private.</b> <span data-i18n="t3b">Don't type your address, school name or family details into a chatbot, and think twice before posting photos of your kids.</span> <a class="src" href="https://support.google.com/gemini/answer/16109150?hl=en" target="_blank" rel="noopener" data-i18n="src">Source</a></p></div><div class="fcol kids"><h3 data-i18n="g_kids">KIDS 5 TO 12</h3><p class="tip"><span class="n">4</span><b data-i18n="t4a">AI is a tool, not a friend.</b> <span data-i18n="t4b">Google asks parents to help kids understand that AI is not a person to share secrets with.</span> <a class="src" href="https://support.google.com/gemini/answer/16109150?hl=en" target="_blank" rel="noopener" data-i18n="src">Source</a></p><p class="tip"><span class="n">5</span><b data-i18n="t5a">Most AI apps aren't made for kids under 13.</b> <span data-i18n="t5b">ChatGPT's maker says it isn't designed for kids 12 and under. Gemini can be turned on for a child under 13 only by a parent, through Google Family Link.</span> <a class="src" href="https://www.nbcnewyork.com/news/national-international/chatgpt-new-parental-controls/6397845/" target="_blank" rel="noopener" data-i18n="src">Source</a></p><p class="tip"><span class="n">6</span><b data-i18n="t6a">Use it together, and ask:</b> <span data-i18n="t6b">“How do we know that's true?”</span></p></div><div class="fcol teens"><h3 data-i18n="g_teens">TEENS AND SCHOOL</h3><p class="tip"><span class="n">7</span><b data-i18n="t7a">AI “companion” apps</b> <span data-i18n="t7b">(chatbots that act like a friend or partner) are not for anyone under 18, says Common Sense Media. In New York, since November 2025, these apps must remind users they're talking to AI, not a person, and point them to crisis help.</span> <a class="src" href="https://www.governor.ny.gov/news/governor-hochul-pens-letter-ai-companion-companies-notifying-them-safeguard-requirements-are" target="_blank" rel="noopener" data-i18n="src">Source</a></p><p class="tip"><span class="n">8</span><b data-i18n="t8a">ChatGPT has parental controls</b> <span data-i18n="t8b">for teens 13 to 17: link your accounts, set quiet hours, and turn off image making.</span> <a class="src" href="https://www.nbcnewyork.com/news/national-international/chatgpt-new-parental-controls/6397845/" target="_blank" rel="noopener" data-i18n="src">Source</a></p><p class="tip"><span class="n">9</span><b data-i18n="t9a">Ask your school about its AI rules.</b> <span data-i18n="t9b">Using AI to learn is not the same as using it to copy.</span></p></div></div>
+    <p class="crisis" data-i18n-html="crisis">If someone is in crisis, call or text <b>988</b>. En español: llame al <b>988</b> y marque 2.</p>
+  </section>
+<section class="fam kp2" id="kp2">
+    <div class="en-only"><p class="kkp">KLEE'S PICKS #2</p><h2>Hard Questions, Calm Answers</h2><div class="kgrid"><div class="kc c0"><h4><span class="n">1</span>Can someone make fake pictures of my child with AI?</h4><p>Yes. It has happened at schools. Sharing fake intimate images is now a federal crime, and since May 2026 websites must take them down within 48 hours of a report.</p><p><span class="lab">Do this:</span> Tell your kids now: if this ever happens, come to me. You are not in trouble.</p><p><span class="lab">Free help:</span> <b>Take It Down</b> (takeitdown.ncmec.org) helps remove images of anyone under 18. The photo never leaves your phone.</p><p class="ks">Source: <a href="https://ftc.gov/business-guidance/blog/2026/05/take-it-down-act-enforcement-starts-now-what-know-about-ftc-tida" target="_blank" rel="noopener">FTC</a> · <a href="https://takeitdown.ncmec.org/" target="_blank" rel="noopener">NCMEC</a> · <a href="https://www.cbsnews.com/amp/news/5-beverly-hills-middle-school-students-expelled-following-ai-generated-nude-photo-scandal" target="_blank" rel="noopener">CBS News</a></p></div><div class="kc c1"><h4><span class="n">2</span>Can a chatbot push my teen toward hurting themselves?</h4><p>Families have sued AI companies after losing their teens. Companion chatbots (apps that act like a friend or partner) are not for anyone under 18, says Common Sense Media. In New York, they must point users to crisis help.</p><p><span class="lab">Do this:</span> Notice if your child treats an app like their closest friend, and talk about it gently.</p><p><span class="lab">Free help:</span> <b>988 Suicide &amp; Crisis Lifeline:</b> call or text 988.</p><p class="ks">Source: <a href="https://www.commonsensemedia.org/ai-ratings" target="_blank" rel="noopener">Common Sense Media</a> · <a href="https://www.governor.ny.gov/news/governor-hochul-pens-letter-ai-companion-companies-notifying-them-safeguard-requirements-are" target="_blank" rel="noopener">NY Governor's Office</a> · <a href="https://6abc.com/post/parents-16-year-old-sue-openai-claiming-chatgpt-advised-teens-suicide/17664365/" target="_blank" rel="noopener">ABC News</a> · <a href="https://www.aljazeera.com/amp/economy/2024/10/24/us-mother-says-in-lawsuit-that-ai-chatbot-encouraged-sons-suicide" target="_blank" rel="noopener">Al Jazeera</a></p></div><div class="kc c2"><h4><span class="n">3</span>Can scammers fake my family's voice?</h4><p>Yes. AI can copy a person's voice. Scammers use it to fake a call from a loved one in trouble.</p><p><span class="lab">Do this:</span> Pick a family secret word. If a call sounds urgent, hang up and call them back on their real number.</p><p><span class="lab">Free help:</span> Report scams to the <b>FBI</b> at ic3.gov.</p><p class="ks">Source: <a href="https://www.ic3.gov/psa/2024/psa241203" target="_blank" rel="noopener">FBI Internet Crime Complaint Center (ic3.gov)</a></p></div><div class="kc c3"><h4><span class="n">4</span>Is AI listening to us?</h4><p>Many chatbots save what you type. ChatGPT, for example, may use your chats to train its models unless you turn that off.</p><p><span class="lab">Do this:</span> Keep names, addresses, school names and photos of your kids out of chatbots.</p><p><span class="lab">Free help:</span> In ChatGPT: <b>Settings, then Data Controls</b>, and turn off model training.</p><p class="ks">Source: <a href="https://help.openai.com/en/articles/5722486-how-your-data-is-used-to-improve-model-performance" target="_blank" rel="noopener">OpenAI Help Center</a> · <a href="https://tomsguide.com/ai/keep-your-chatgpt-data-private-by-opting-out-of-training-heres-how" target="_blank" rel="noopener">Tom's Guide</a></p></div><div class="kc c4"><h4><span class="n">5</span>Will AI take my kid's future job?</h4><p>Nobody knows for sure. Jobs will change. People who understand these tools, and can still think, create and check the work, will be ready.</p><p><span class="lab">Do this:</span> Let your kids make things with technology, not just watch it.</p><p><span class="lab">Free help:</span> <b>Hour of AI</b> from Code.org (code.org/hourofai): free activities families can do any time of year.</p><p class="ks">Source: <a href="https://code.org/hourofai" target="_blank" rel="noopener">Code.org</a> · <a href="https://www.edtechinnovationhub.com/news/more-than-50-tech-companies-and-nonprofits-create-free-activities-for-the-hour-of-ai" target="_blank" rel="noopener">EdTech Innovation Hub</a></p></div><div class="kc c5"><h4><span class="n">6</span>What about things that haven't happened yet?</h4><p>Nobody can see the future, and anyone who says they know for sure is selling something. Some things don't change.</p><p><span class="lab">Do this:</span> Talk with your kids. Check what you see. Report what hurts people.</p><p><span class="lab">Free help:</span> <b>AI Incident Database</b> (incidentdatabase.ai): a public record of real AI failures, so mistakes don't repeat.</p><p class="ks">Source: <a href="https://incidentdatabase.ai/about/" target="_blank" rel="noopener">AI Incident Database</a></p></div></div><p class="crisis">If someone is in crisis, call or text <b>988</b>.</p><h2 class="kh2">The Bright Side</h2><div class="kgrid"><div class="kc c0"><h4><span class="n">1</span>From users to makers</h4><p>Kids can train their own AI with their own pictures and sounds, free and with no code, using Google's Teachable Machine. Code.org's Hour of AI has free activities for families all year.</p><p><span class="lab">Try this:</span> Make one thing together this week.</p><p class="ks">Source: <a href="https://teachablemachine.withgoogle.com/" target="_blank" rel="noopener">Google Teachable Machine</a> · <a href="https://code.org/hourofai" target="_blank" rel="noopener">Code.org</a></p></div><div class="kc c1"><h4><span class="n">2</span>Speaking up fixed the machine</h4><p>Researcher Joy Buolamwini found that face recognition failed darker-skinned women far more often. After she named the companies, all three improved within seven months.</p><p><span class="lab">Try this:</span> When something seems unfair, say so. Noticing is a skill.</p><p class="ks">Source: <a href="https://www.media.mit.edu/publications/actionable-auditing-investigating-the-impact-of-publicly-naming-biased-performance-results-of-commercial-ai-products/" target="_blank" rel="noopener">MIT Media Lab (Raji and Buolamwini, 2019)</a></p></div><div class="kc c2"><h4><span class="n">3</span>A free helper at the table</h4><p>Khanmigo for Teachers is free for every U.S. teacher. Free translation apps help parents read school notices and talk with teachers in their own language.</p><p><span class="lab">Try this:</span> Ask your child's teacher which free tools the class uses.</p><p class="ks">Source: <a href="https://blog.khanacademy.org/?p=16370" target="_blank" rel="noopener">Khan Academy</a></p></div><div class="kc c3"><h4><span class="n">4</span>Love for the planet</h4><p>AI tracks pollution from millions of sources (Climate TRACE), forecasts floods for about 2 billion people (Google), and listens for illegal chainsaws so rangers can protect forests (Rainforest Connection).</p><p><span class="lab">Try this:</span> Look up pollution sources near your home together on climatetrace.org.</p><p class="ks">Source: <a href="https://climatetrace.org/" target="_blank" rel="noopener">Climate TRACE</a> · <a href="https://sites.research.google/gr/floodforecasting/" target="_blank" rel="noopener">Google</a> · <a href="https://rfcx.org/" target="_blank" rel="noopener">Rainforest Connection</a></p></div><div class="kc c4"><h4><span class="n">5</span>Love for each other</h4><p>Be My Eyes is a free app that connects blind and low-vision people with volunteers and with AI descriptions of the world around them.</p><p><span class="lab">Try this:</span> Show your kids how technology can help someone else.</p><p class="ks">Source: <a href="https://www.bemyeyes.com/" target="_blank" rel="noopener">Be My Eyes</a></p></div><div class="kc c5"><h4><span class="n">6</span>Love for ourselves</h4><p>AI can't love you. It can give you back time. Use that time together: record a grandparent's stories, make art, cook, play.</p><p><span class="lab">Try this:</span> Pause before posting. Kindness is something we teach.</p></div></div><p class="kdisc">I'm an artist and educator who has taught with these tools in classrooms since 2023. I'm not a data scientist, and I don't have a degree in AI systems. I'm not an expert. I'm a parent, and that drives my work more than anything. At the heart of it all: love for our kids. <b>Aaron (SpazeCraft)</b></p></div><div class="es-only"><p class="kkp">LAS SELECCIONES DE KLEE #2</p><h2>Preguntas difíciles, respuestas fáciles</h2><div class="kgrid"><div class="kc c0"><h4><span class="n">1</span>¿Alguien puede crear fotos falsas de mi hijo o hija con IA?</h4><p>Sí. Ya ha pasado en escuelas. Compartir imágenes íntimas falsas ahora es un delito federal, y desde mayo de 2026 los sitios web deben quitarlas dentro de las 48 horas después de recibir un reporte.</p><p><span class="lab">Qué hacer:</span> Infórmele a sus hijos desde ahora: si esto pasa algún día, vengan a mí. No estás en problemas.</p><p><span class="lab">Ayuda gratis:</span> <b>Take It Down</b> (takeitdown.ncmec.org) ayuda a quitar imágenes de menores de 18 años. La foto nunca sale de su teléfono.</p><p class="ks">Fuente: <a href="https://ftc.gov/business-guidance/blog/2026/05/take-it-down-act-enforcement-starts-now-what-know-about-ftc-tida" target="_blank" rel="noopener">FTC</a> · <a href="https://takeitdown.ncmec.org/" target="_blank" rel="noopener">NCMEC</a> · <a href="https://www.cbsnews.com/amp/news/5-beverly-hills-middle-school-students-expelled-following-ai-generated-nude-photo-scandal" target="_blank" rel="noopener">CBS News</a></p></div><div class="kc c1"><h4><span class="n">2</span>¿Un chatbot puede empujar a mi adolescente a hacerse daño?</h4><p>Algunas familias han demandado a empresas de IA después de perder a sus hijos adolescentes. Los chatbots de compañía (apps que actúan como amigo o pareja) no son para menores de 18 años, según Common Sense Media. En Nueva York, deben dirigir a los usuarios a ayuda en caso de crisis.</p><p><span class="lab">Qué hacer:</span> Fíjese si su hijo trata una app como su mejor amigo, y hablen del tema con calma.</p><p><span class="lab">Ayuda gratis:</span> <b>Línea 988 de Prevención del Suicidio y Crisis:</b> llame al 988 y marque 2, o envíe AYUDA por texto al 988.</p><p class="ks">Fuente: <a href="https://www.commonsensemedia.org/ai-ratings" target="_blank" rel="noopener">Common Sense Media</a> · <a href="https://www.governor.ny.gov/news/governor-hochul-pens-letter-ai-companion-companies-notifying-them-safeguard-requirements-are" target="_blank" rel="noopener">Oficina de la Gobernadora de NY</a> · <a href="https://6abc.com/post/parents-16-year-old-sue-openai-claiming-chatgpt-advised-teens-suicide/17664365/" target="_blank" rel="noopener">ABC News</a> · <a href="https://www.aljazeera.com/amp/economy/2024/10/24/us-mother-says-in-lawsuit-that-ai-chatbot-encouraged-sons-suicide" target="_blank" rel="noopener">Al Jazeera</a></p></div><div class="kc c2"><h4><span class="n">3</span>¿Los estafadores pueden copiar la voz de mi familia?</h4><p>Sí. IA puede copiar la voz de una persona. Los estafadores la usan para fingir una llamada de un ser querido en apuros.</p><p><span class="lab">Qué hacer:</span> Elijan una palabra secreta en familia. Si una llamada suena urgente, cuelgue y llame usted a su número real.</p><p><span class="lab">Ayuda gratis:</span> Reporte estafas al <b>FBI</b> en ic3.gov.</p><p class="ks">Fuente: <a href="https://www.ic3.gov/psa/2024/psa241203" target="_blank" rel="noopener">Centro de Denuncias de Delitos por Internet del FBI (ic3.gov)</a></p></div><div class="kc c3"><h4><span class="n">4</span>¿La IA nos está escuchando?</h4><p>Muchos chatbots guardan lo que usted escribe. ChatGPT, por ejemplo, puede usar sus conversaciones para entrenar sus modelos, a menos que usted lo apague.</p><p><span class="lab">Qué hacer:</span> No escriba nombres, direcciones, nombres de escuelas ni fotos de sus hijos en un chatbot.</p><p><span class="lab">Ayuda gratis:</span> En ChatGPT: <b>Configuración, luego Controles de datos</b>, y apague el entrenamiento del modelo.</p><p class="ks">Fuente: <a href="https://help.openai.com/en/articles/5722486-how-your-data-is-used-to-improve-model-performance" target="_blank" rel="noopener">Centro de ayuda de OpenAI</a> · <a href="https://tomsguide.com/ai/keep-your-chatgpt-data-private-by-opting-out-of-training-heres-how" target="_blank" rel="noopener">Tom's Guide</a></p></div><div class="kc c4"><h4><span class="n">5</span>¿IA le quitará el futuro trabajo a mi hijo?</h4><p>Nadie lo sabe con seguridad. Los trabajos van a cambiar. Las personas que entienden estas herramientas, y que todavía pueden pensar, crear y revisar el trabajo, estarán preparadas.</p><p><span class="lab">Qué hacer:</span> Deje que sus hijos creen cosas con la tecnología, no que solo la vean.</p><p><span class="lab">Ayuda gratis:</span> <b>Hour of AI</b> de Code.org (code.org/hourofai): actividades gratis que las familias pueden hacer en cualquier época del año.</p><p class="ks">Fuente: <a href="https://code.org/hourofai" target="_blank" rel="noopener">Code.org</a> · <a href="https://www.edtechinnovationhub.com/news/more-than-50-tech-companies-and-nonprofits-create-free-activities-for-the-hour-of-ai" target="_blank" rel="noopener">EdTech Innovation Hub</a></p></div><div class="kc c5"><h4><span class="n">6</span>¿Y las cosas que todavía no han pasado?</h4><p>Nadie puede ver el futuro, y quien diga que lo sabe con seguridad le está vendiendo algo. Algunas cosas no cambian.</p><p><span class="lab">Qué hacer:</span> Hable con sus hijos. Verifique lo que ve. Reporte lo que hace daño.</p><p><span class="lab">Ayuda gratis:</span> <b>AI Incident Database</b> (incidentdatabase.ai): un registro público de fallas reales de la IA, para que los errores no se repitan.</p><p class="ks">Fuente: <a href="https://incidentdatabase.ai/about/" target="_blank" rel="noopener">AI Incident Database</a></p></div></div><p class="crisis">Si alguien está en crisis: llame al <b>988</b> y marque 2, o envíe <b>AYUDA</b> por texto al <b>988</b>.</p><h2 class="kh2">El lado brillante</h2><div class="kgrid"><div class="kc c0"><h4><span class="n">1</span>De usuarios a creadores</h4><p>Los niños pueden entrenar su propia IA con sus propias imágenes y sonidos, gratis y sin programar, con Teachable Machine de Google. Hour of AI de Code.org tiene actividades gratis para familias todo el año.</p><p><span class="lab">Pruébelo:</span> Hagan una cosa juntos esta semana.</p><p class="ks">Fuente: <a href="https://teachablemachine.withgoogle.com/" target="_blank" rel="noopener">Google Teachable Machine</a> · <a href="https://code.org/hourofai" target="_blank" rel="noopener">Code.org</a></p></div><div class="kc c1"><h4><span class="n">2</span>Alzar la voz arregló la máquina</h4><p>La investigadora Joy Buolamwini descubrió que el reconocimiento facial fallaba mucho más con mujeres de piel oscura. Después de que ella nombró a las empresas, las tres mejoraron en siete meses.</p><p><span class="lab">Pruébelo:</span> Cuando algo parezca injusto, dígalo. Darse cuenta es una habilidad.</p><p class="ks">Fuente: <a href="https://www.media.mit.edu/publications/actionable-auditing-investigating-the-impact-of-publicly-naming-biased-performance-results-of-commercial-ai-products/" target="_blank" rel="noopener">MIT Media Lab (Raji y Buolamwini, 2019)</a></p></div><div class="kc c2"><h4><span class="n">3</span>Ayuda gratis en la mesa</h4><p>Khanmigo para maestros es gratis para todos los maestros de E.U. Las apps de traducción gratis ayudan a los padres a leer los avisos de la escuela y a hablar con los maestros en su propio idioma.</p><p><span class="lab">Pruébelo:</span> Pregúntele al maestro de su hijo qué herramientas gratis usa la clase.</p><p class="ks">Fuente: <a href="https://blog.khanacademy.org/?p=16370" target="_blank" rel="noopener">Khan Academy</a></p></div><div class="kc c3"><h4><span class="n">4</span>Amor por el planeta</h4><p>IA rastrea la contaminación de millones de fuentes (Climate TRACE), pronostica inundaciones para unos 2 mil millones de personas (Google) y escucha motosierras ilegales para que los guardabosques protejan las selvas (Rainforest Connection).</p><p><span class="lab">Pruébelo:</span> Busquen juntos las fuentes de contaminación cerca de su casa en climatetrace.org.</p><p class="ks">Fuente: <a href="https://climatetrace.org/" target="_blank" rel="noopener">Climate TRACE</a> · <a href="https://sites.research.google/gr/floodforecasting/" target="_blank" rel="noopener">Google</a> · <a href="https://rfcx.org/" target="_blank" rel="noopener">Rainforest Connection</a></p></div><div class="kc c4"><h4><span class="n">5</span>Amor por los demás</h4><p>Be My Eyes es una app gratis que conecta a personas ciegas o con baja visión con voluntarios y con descripciones hechas por IA del mundo a su alrededor.</p><p><span class="lab">Pruébelo:</span> Muéstreles a sus hijos cómo la tecnología puede ayudar a otra persona.</p><p class="ks">Fuente: <a href="https://www.bemyeyes.com/" target="_blank" rel="noopener">Be My Eyes</a></p></div><div class="kc c5"><h4><span class="n">6</span>Amor por nosotros mismos</h4><p>IA no puede amarle. Sí puede devolverle tiempo. Úselo en familia: graben las historias de los abuelos, hagan arte, cocinen, jueguen.</p><p><span class="lab">Pruébelo:</span> Haga una pausa antes de publicar. La bondad es algo que enseñamos.</p></div></div><p class="kdisc">Soy artista y educador, y enseño con estas herramientas en el salón de clases desde 2023. No soy científico de datos ni tengo un título en sistemas de IA. No soy un experto. Soy padre, y eso impulsa mi trabajo más que nada. El amor por nuestros hijos: Es el corazón de todo. <b>Aaron (SpazeCraft)</b></p></div>
+  </section>
+  <div class="legend" aria-label="Age guide">
+    <span><span class="age K">K</span><span data-i18n="lg_k">Ages 5 to 12</span></span>
+    <span><span class="age T">T</span><span data-i18n="lg_t">Teens</span></span>
+    <span><span class="age A">A</span><span data-i18n="lg_a">Adults</span></span>
+    <span><span class="age P">P</span><span data-i18n="lg_p">Parents and educators</span></span>
+  </div>
+
+  <main class="cols" id="cols"></main>
+
+  <div class="tremor" id="tremor" hidden>
+    <div class="tremor-head">
+      <h2><span class="dtitle en-only" role="img" aria-label="Feel the Planet"><svg class="dw tk" viewBox="43 -830 2421 860" aria-hidden="true" focusable="false"><path d="M293 -5C293 -5 291 -218 291 -218C291 -218 210 -146 210 -146C210 -146 296 -249 296 -249C296 -249 551 -254 551 -254C551 -254 549 -401 549 -401C549 -401 323 -399 323 -399C323 -399 195 -328 195 -328C195 -328 294 -403 294 -403C294 -403 295 -541 295 -541C295 -541 546 -541 546 -541C546 -541 574 -509 574 -509C574 -509 577 -703 577 -703C577 -703 190 -700 190 -700C190 -700 241 -628 241 -628C241 -628 159 -704 159 -704C159 -704 85 -704 85 -704C85 -704 49 -543 49 -543C49 -543 90 -663 90 -663C90 -663 89 -112 89 -112C89 -112 187 -214 187 -214C187 -214 92 -73 92 -73C92 -73 253 -250 253 -250C253 -250 92 -41 92 -41C92 -41 43 -128 43 -128C43 -128 88 -2 88 -2C88 -2 293 -5 293 -5ZM1043 -131C1043 -131 936 -7 936 -7C936 -7 1211 -4 1211 -4C1211 -4 1210 -172 1210 -172C1210 -172 1153 -240 1153 -240C1153 -240 1175 -169 1175 -169C1175 -169 905 -168 905 -168C905 -168 895 -354 895 -354C895 -354 942 -285 942 -285C942 -285 1172 -284 1172 -284C1172 -284 1159 -477 1159 -477C1159 -477 1143 -430 1143 -430C1143 -430 899 -432 899 -432C899 -432 899 -541 899 -541C899 -541 1167 -544 1167 -544C1167 -544 1187 -510 1187 -510C1187 -510 1188 -705 1188 -705C1188 -705 646 -704 646 -704C646 -704 700 -685 700 -685C700 -685 701 -477 701 -477C701 -477 838 -643 838 -643C838 -643 701 -442 701 -442C701 -442 697 -73 697 -73C697 -73 819 -401 819 -401C819 -401 696 -5 696 -5C696 -5 903 -4 903 -4C903 -4 1043 -131 1043 -131ZM1688 -131C1688 -131 1581 -7 1581 -7C1581 -7 1856 -4 1856 -4C1856 -4 1855 -172 1855 -172C1855 -172 1798 -240 1798 -240C1798 -240 1820 -169 1820 -169C1820 -169 1550 -168 1550 -168C1550 -168 1540 -354 1540 -354C1540 -354 1587 -285 1587 -285C1587 -285 1817 -284 1817 -284C1817 -284 1804 -477 1804 -477C1804 -477 1788 -430 1788 -430C1788 -430 1544 -432 1544 -432C1544 -432 1544 -541 1544 -541C1544 -541 1812 -544 1812 -544C1812 -544 1832 -510 1832 -510C1832 -510 1833 -705 1833 -705C1833 -705 1291 -704 1291 -704C1291 -704 1345 -685 1345 -685C1345 -685 1346 -477 1346 -477C1346 -477 1483 -643 1483 -643C1483 -643 1346 -442 1346 -442C1346 -442 1342 -73 1342 -73C1342 -73 1464 -401 1464 -401C1464 -401 1341 -5 1341 -5C1341 -5 1548 -4 1548 -4C1548 -4 1688 -131 1688 -131ZM2464 1C2464 1 2463 -30 2463 -47C2463 -63 2460 -286 2460 -286C2460 -286 2436 -162 2436 -162C2436 -162 2213 -164 2213 -164C2213 -164 2088 -68 2088 -68C2088 -68 2188 -163 2188 -163C2188 -163 2187 -328 2187 -328C2187 -328 2124 -341 2124 -341C2124 -341 2186 -349 2186 -349C2186 -349 2061 -363 2061 -363C2061 -363 2186 -374 2186 -374C2186 -374 2023 -383 2023 -383C2023 -383 2187 -394 2187 -394C2187 -394 2192 -673 2192 -673C2192 -673 2301 -700 2301 -700C2301 -700 1981 -707 1981 -707C1981 -707 1953 -620 1953 -620C1953 -620 1983 -678 1983 -678C1983 -678 1980 -292 1980 -292C1980 -292 2099 -279 2099 -279C2099 -279 1980 -272 1980 -272C1980 -272 1984 1 1984 1C1984 1 2464 1 2464 1Z"/></svg><svg class="dw tk" viewBox="17 -830 2237 860" aria-hidden="true" focusable="false"><path d="M460 -277C460 -277 341 -298 341 -298C341 -298 471 -331 471 -331C471 -331 470 -538 470 -538C470 -538 650 -547 650 -547C650 -547 794 -786 794 -786C794 -786 654 -702 654 -702C654 -702 97 -703 97 -703C97 -703 17 -510 17 -510C17 -510 84 -418 84 -418C84 -418 69 -501 69 -501C69 -501 94 -550 94 -550C94 -550 275 -547 275 -547C275 -547 264 -329 264 -329C264 -329 265 -92 265 -92C265 -92 316 -76 316 -76C316 -76 171 -8 171 -8C171 -8 260 -11 260 -11C260 -11 475 -6 475 -6C475 -6 460 -277 460 -277ZM1617 -192C1617 -192 1574 -50 1574 -50C1574 -50 1572 -704 1572 -704C1572 -704 1269 -705 1269 -705C1269 -705 1371 -674 1371 -674C1371 -674 1368 -433 1368 -433C1368 -433 1134 -432 1134 -432C1134 -432 1119 -358 1119 -358C1119 -358 1122 -701 1122 -701C1122 -701 828 -704 828 -704C828 -704 901 -666 901 -666C901 -666 917 -34 917 -34C917 -34 857 -140 857 -140C857 -140 911 0 911 0C911 0 1118 2 1118 2C1118 2 1123 -270 1123 -270C1123 -270 1330 -280 1330 -280C1330 -280 1274 -340 1274 -340C1274 -340 1258 -319 1258 -319C1258 -319 1202 -410 1202 -410C1202 -410 1276 -344 1276 -368C1276 -391 1357 -282 1357 -282C1357 -282 1369 -26 1369 -26C1369 -26 1325 -2 1325 -2C1325 -2 1577 2 1577 2C1577 2 1617 -192 1617 -192ZM2086 -131C2086 -131 1979 -7 1979 -7C1979 -7 2254 -4 2254 -4C2254 -4 2253 -172 2253 -172C2253 -172 2196 -240 2196 -240C2196 -240 2218 -169 2218 -169C2218 -169 1948 -168 1948 -168C1948 -168 1938 -354 1938 -354C1938 -354 1985 -285 1985 -285C1985 -285 2215 -284 2215 -284C2215 -284 2202 -477 2202 -477C2202 -477 2186 -430 2186 -430C2186 -430 1942 -432 1942 -432C1942 -432 1942 -541 1942 -541C1942 -541 2210 -544 2210 -544C2210 -544 2230 -510 2230 -510C2230 -510 2231 -705 2231 -705C2231 -705 1689 -704 1689 -704C1689 -704 1743 -685 1743 -685C1743 -685 1744 -477 1744 -477C1744 -477 1881 -643 1881 -643C1881 -643 1744 -442 1744 -442C1744 -442 1740 -73 1740 -73C1740 -73 1862 -401 1862 -401C1862 -401 1739 -5 1739 -5C1739 -5 1946 -4 1946 -4C1946 -4 2086 -131 2086 -131Z"/></svg><svg class="dw tk" viewBox="27 -830 4321 860" aria-hidden="true" focusable="false"><path d="M340 1C340 1 298 -17 298 -17C298 -17 299 -193 299 -193C299 -193 262 -261 262 -261C262 -261 301 -220 317 -203C320 -206 325 -207 329 -206C341 -202 355 -199 369 -197C397 -197 431 -197 454 -197C522 -207 587 -239 617 -293C618 -362 635 -431 666 -494C665 -505 663 -515 662 -522C660 -532 657 -542 653 -551C651 -556 648 -563 644 -570C636 -585 626 -600 614 -612C591 -637 563 -656 533 -671C504 -685 473 -696 442 -703C354 -703 27 -704 27 -704C27 -704 89 -684 89 -684C89 -684 52 -673 52 -673C52 -673 88 -663 88 -663C88 -663 94 1 94 1C94 1 299 4 299 4C299 4 340 1 340 1ZM327 -348C310 -359 296 -378 295 -397V-411V-413V-425V-432C295 -440 295 -449 295 -457C295 -471 294 -486 294 -501C294 -501 294 -502 294 -502C294 -502 294 -503 294 -503C294 -503 294 -503 294 -503C293 -505 293 -507 293 -509C293 -509 292 -509 291 -509C293 -515 294 -522 294 -522C294 -522 232 -530 210 -534C210 -534 211 -534 211 -535C225 -535 253 -534 281 -534C283 -534 285 -534 287 -534C287 -534 287 -534 287 -534C331 -533 377 -533 385 -533C389 -532 393 -531 396 -530C415 -524 433 -514 448 -501C452 -497 456 -493 459 -488C463 -477 466 -465 468 -454C468 -453 468 -452 468 -451C469 -446 469 -440 470 -434C470 -430 470 -426 470 -422C469 -420 469 -419 469 -417C468 -413 467 -408 466 -404C461 -391 452 -380 444 -370C443 -368 441 -367 440 -366C432 -361 423 -356 415 -353C415 -353 414 -353 414 -353C411 -352 407 -351 403 -350C379 -345 353 -345 327 -348ZM1252 1C1252 1 1251 -30 1251 -47C1251 -63 1248 -286 1248 -286C1248 -286 1224 -162 1224 -162C1224 -162 1001 -164 1001 -164C1001 -164 876 -68 876 -68C876 -68 976 -163 976 -163C976 -163 975 -328 975 -328C975 -328 912 -341 912 -341C912 -341 974 -349 974 -349C974 -349 849 -363 849 -363C849 -363 974 -374 974 -374C974 -374 811 -383 811 -383C811 -383 975 -394 975 -394C975 -394 980 -673 980 -673C980 -673 1089 -700 1089 -700C1089 -700 769 -707 769 -707C769 -707 741 -620 741 -620C741 -620 771 -678 771 -678C771 -678 768 -292 768 -292C768 -292 887 -279 887 -279C887 -279 768 -272 768 -272C768 -272 772 1 772 1C772 1 1252 1 1252 1ZM1616 -139C1616 -139 1700 -146 1700 -146C1700 -146 1700 -286 1700 -286C1700 -286 1646 -286 1646 -286C1646 -286 1718 -537 1718 -537C1718 -537 1784 -288 1784 -288C1784 -288 1723 -283 1723 -283C1723 -283 1721 -148 1721 -148C1721 -148 1823 -140 1823 -140C1823 -140 1864 -3 1864 -3C1864 -3 2076 -5 2076 -5C2076 -5 2078 -210 2078 -210C2078 -210 2053 -56 2053 -56C2053 -56 1871 -634 1871 -634C1871 -634 1925 -544 1925 -544C1925 -544 1851 -703 1851 -703L1591 -707C1591 -707 1453 -575 1453 -575C1453 -575 1581 -670 1581 -670C1581 -670 1370 -43 1370 -43C1370 -43 1291 -3 1291 -3C1291 -3 1573 0 1573 0C1573 0 1616 -139 1616 -139ZM2872 -183C2872 -183 2813 -58 2813 -58C2813 -58 2825 -700 2825 -700C2825 -700 2537 -707 2537 -707C2537 -707 2621 -676 2621 -676C2621 -676 2616 -357 2616 -357C2616 -357 2468 -547 2468 -547C2468 -547 2263 -466 2263 -466C2263 -466 2445 -577 2445 -577C2445 -577 2374 -570 2308 -563L2395 -586C2418 -588 2436 -589 2436 -589C2436 -589 2362 -700 2362 -700C2362 -700 2349 -699 2329 -699C2354 -700 2371 -700 2371 -700C2371 -700 2128 -702 2128 -702C2128 -702 2191 -656 2191 -656C2191 -656 2196 -595 2199 -553C2198 -553 2198 -553 2198 -553C2197 -412 2195 -196 2195 -196C2195 -196 2315 -171 2315 -171C2315 -171 2196 -153 2196 -153C2196 -153 2197 -47 2197 -47C2197 -47 2157 -143 2157 -143C2157 -143 2200 -10 2200 -10C2200 -10 2400 -7 2400 -7C2400 -7 2404 -376 2404 -376C2404 -376 2520 -209 2520 -209C2520 -209 2762 -333 2762 -333C2762 -333 2536 -184 2536 -184C2536 -184 2614 -64 2614 -64C2614 -64 2616 -11 2616 -11C2616 -11 2820 -3 2820 -3C2820 -3 2872 -183 2872 -183ZM2198 -553C2198 -553 2198 -557 2198 -557C2197 -556 2197 -554 2196 -553C2196 -553 2198 -553 2198 -553ZM3337 -131C3337 -131 3230 -7 3230 -7C3230 -7 3505 -4 3505 -4C3505 -4 3504 -172 3504 -172C3504 -172 3447 -240 3447 -240C3447 -240 3469 -169 3469 -169C3469 -169 3199 -168 3199 -168C3199 -168 3189 -354 3189 -354C3189 -354 3236 -285 3236 -285C3236 -285 3466 -284 3466 -284C3466 -284 3453 -477 3453 -477C3453 -477 3437 -430 3437 -430C3437 -430 3193 -432 3193 -432C3193 -432 3193 -541 3193 -541C3193 -541 3461 -544 3461 -544C3461 -544 3481 -510 3481 -510C3481 -510 3482 -705 3482 -705C3482 -705 2940 -704 2940 -704C2940 -704 2994 -685 2994 -685C2994 -685 2995 -477 2995 -477C2995 -477 3132 -643 3132 -643C3132 -643 2995 -442 2995 -442C2995 -442 2991 -73 2991 -73C2991 -73 3113 -401 3113 -401C3113 -401 2990 -5 2990 -5C2990 -5 3197 -4 3197 -4C3197 -4 3337 -131 3337 -131ZM4014 -277C4014 -277 3895 -298 3895 -298C3895 -298 4025 -331 4025 -331C4025 -331 4024 -538 4024 -538C4024 -538 4204 -547 4204 -547C4204 -547 4348 -786 4348 -786C4348 -786 4208 -702 4208 -702C4208 -702 3651 -703 3651 -703C3651 -703 3571 -510 3571 -510C3571 -510 3638 -418 3638 -418C3638 -418 3623 -501 3623 -501C3623 -501 3648 -550 3648 -550C3648 -550 3829 -547 3829 -547C3829 -547 3818 -329 3818 -329C3818 -329 3819 -92 3819 -92C3819 -92 3870 -76 3870 -76C3870 -76 3725 -8 3725 -8C3725 -8 3814 -11 3814 -11C3814 -11 4029 -6 4029 -6C4029 -6 4014 -277 4014 -277Z"/></svg><span class="sr">Feel the Planet</span></span><span class="dtitle es-only" role="img" aria-label="Siente el planeta"><svg class="dw tk" viewBox="19 -830 3987 860" aria-hidden="true" focusable="false"><path d="M440 -7C440 -7 545 -11 545 -11C545 -11 652 -90 652 -90C652 -90 777 -284 777 -284C777 -284 659 -296 659 -296C659 -296 628 -369 628 -369C628 -369 565 -416 565 -416C565 -416 479 -436 479 -436C479 -436 405 -447 405 -447C405 -447 328 -475 328 -475C328 -475 273 -494 273 -494C273 -494 363 -572 363 -572C363 -572 455 -591 455 -591C455 -591 515 -554 515 -554C515 -554 490 -490 490 -490C490 -490 728 -499 728 -499C728 -499 744 -695 744 -695C744 -695 693 -554 693 -554C693 -554 616 -647 616 -647C616 -647 474 -717 474 -717C474 -717 287 -709 287 -709C287 -709 146 -620 146 -620C146 -620 48 -493 48 -493C48 -493 135 -397 135 -397C135 -397 251 -325 251 -325C251 -325 374 -297 374 -297C374 -297 494 -267 494 -267C494 -267 518 -204 518 -204C518 -204 502 -154 502 -154C502 -154 432 -136 432 -136C432 -136 334 -148 334 -148C334 -148 275 -191 275 -191C275 -191 271 -248 271 -248C271 -248 19 -164 19 -164C19 -164 102 -181 102 -181C102 -181 112 -116 112 -116C112 -116 151 -62 151 -62C151 -62 203 -28 203 -28C203 -28 314 -6 314 -6C314 -6 440 -7 440 -7ZM1077 -17C1077 -17 1079 -506 1079 -506C1079 -506 969 -513 969 -513C969 -513 1094 -584 1094 -584C1094 -584 1096 -814 1096 -814C1096 -814 873 -682 873 -682C873 -682 876 -3 876 -3C876 -3 1077 -17 1077 -17ZM1580 -131C1580 -131 1473 -7 1473 -7C1473 -7 1748 -4 1748 -4C1748 -4 1747 -172 1747 -172C1747 -172 1690 -240 1690 -240C1690 -240 1712 -169 1712 -169C1712 -169 1442 -168 1442 -168C1442 -168 1432 -354 1432 -354C1432 -354 1479 -285 1479 -285C1479 -285 1709 -284 1709 -284C1709 -284 1696 -477 1696 -477C1696 -477 1680 -430 1680 -430C1680 -430 1436 -432 1436 -432C1436 -432 1436 -541 1436 -541C1436 -541 1704 -544 1704 -544C1704 -544 1724 -510 1724 -510C1724 -510 1725 -705 1725 -705C1725 -705 1183 -704 1183 -704C1183 -704 1237 -685 1237 -685C1237 -685 1238 -477 1238 -477C1238 -477 1375 -643 1375 -643C1375 -643 1238 -442 1238 -442C1238 -442 1234 -73 1234 -73C1234 -73 1356 -401 1356 -401C1356 -401 1233 -5 1233 -5C1233 -5 1440 -4 1440 -4C1440 -4 1580 -131 1580 -131ZM2569 -183C2569 -183 2510 -58 2510 -58C2510 -58 2522 -700 2522 -700C2522 -700 2234 -707 2234 -707C2234 -707 2318 -676 2318 -676C2318 -676 2313 -357 2313 -357C2313 -357 2165 -547 2165 -547C2165 -547 1960 -466 1960 -466C1960 -466 2142 -577 2142 -577C2142 -577 2071 -570 2005 -563L2092 -586C2115 -588 2133 -589 2133 -589C2133 -589 2059 -700 2059 -700C2059 -700 2046 -699 2026 -699C2051 -700 2068 -700 2068 -700C2068 -700 1825 -702 1825 -702C1825 -702 1888 -656 1888 -656C1888 -656 1893 -595 1896 -553C1895 -553 1895 -553 1895 -553C1894 -412 1892 -196 1892 -196C1892 -196 2012 -171 2012 -171C2012 -171 1893 -153 1893 -153C1893 -153 1894 -47 1894 -47C1894 -47 1854 -143 1854 -143C1854 -143 1897 -10 1897 -10C1897 -10 2097 -7 2097 -7C2097 -7 2101 -376 2101 -376C2101 -376 2217 -209 2217 -209C2217 -209 2459 -333 2459 -333C2459 -333 2233 -184 2233 -184C2233 -184 2311 -64 2311 -64C2311 -64 2313 -11 2313 -11C2313 -11 2517 -3 2517 -3C2517 -3 2569 -183 2569 -183ZM1895 -553C1895 -553 1895 -557 1895 -557C1894 -556 1894 -554 1893 -553C1893 -553 1895 -553 1895 -553ZM3066 -277C3066 -277 2947 -298 2947 -298C2947 -298 3077 -331 3077 -331C3077 -331 3076 -538 3076 -538C3076 -538 3256 -547 3256 -547C3256 -547 3400 -786 3400 -786C3400 -786 3260 -702 3260 -702C3260 -702 2703 -703 2703 -703C2703 -703 2623 -510 2623 -510C2623 -510 2690 -418 2690 -418C2690 -418 2675 -501 2675 -501C2675 -501 2700 -550 2700 -550C2700 -550 2881 -547 2881 -547C2881 -547 2870 -329 2870 -329C2870 -329 2871 -92 2871 -92C2871 -92 2922 -76 2922 -76C2922 -76 2777 -8 2777 -8C2777 -8 2866 -11 2866 -11C2866 -11 3081 -6 3081 -6C3081 -6 3066 -277 3066 -277ZM3838 -131C3838 -131 3731 -7 3731 -7C3731 -7 4006 -4 4006 -4C4006 -4 4005 -172 4005 -172C4005 -172 3948 -240 3948 -240C3948 -240 3970 -169 3970 -169C3970 -169 3700 -168 3700 -168C3700 -168 3690 -354 3690 -354C3690 -354 3737 -285 3737 -285C3737 -285 3967 -284 3967 -284C3967 -284 3954 -477 3954 -477C3954 -477 3938 -430 3938 -430C3938 -430 3694 -432 3694 -432C3694 -432 3694 -541 3694 -541C3694 -541 3962 -544 3962 -544C3962 -544 3982 -510 3982 -510C3982 -510 3983 -705 3983 -705C3983 -705 3441 -704 3441 -704C3441 -704 3495 -685 3495 -685C3495 -685 3496 -477 3496 -477C3496 -477 3633 -643 3633 -643C3633 -643 3496 -442 3496 -442C3496 -442 3492 -73 3492 -73C3492 -73 3614 -401 3614 -401C3614 -401 3491 -5 3491 -5C3491 -5 3698 -4 3698 -4C3698 -4 3838 -131 3838 -131Z"/></svg><svg class="dw tk" viewBox="31 -830 1173 860" aria-hidden="true" focusable="false"><path d="M428 -131C428 -131 321 -7 321 -7C321 -7 596 -4 596 -4C596 -4 595 -172 595 -172C595 -172 538 -240 538 -240C538 -240 560 -169 560 -169C560 -169 290 -168 290 -168C290 -168 280 -354 280 -354C280 -354 327 -285 327 -285C327 -285 557 -284 557 -284C557 -284 544 -477 544 -477C544 -477 528 -430 528 -430C528 -430 284 -432 284 -432C284 -432 284 -541 284 -541C284 -541 552 -544 552 -544C552 -544 572 -510 572 -510C572 -510 573 -705 573 -705C573 -705 31 -704 31 -704C31 -704 85 -685 85 -685C85 -685 86 -477 86 -477C86 -477 223 -643 223 -643C223 -643 86 -442 86 -442C86 -442 82 -73 82 -73C82 -73 204 -401 204 -401C204 -401 81 -5 81 -5C81 -5 288 -4 288 -4C288 -4 428 -131 428 -131ZM1204 1C1204 1 1203 -30 1203 -47C1203 -63 1200 -286 1200 -286C1200 -286 1176 -162 1176 -162C1176 -162 953 -164 953 -164C953 -164 828 -68 828 -68C828 -68 928 -163 928 -163C928 -163 927 -328 927 -328C927 -328 864 -341 864 -341C864 -341 926 -349 926 -349C926 -349 801 -363 801 -363C801 -363 926 -374 926 -374C926 -374 763 -383 763 -383C763 -383 927 -394 927 -394C927 -394 932 -673 932 -673C932 -673 1041 -700 1041 -700C1041 -700 721 -707 721 -707C721 -707 693 -620 693 -620C693 -620 723 -678 723 -678C723 -678 720 -292 720 -292C720 -292 839 -279 839 -279C839 -279 720 -272 720 -272C720 -272 724 1 724 1C724 1 1204 1 1204 1Z"/></svg><svg class="dw tk" viewBox="27 -830 5128 860" aria-hidden="true" focusable="false"><path d="M340 1C340 1 298 -17 298 -17C298 -17 299 -193 299 -193C299 -193 262 -261 262 -261C262 -261 301 -220 317 -203C320 -206 325 -207 329 -206C341 -202 355 -199 369 -197C397 -197 431 -197 454 -197C522 -207 587 -239 617 -293C618 -362 635 -431 666 -494C665 -505 663 -515 662 -522C660 -532 657 -542 653 -551C651 -556 648 -563 644 -570C636 -585 626 -600 614 -612C591 -637 563 -656 533 -671C504 -685 473 -696 442 -703C354 -703 27 -704 27 -704C27 -704 89 -684 89 -684C89 -684 52 -673 52 -673C52 -673 88 -663 88 -663C88 -663 94 1 94 1C94 1 299 4 299 4C299 4 340 1 340 1ZM327 -348C310 -359 296 -378 295 -397V-411V-413V-425V-432C295 -440 295 -449 295 -457C295 -471 294 -486 294 -501C294 -501 294 -502 294 -502C294 -502 294 -503 294 -503C294 -503 294 -503 294 -503C293 -505 293 -507 293 -509C293 -509 292 -509 291 -509C293 -515 294 -522 294 -522C294 -522 232 -530 210 -534C210 -534 211 -534 211 -535C225 -535 253 -534 281 -534C283 -534 285 -534 287 -534C287 -534 287 -534 287 -534C331 -533 377 -533 385 -533C389 -532 393 -531 396 -530C415 -524 433 -514 448 -501C452 -497 456 -493 459 -488C463 -477 466 -465 468 -454C468 -453 468 -452 468 -451C469 -446 469 -440 470 -434C470 -430 470 -426 470 -422C469 -420 469 -419 469 -417C468 -413 467 -408 466 -404C461 -391 452 -380 444 -370C443 -368 441 -367 440 -366C432 -361 423 -356 415 -353C415 -353 414 -353 414 -353C411 -352 407 -351 403 -350C379 -345 353 -345 327 -348ZM1252 1C1252 1 1251 -30 1251 -47C1251 -63 1248 -286 1248 -286C1248 -286 1224 -162 1224 -162C1224 -162 1001 -164 1001 -164C1001 -164 876 -68 876 -68C876 -68 976 -163 976 -163C976 -163 975 -328 975 -328C975 -328 912 -341 912 -341C912 -341 974 -349 974 -349C974 -349 849 -363 849 -363C849 -363 974 -374 974 -374C974 -374 811 -383 811 -383C811 -383 975 -394 975 -394C975 -394 980 -673 980 -673C980 -673 1089 -700 1089 -700C1089 -700 769 -707 769 -707C769 -707 741 -620 741 -620C741 -620 771 -678 771 -678C771 -678 768 -292 768 -292C768 -292 887 -279 887 -279C887 -279 768 -272 768 -272C768 -272 772 1 772 1C772 1 1252 1 1252 1ZM1616 -139C1616 -139 1700 -146 1700 -146C1700 -146 1700 -286 1700 -286C1700 -286 1646 -286 1646 -286C1646 -286 1718 -537 1718 -537C1718 -537 1784 -288 1784 -288C1784 -288 1723 -283 1723 -283C1723 -283 1721 -148 1721 -148C1721 -148 1823 -140 1823 -140C1823 -140 1864 -3 1864 -3C1864 -3 2076 -5 2076 -5C2076 -5 2078 -210 2078 -210C2078 -210 2053 -56 2053 -56C2053 -56 1871 -634 1871 -634C1871 -634 1925 -544 1925 -544C1925 -544 1851 -703 1851 -703L1591 -707C1591 -707 1453 -575 1453 -575C1453 -575 1581 -670 1581 -670C1581 -670 1370 -43 1370 -43C1370 -43 1291 -3 1291 -3C1291 -3 1573 0 1573 0C1573 0 1616 -139 1616 -139ZM2872 -183C2872 -183 2813 -58 2813 -58C2813 -58 2825 -700 2825 -700C2825 -700 2537 -707 2537 -707C2537 -707 2621 -676 2621 -676C2621 -676 2616 -357 2616 -357C2616 -357 2468 -547 2468 -547C2468 -547 2263 -466 2263 -466C2263 -466 2445 -577 2445 -577C2445 -577 2374 -570 2308 -563L2395 -586C2418 -588 2436 -589 2436 -589C2436 -589 2362 -700 2362 -700C2362 -700 2349 -699 2329 -699C2354 -700 2371 -700 2371 -700C2371 -700 2128 -702 2128 -702C2128 -702 2191 -656 2191 -656C2191 -656 2196 -595 2199 -553C2198 -553 2198 -553 2198 -553C2197 -412 2195 -196 2195 -196C2195 -196 2315 -171 2315 -171C2315 -171 2196 -153 2196 -153C2196 -153 2197 -47 2197 -47C2197 -47 2157 -143 2157 -143C2157 -143 2200 -10 2200 -10C2200 -10 2400 -7 2400 -7C2400 -7 2404 -376 2404 -376C2404 -376 2520 -209 2520 -209C2520 -209 2762 -333 2762 -333C2762 -333 2536 -184 2536 -184C2536 -184 2614 -64 2614 -64C2614 -64 2616 -11 2616 -11C2616 -11 2820 -3 2820 -3C2820 -3 2872 -183 2872 -183ZM2198 -553C2198 -553 2198 -557 2198 -557C2197 -556 2197 -554 2196 -553C2196 -553 2198 -553 2198 -553ZM3337 -131C3337 -131 3230 -7 3230 -7C3230 -7 3505 -4 3505 -4C3505 -4 3504 -172 3504 -172C3504 -172 3447 -240 3447 -240C3447 -240 3469 -169 3469 -169C3469 -169 3199 -168 3199 -168C3199 -168 3189 -354 3189 -354C3189 -354 3236 -285 3236 -285C3236 -285 3466 -284 3466 -284C3466 -284 3453 -477 3453 -477C3453 -477 3437 -430 3437 -430C3437 -430 3193 -432 3193 -432C3193 -432 3193 -541 3193 -541C3193 -541 3461 -544 3461 -544C3461 -544 3481 -510 3481 -510C3481 -510 3482 -705 3482 -705C3482 -705 2940 -704 2940 -704C2940 -704 2994 -685 2994 -685C2994 -685 2995 -477 2995 -477C2995 -477 3132 -643 3132 -643C3132 -643 2995 -442 2995 -442C2995 -442 2991 -73 2991 -73C2991 -73 3113 -401 3113 -401C3113 -401 2990 -5 2990 -5C2990 -5 3197 -4 3197 -4C3197 -4 3337 -131 3337 -131ZM4014 -277C4014 -277 3895 -298 3895 -298C3895 -298 4025 -331 4025 -331C4025 -331 4024 -538 4024 -538C4024 -538 4204 -547 4204 -547C4204 -547 4348 -786 4348 -786C4348 -786 4208 -702 4208 -702C4208 -702 3651 -703 3651 -703C3651 -703 3571 -510 3571 -510C3571 -510 3638 -418 3638 -418C3638 -418 3623 -501 3623 -501C3623 -501 3648 -550 3648 -550C3648 -550 3829 -547 3829 -547C3829 -547 3818 -329 3818 -329C3818 -329 3819 -92 3819 -92C3819 -92 3870 -76 3870 -76C3870 -76 3725 -8 3725 -8C3725 -8 3814 -11 3814 -11C3814 -11 4029 -6 4029 -6C4029 -6 4014 -277 4014 -277ZM4693 -139C4693 -139 4777 -146 4777 -146C4777 -146 4777 -286 4777 -286C4777 -286 4723 -286 4723 -286C4723 -286 4795 -537 4795 -537C4795 -537 4861 -288 4861 -288C4861 -288 4800 -283 4800 -283C4800 -283 4798 -148 4798 -148C4798 -148 4900 -140 4900 -140C4900 -140 4941 -3 4941 -3C4941 -3 5153 -5 5153 -5C5153 -5 5155 -210 5155 -210C5155 -210 5130 -56 5130 -56C5130 -56 4948 -634 4948 -634C4948 -634 5002 -544 5002 -544C5002 -544 4928 -703 4928 -703L4668 -707C4668 -707 4530 -575 4530 -575C4530 -575 4658 -670 4658 -670C4658 -670 4447 -43 4447 -43C4447 -43 4368 -3 4368 -3C4368 -3 4650 0 4650 0C4650 0 4693 -139 4693 -139Z"/></svg><span class="sr">Siente el planeta</span></span></h2>
+      <div class="tbtns">
+        <button class="safe-btn" id="practice" data-i18n="ps_btn">Practice Safety</button>
+        <button class="feel" id="feel" aria-pressed="false" data-i18n="feel_btn">Tap to feel the Earth</button>
+      </div>
+    </div>
+    <h3 class="vt" id="vt">Thermal Earth</h3>
+    <div class="seiswrap viewer" id="seiswrap" role="button" tabindex="0" aria-label="Earthquake views. Tap to switch view.">
+      <canvas id="seis" class="tv on" aria-label="Thermal Earth: real earthquakes from the last 24 hours glowing at their real locations"></canvas>
+      <canvas id="spec" class="tv" aria-label="Thermal spectrogram of the current earthquake"></canvas>
+      <canvas id="grid" class="tv" aria-label="24-hour heat grid of real earthquakes"></canvas>
+    </div>
+    <p class="vb" id="vb"></p>
+    <div class="dots" id="dots"><button class="dot on" aria-label="Thermal Earth"></button><button class="dot" aria-label="Thermal spectrogram"></button><button class="dot" aria-label="24-hour heat grid"></button></div>
+    <p class="hint" data-i18n="hint">Tap the picture to switch view</p>
+    <p class="quake" id="quake"></p>
+    <p class="note" id="qcount"></p>
+    <p class="note src" data-i18n-html="usgs_src">Earthquake data: <a href="https://earthquake.usgs.gov/earthquakes/feed/v1.0/" target="_blank" rel="noopener">USGS Earthquake Hazards Program</a></p>
+    <p class="note" data-i18n="tremor_note">Real earthquakes from the US Geological Survey, picked at random from the past 24 hours. The views are drawn from each quake's real time, place and magnitude. They are drawings, not recorded waveforms. Sound is a low rumble, best in headphones.</p>
+  </div>
+
+<div class="disc">
+    <h2 data-i18n="disc_h">How this list was made</h2>
+    <p data-i18n="disc1">Klee's Picks were curated by Klee (Claude, an AI made by Anthropic) with SpazeCraft.</p>
+    <p data-i18n="disc2">Transparency note: Klee was trained partly on publicly available web data, so the AI that curated this list does not fully meet the data standards below. We are working with the tools that are currently available.</p>
+<p data-i18n="disc7">We don't take the stance of any organization in particular. We share these links as convenient resources for the community. It's up to you to decide what's best for you and your family.</p>
+    <p data-i18n="disc3">ARTOOLZ apps contain no AI in anything you touch or play. Activ8 CellF, the evolving ecosystem this list lives in, uses AI as a tool and creative building partner, a testing ground where ideas can grow without big budgets.</p>
+    <p data-i18n="disc4">We stand for artist rights, ethically sourced data, open source, remix culture, Creative Commons and the public domain.</p>
+    <p data-i18n="disc5">This page is alive. The light beams follow the real sun over New York City as it rises, moves across the sky and sets, changing color through the day. Tap Play today's sky to watch a whole day in 20 seconds.</p>
+    <p data-i18n="disc6">INFOPILLZ is a living document that shifts as we learn. Every link was checked on October 16, 2026.</p>
+    <p class="beta" data-i18n-html="updates">Beta list, partnerships and workshop/events updates: <a href="mailto:kaijufruitcode@gmail.com">kaijufruitcode@gmail.com</a></p>
+  </div>
+
+  <div class="join" id="join">
+    <h2 data-i18n="join_h">Join the list</h2>
+    <p data-i18n-html="updates">Beta list, partnerships and workshop/events updates: <a href="mailto:kaijufruitcode@gmail.com">kaijufruitcode@gmail.com</a></p>
+    <form id="joinForm" novalidate>
+      <label for="jName"><span data-i18n="j_name">First name</span> <input id="jName" name="firstName" type="text" autocomplete="given-name" placeholder="First name" data-i18n-ph="j_ph_name" maxlength="60"></label>
+      <label for="jEmail"><span data-i18n="j_email">Email</span> <input id="jEmail" name="email" type="email" autocomplete="email" placeholder="your@email.com" maxlength="120" required></label>
+      <button type="submit" id="jBtn" data-i18n="j_btn">Sign me up</button>
+    </form>
+    <p class="msg" id="jMsg" role="status" aria-live="polite"></p>
+  </div>
+
+  <p class="creed" data-i18n="creed">FEEL · PEACE · PROTECT · GROW · HONOR · HEALTH</p>
+  <p class="end">Industry Grade, Community Made!</p>
+  <p class="ver">INFOPILLZ v2.5</p>
+</div>
+
+<div class="ps" id="ps" role="alertdialog" aria-modal="true" aria-labelledby="psTitle" hidden>
+  <div class="ps-box">
+    <h2 id="psTitle"><span class="dtitle en-only" role="img" aria-label="PRACTICE SAFETY"><svg class="dw tk" viewBox="27 -830 5651 860" aria-hidden="true" focusable="false"><path d="M340 1C340 1 298 -17 298 -17C298 -17 299 -193 299 -193C299 -193 262 -261 262 -261C262 -261 301 -220 317 -203C320 -206 325 -207 329 -206C341 -202 355 -199 369 -197C397 -197 431 -197 454 -197C522 -207 587 -239 617 -293C618 -362 635 -431 666 -494C665 -505 663 -515 662 -522C660 -532 657 -542 653 -551C651 -556 648 -563 644 -570C636 -585 626 -600 614 -612C591 -637 563 -656 533 -671C504 -685 473 -696 442 -703C354 -703 27 -704 27 -704C27 -704 89 -684 89 -684C89 -684 52 -673 52 -673C52 -673 88 -663 88 -663C88 -663 94 1 94 1C94 1 299 4 299 4C299 4 340 1 340 1ZM327 -348C310 -359 296 -378 295 -397V-411V-413V-425V-432C295 -440 295 -449 295 -457C295 -471 294 -486 294 -501C294 -501 294 -502 294 -502C294 -502 294 -503 294 -503C294 -503 294 -503 294 -503C293 -505 293 -507 293 -509C293 -509 292 -509 291 -509C293 -515 294 -522 294 -522C294 -522 232 -530 210 -534C210 -534 211 -534 211 -535C225 -535 253 -534 281 -534C283 -534 285 -534 287 -534C287 -534 287 -534 287 -534C331 -533 377 -533 385 -533C389 -532 393 -531 396 -530C415 -524 433 -514 448 -501C452 -497 456 -493 459 -488C463 -477 466 -465 468 -454C468 -453 468 -452 468 -451C469 -446 469 -440 470 -434C470 -430 470 -426 470 -422C469 -420 469 -419 469 -417C468 -413 467 -408 466 -404C461 -391 452 -380 444 -370C443 -368 441 -367 440 -366C432 -361 423 -356 415 -353C415 -353 414 -353 414 -353C411 -352 407 -351 403 -350C379 -345 353 -345 327 -348ZM1392 -5C1392 -5 1380 -195 1380 -195C1380 -195 1370 -56 1370 -56C1370 -56 1261 -264 1261 -264C1261 -264 1326 -313 1326 -313C1326 -313 1369 -420 1369 -420C1369 -420 1353 -579 1353 -579C1353 -579 1157 -703 1157 -703C1157 -703 785 -701 785 -701C785 -701 735 -526 735 -526L791 -634C791 -634 786 -104 786 -104C786 -104 807 -406 807 -406C807 -406 993 -421 993 -421C993 -421 991 -524 991 -524C991 -524 1170 -522 1170 -522C1170 -522 1200 -464 1200 -464C1200 -464 1166 -410 1166 -410C1166 -410 837 -401 837 -401C837 -401 787 -58 787 -58C787 -58 736 -144 736 -144C736 -144 778 -4 778 -4C778 -4 987 -13 987 -13C987 -13 991 -236 991 -236C991 -236 1098 -239 1098 -239C1098 -239 1168 -2 1168 -2C1168 -2 1392 -5 1392 -5ZM1769 -139C1769 -139 1853 -146 1853 -146C1853 -146 1853 -286 1853 -286C1853 -286 1799 -286 1799 -286C1799 -286 1871 -537 1871 -537C1871 -537 1937 -288 1937 -288C1937 -288 1876 -283 1876 -283C1876 -283 1874 -148 1874 -148C1874 -148 1976 -140 1976 -140C1976 -140 2017 -3 2017 -3C2017 -3 2229 -5 2229 -5C2229 -5 2231 -210 2231 -210C2231 -210 2206 -56 2206 -56C2206 -56 2024 -634 2024 -634C2024 -634 2078 -544 2078 -544C2078 -544 2004 -703 2004 -703L1744 -707C1744 -707 1606 -575 1606 -575C1606 -575 1734 -670 1734 -670C1734 -670 1523 -43 1523 -43C1523 -43 1444 -3 1444 -3C1444 -3 1726 0 1726 0C1726 0 1769 -139 1769 -139ZM2773 -2C2919 -20 2913 -113 2943 -113C2973 -113 2996 -279 2996 -279C2996 -279 2798 -274 2798 -274C2798 -274 2813 -245 2767 -191C2721 -136 2613 -162 2613 -162C2613 -162 2560 -221 2560 -221C2560 -221 2529 -322 2529 -322C2529 -322 2499 -416 2554 -480C2609 -545 2608 -538 2676 -547C2744 -556 2778 -502 2778 -502C2778 -502 2800 -419 2800 -419C2800 -419 2802 -419 2804 -419H2802C2802 -419 2802 -419 2802 -419H2801C2801 -419 2801 -419 2801 -419H2800C2800 -419 2800 -419 2800 -419C2800 -419 2800 -419 2800 -419C2800 -419 2800 -419 2801 -419C2802 -419 2802 -419 2802 -419C2803 -419 2804 -419 2804 -419C2831 -419 2998 -417 2998 -417C2998 -417 3071 -584 3071 -584C3071 -584 2985 -463 2985 -463C2985 -463 2975 -559 2975 -559C2975 -559 2911 -642 2911 -642C2911 -642 2798 -688 2798 -688C2798 -688 2674 -712 2674 -712C2674 -712 2580 -708 2580 -708C2580 -708 2527 -685 2503 -675C2522 -721 2556 -804 2556 -804C2556 -804 2501 -721 2461 -662C2454 -653 2449 -647 2449 -647C2449 -647 2436 -629 2424 -613C2428 -630 2433 -649 2438 -669C2445 -694 2451 -713 2451 -713C2451 -713 2450 -710 2447 -706C2457 -743 2464 -773 2464 -773C2464 -773 2419 -666 2389 -595C2383 -585 2376 -573 2368 -559C2282 -413 2374 -387 2333 -387C2292 -387 2297 -557 2297 -557C2297 -557 2261 -466 2333 -253C2404 -39 2395 -140 2408 -97C2421 -54 2561 -3 2561 -3C2561 -3 2626 15 2773 -2ZM2996 -424C2996 -424 2996 -424 2996 -424ZM2995 -424C2995 -424 2995 -424 2995 -424ZM2995 -424C2995 -424 2994 -424 2994 -424ZM2981 -424H2980ZM2969 -423C2969 -423 2968 -423 2967 -423ZM2955 -423 2924 -422C2935 -423 2946 -423 2955 -423ZM2916 -422C2918 -422 2919 -422 2921 -422H2910ZM2857 -421H2859C2858 -421 2857 -421 2857 -421ZM2849 -420C2850 -420 2851 -420 2852 -420H2849C2847 -420 2845 -420 2843 -420ZM2842 -420C2841 -420 2839 -420 2837 -420ZM2835 -420C2833 -420 2831 -420 2829 -420ZM3552 -277C3552 -277 3433 -298 3433 -298C3433 -298 3563 -331 3563 -331C3563 -331 3562 -538 3562 -538C3562 -538 3742 -547 3742 -547C3742 -547 3886 -786 3886 -786C3886 -786 3746 -702 3746 -702C3746 -702 3189 -703 3189 -703C3189 -703 3109 -510 3109 -510C3109 -510 3176 -418 3176 -418C3176 -418 3161 -501 3161 -501C3161 -501 3186 -550 3186 -550C3186 -550 3367 -547 3367 -547C3367 -547 3356 -329 3356 -329C3356 -329 3357 -92 3357 -92C3357 -92 3408 -76 3408 -76C3408 -76 3263 -8 3263 -8C3263 -8 3352 -11 3352 -11C3352 -11 3567 -6 3567 -6C3567 -6 3552 -277 3552 -277ZM4168 -17C4168 -17 4170 -506 4170 -506C4170 -506 4060 -513 4060 -513C4060 -513 4185 -584 4185 -584C4185 -584 4187 -814 4187 -814C4187 -814 3964 -682 3964 -682C3964 -682 3967 -3 3967 -3C3967 -3 4168 -17 4168 -17ZM4763 -2C4909 -20 4903 -113 4933 -113C4963 -113 4986 -279 4986 -279C4986 -279 4788 -274 4788 -274C4788 -274 4803 -245 4757 -191C4711 -136 4603 -162 4603 -162C4603 -162 4550 -221 4550 -221C4550 -221 4519 -322 4519 -322C4519 -322 4489 -416 4544 -480C4599 -545 4598 -538 4666 -547C4734 -556 4768 -502 4768 -502C4768 -502 4790 -419 4790 -419C4790 -419 4792 -419 4794 -419H4792C4792 -419 4792 -419 4792 -419H4791C4791 -419 4791 -419 4791 -419H4790C4790 -419 4790 -419 4790 -419C4790 -419 4790 -419 4790 -419C4790 -419 4790 -419 4791 -419C4792 -419 4792 -419 4792 -419C4793 -419 4794 -419 4794 -419C4821 -419 4988 -417 4988 -417C4988 -417 5061 -584 5061 -584C5061 -584 4975 -463 4975 -463C4975 -463 4965 -559 4965 -559C4965 -559 4901 -642 4901 -642C4901 -642 4788 -688 4788 -688C4788 -688 4664 -712 4664 -712C4664 -712 4570 -708 4570 -708C4570 -708 4517 -685 4493 -675C4512 -721 4546 -804 4546 -804C4546 -804 4491 -721 4451 -662C4444 -653 4439 -647 4439 -647C4439 -647 4426 -629 4414 -613C4418 -630 4423 -649 4428 -669C4435 -694 4441 -713 4441 -713C4441 -713 4440 -710 4437 -706C4447 -743 4454 -773 4454 -773C4454 -773 4409 -666 4379 -595C4373 -585 4366 -573 4358 -559C4272 -413 4364 -387 4323 -387C4282 -387 4287 -557 4287 -557C4287 -557 4251 -466 4323 -253C4394 -39 4385 -140 4398 -97C4411 -54 4551 -3 4551 -3C4551 -3 4616 15 4763 -2ZM4986 -424C4986 -424 4986 -424 4986 -424ZM4985 -424C4985 -424 4985 -424 4985 -424ZM4985 -424C4985 -424 4984 -424 4984 -424ZM4971 -424H4970ZM4959 -423C4959 -423 4958 -423 4957 -423ZM4945 -423 4914 -422C4925 -423 4936 -423 4945 -423ZM4906 -422C4908 -422 4909 -422 4911 -422H4900ZM4847 -421H4849C4848 -421 4847 -421 4847 -421ZM4839 -420C4840 -420 4841 -420 4842 -420H4839C4837 -420 4835 -420 4833 -420ZM4832 -420C4831 -420 4829 -420 4827 -420ZM4825 -420C4823 -420 4821 -420 4819 -420ZM5510 -131C5510 -131 5403 -7 5403 -7C5403 -7 5678 -4 5678 -4C5678 -4 5677 -172 5677 -172C5677 -172 5620 -240 5620 -240C5620 -240 5642 -169 5642 -169C5642 -169 5372 -168 5372 -168C5372 -168 5362 -354 5362 -354C5362 -354 5409 -285 5409 -285C5409 -285 5639 -284 5639 -284C5639 -284 5626 -477 5626 -477C5626 -477 5610 -430 5610 -430C5610 -430 5366 -432 5366 -432C5366 -432 5366 -541 5366 -541C5366 -541 5634 -544 5634 -544C5634 -544 5654 -510 5654 -510C5654 -510 5655 -705 5655 -705C5655 -705 5113 -704 5113 -704C5113 -704 5167 -685 5167 -685C5167 -685 5168 -477 5168 -477C5168 -477 5305 -643 5305 -643C5305 -643 5168 -442 5168 -442C5168 -442 5164 -73 5164 -73C5164 -73 5286 -401 5286 -401C5286 -401 5163 -5 5163 -5C5163 -5 5370 -4 5370 -4C5370 -4 5510 -131 5510 -131Z"/></svg><svg class="dw tk" viewBox="19 -830 4453 860" aria-hidden="true" focusable="false"><path d="M440 -7C440 -7 545 -11 545 -11C545 -11 652 -90 652 -90C652 -90 777 -284 777 -284C777 -284 659 -296 659 -296C659 -296 628 -369 628 -369C628 -369 565 -416 565 -416C565 -416 479 -436 479 -436C479 -436 405 -447 405 -447C405 -447 328 -475 328 -475C328 -475 273 -494 273 -494C273 -494 363 -572 363 -572C363 -572 455 -591 455 -591C455 -591 515 -554 515 -554C515 -554 490 -490 490 -490C490 -490 728 -499 728 -499C728 -499 744 -695 744 -695C744 -695 693 -554 693 -554C693 -554 616 -647 616 -647C616 -647 474 -717 474 -717C474 -717 287 -709 287 -709C287 -709 146 -620 146 -620C146 -620 48 -493 48 -493C48 -493 135 -397 135 -397C135 -397 251 -325 251 -325C251 -325 374 -297 374 -297C374 -297 494 -267 494 -267C494 -267 518 -204 518 -204C518 -204 502 -154 502 -154C502 -154 432 -136 432 -136C432 -136 334 -148 334 -148C334 -148 275 -191 275 -191C275 -191 271 -248 271 -248C271 -248 19 -164 19 -164C19 -164 102 -181 102 -181C102 -181 112 -116 112 -116C112 -116 151 -62 151 -62C151 -62 203 -28 203 -28C203 -28 314 -6 314 -6C314 -6 440 -7 440 -7ZM1140 -139C1140 -139 1224 -146 1224 -146C1224 -146 1224 -286 1224 -286C1224 -286 1170 -286 1170 -286C1170 -286 1242 -537 1242 -537C1242 -537 1308 -288 1308 -288C1308 -288 1247 -283 1247 -283C1247 -283 1245 -148 1245 -148C1245 -148 1347 -140 1347 -140C1347 -140 1388 -3 1388 -3C1388 -3 1600 -5 1600 -5C1600 -5 1602 -210 1602 -210C1602 -210 1577 -56 1577 -56C1577 -56 1395 -634 1395 -634C1395 -634 1449 -544 1449 -544C1449 -544 1375 -703 1375 -703L1115 -707C1115 -707 977 -575 977 -575C977 -575 1105 -670 1105 -670C1105 -670 894 -43 894 -43C894 -43 815 -3 815 -3C815 -3 1097 0 1097 0C1097 0 1140 -139 1140 -139ZM1917 -5C1917 -5 1915 -218 1915 -218C1915 -218 1834 -146 1834 -146C1834 -146 1920 -249 1920 -249C1920 -249 2175 -254 2175 -254C2175 -254 2173 -401 2173 -401C2173 -401 1947 -399 1947 -399C1947 -399 1819 -328 1819 -328C1819 -328 1918 -403 1918 -403C1918 -403 1919 -541 1919 -541C1919 -541 2170 -541 2170 -541C2170 -541 2198 -509 2198 -509C2198 -509 2201 -703 2201 -703C2201 -703 1814 -700 1814 -700C1814 -700 1865 -628 1865 -628C1865 -628 1783 -704 1783 -704C1783 -704 1709 -704 1709 -704C1709 -704 1673 -543 1673 -543C1673 -543 1714 -663 1714 -663C1714 -663 1713 -112 1713 -112C1713 -112 1811 -214 1811 -214C1811 -214 1716 -73 1716 -73C1716 -73 1877 -250 1877 -250C1877 -250 1716 -41 1716 -41C1716 -41 1667 -128 1667 -128C1667 -128 1712 -2 1712 -2C1712 -2 1917 -5 1917 -5ZM2667 -131C2667 -131 2560 -7 2560 -7C2560 -7 2835 -4 2835 -4C2835 -4 2834 -172 2834 -172C2834 -172 2777 -240 2777 -240C2777 -240 2799 -169 2799 -169C2799 -169 2529 -168 2529 -168C2529 -168 2519 -354 2519 -354C2519 -354 2566 -285 2566 -285C2566 -285 2796 -284 2796 -284C2796 -284 2783 -477 2783 -477C2783 -477 2767 -430 2767 -430C2767 -430 2523 -432 2523 -432C2523 -432 2523 -541 2523 -541C2523 -541 2791 -544 2791 -544C2791 -544 2811 -510 2811 -510C2811 -510 2812 -705 2812 -705C2812 -705 2270 -704 2270 -704C2270 -704 2324 -685 2324 -685C2324 -685 2325 -477 2325 -477C2325 -477 2462 -643 2462 -643C2462 -643 2325 -442 2325 -442C2325 -442 2321 -73 2321 -73C2321 -73 2443 -401 2443 -401C2443 -401 2320 -5 2320 -5C2320 -5 2527 -4 2527 -4C2527 -4 2667 -131 2667 -131ZM3344 -277C3344 -277 3225 -298 3225 -298C3225 -298 3355 -331 3355 -331C3355 -331 3354 -538 3354 -538C3354 -538 3534 -547 3534 -547C3534 -547 3678 -786 3678 -786C3678 -786 3538 -702 3538 -702C3538 -702 2981 -703 2981 -703C2981 -703 2901 -510 2901 -510C2901 -510 2968 -418 2968 -418C2968 -418 2953 -501 2953 -501C2953 -501 2978 -550 2978 -550C2978 -550 3159 -547 3159 -547C3159 -547 3148 -329 3148 -329C3148 -329 3149 -92 3149 -92C3149 -92 3200 -76 3200 -76C3200 -76 3055 -8 3055 -8C3055 -8 3144 -11 3144 -11C3144 -11 3359 -6 3359 -6C3359 -6 3344 -277 3344 -277ZM4229 -1C4229 -1 4229 -222 4229 -222C4229 -222 4354 -482 4354 -482C4354 -482 4236 -485 4236 -485C4236 -485 4370 -507 4370 -507C4370 -507 4381 -537 4381 -537C4381 -537 4276 -528 4276 -528C4276 -528 4398 -564 4398 -564C4398 -564 4472 -704 4472 -704C4472 -704 4175 -739 4175 -739C4175 -739 4252 -700 4252 -700C4252 -700 4127 -416 4127 -416C4127 -416 3999 -701 3999 -701C3999 -701 3698 -704 3698 -704C3698 -704 3800 -678 3800 -678C3800 -678 3895 -486 3895 -486C3895 -486 4052 -481 4052 -481C4052 -481 3909 -464 3909 -464C3909 -464 4020 -456 4020 -456C4020 -456 3922 -439 3922 -439C3922 -439 4028 -219 4028 -219C4028 -219 4142 -225 4142 -225C4142 -225 4027 -195 4027 -195C4027 -195 4025 -25 4025 -25C4025 -25 3972 2 3972 2C3972 2 4229 -1 4229 -1Z"/></svg><span class="sr">PRACTICE SAFETY</span></span><span class="dtitle es-only" role="img" aria-label="SIMULACRO DE SEGURIDAD"><svg class="dw tk" viewBox="19 -830 6670 860" aria-hidden="true" focusable="false"><path d="M440 -7C440 -7 545 -11 545 -11C545 -11 652 -90 652 -90C652 -90 777 -284 777 -284C777 -284 659 -296 659 -296C659 -296 628 -369 628 -369C628 -369 565 -416 565 -416C565 -416 479 -436 479 -436C479 -436 405 -447 405 -447C405 -447 328 -475 328 -475C328 -475 273 -494 273 -494C273 -494 363 -572 363 -572C363 -572 455 -591 455 -591C455 -591 515 -554 515 -554C515 -554 490 -490 490 -490C490 -490 728 -499 728 -499C728 -499 744 -695 744 -695C744 -695 693 -554 693 -554C693 -554 616 -647 616 -647C616 -647 474 -717 474 -717C474 -717 287 -709 287 -709C287 -709 146 -620 146 -620C146 -620 48 -493 48 -493C48 -493 135 -397 135 -397C135 -397 251 -325 251 -325C251 -325 374 -297 374 -297C374 -297 494 -267 494 -267C494 -267 518 -204 518 -204C518 -204 502 -154 502 -154C502 -154 432 -136 432 -136C432 -136 334 -148 334 -148C334 -148 275 -191 275 -191C275 -191 271 -248 271 -248C271 -248 19 -164 19 -164C19 -164 102 -181 102 -181C102 -181 112 -116 112 -116C112 -116 151 -62 151 -62C151 -62 203 -28 203 -28C203 -28 314 -6 314 -6C314 -6 440 -7 440 -7ZM1077 -17C1077 -17 1079 -506 1079 -506C1079 -506 969 -513 969 -513C969 -513 1094 -584 1094 -584C1094 -584 1096 -814 1096 -814C1096 -814 873 -682 873 -682C873 -682 876 -3 876 -3C876 -3 1077 -17 1077 -17ZM1684 -35C1687 -40 1691 -45 1693 -51C1696 -57 1699 -63 1702 -69C1702 -70 1702 -70 1703 -71C1703 -71 1703 -71 1703 -71C1703 -71 1800 -341 1834 -436C1834 -232 1834 -4 1834 -4C1834 -4 2003 -4 2003 -4C2003 -4 2003 -552 2003 -711C2014 -716 2105 -756 2147 -775C2161 -779 2170 -782 2170 -782C2170 -782 2166 -781 2158 -779C2164 -782 2168 -784 2168 -784C2168 -784 2150 -781 2122 -775C2115 -773 2107 -770 2100 -767C1987 -744 1777 -701 1771 -700C1770 -700 1769 -700 1769 -700C1752 -655 1677 -452 1638 -345L1636 -341L1639 -351C1639 -352 1639 -352 1640 -352V-353C1640 -353 1640 -354 1640 -354C1640 -354 1640 -354 1640 -354V-353C1640 -353 1640 -353 1640 -352L1639 -351C1639 -349 1638 -346 1636 -341L1616 -291C1615 -290 1614 -289 1614 -287C1613 -289 1612 -291 1611 -294C1602 -318 1583 -370 1571 -403C1565 -422 1561 -435 1561 -435C1561 -435 1541 -356 1541 -356C1541 -356 1542 -474 1542 -474C1542 -474 1491 -296 1491 -296C1491 -296 1519 -510 1519 -510C1519 -510 1467 -697 1467 -697C1467 -697 1418 -700 1400 -701C1400 -703 1400 -704 1400 -705C1400 -705 1400 -705 1400 -706C1340 -743 1282 -781 1222 -818C1222 -661 1222 -7 1222 -7C1222 -7 1400 -7 1400 -7C1400 -7 1400 -191 1400 -387C1415 -352 1434 -305 1453 -262C1453 -262 1454 -261 1454 -261C1457 -260 1457 -256 1458 -254C1475 -214 1492 -174 1509 -134C1529 -89 1548 -44 1568 0C1585 0 1603 0 1621 0C1645 0 1669 -16 1684 -35ZM2664 -3C2664 -3 2743 -42 2743 -42C2743 -42 2795 -87 2795 -87C2795 -87 2883 -9 2883 -9C2883 -9 2822 -115 2822 -115C2822 -115 2847 -175 2847 -175C2847 -175 2858 -251 2858 -251C2858 -251 2858 -377 2858 -377C2858 -377 2857 -514 2857 -514C2857 -514 2860 -667 2860 -667C2860 -667 2934 -706 2934 -706C2934 -706 2856 -703 2856 -703C2856 -703 2654 -709 2654 -709C2654 -709 2653 -565 2653 -565C2653 -565 2768 -547 2768 -547C2768 -547 2653 -521 2653 -521C2653 -521 2650 -347 2650 -347C2650 -347 2644 -216 2644 -216C2644 -216 2589 -165 2589 -165C2589 -165 2508 -164 2508 -164C2508 -164 2454 -208 2454 -208C2454 -208 2442 -349 2442 -349C2442 -349 2442 -669 2442 -669C2442 -669 2528 -702 2528 -702C2528 -702 2236 -700 2236 -700C2236 -700 2241 -333 2241 -333C2241 -333 2248 -198 2248 -198C2248 -198 2279 -122 2279 -122C2279 -122 2346 -52 2346 -52C2346 -52 2448 -5 2448 -5C2448 -5 2528 8 2528 8C2528 8 2664 -3 2664 -3ZM3512 1C3512 1 3511 -30 3511 -47C3511 -63 3508 -286 3508 -286C3508 -286 3484 -162 3484 -162C3484 -162 3261 -164 3261 -164C3261 -164 3136 -68 3136 -68C3136 -68 3236 -163 3236 -163C3236 -163 3235 -328 3235 -328C3235 -328 3172 -341 3172 -341C3172 -341 3234 -349 3234 -349C3234 -349 3109 -363 3109 -363C3109 -363 3234 -374 3234 -374C3234 -374 3071 -383 3071 -383C3071 -383 3235 -394 3235 -394C3235 -394 3240 -673 3240 -673C3240 -673 3349 -700 3349 -700C3349 -700 3029 -707 3029 -707C3029 -707 3001 -620 3001 -620C3001 -620 3031 -678 3031 -678C3031 -678 3028 -292 3028 -292C3028 -292 3147 -279 3147 -279C3147 -279 3028 -272 3028 -272C3028 -272 3032 1 3032 1C3032 1 3512 1 3512 1ZM3876 -139C3876 -139 3960 -146 3960 -146C3960 -146 3960 -286 3960 -286C3960 -286 3906 -286 3906 -286C3906 -286 3978 -537 3978 -537C3978 -537 4044 -288 4044 -288C4044 -288 3983 -283 3983 -283C3983 -283 3981 -148 3981 -148C3981 -148 4083 -140 4083 -140C4083 -140 4124 -3 4124 -3C4124 -3 4336 -5 4336 -5C4336 -5 4338 -210 4338 -210C4338 -210 4313 -56 4313 -56C4313 -56 4131 -634 4131 -634C4131 -634 4185 -544 4185 -544C4185 -544 4111 -703 4111 -703L3851 -707C3851 -707 3713 -575 3713 -575C3713 -575 3841 -670 3841 -670C3841 -670 3630 -43 3630 -43C3630 -43 3551 -3 3551 -3C3551 -3 3833 0 3833 0C3833 0 3876 -139 3876 -139ZM4880 -2C5026 -20 5020 -113 5050 -113C5080 -113 5103 -279 5103 -279C5103 -279 4905 -274 4905 -274C4905 -274 4920 -245 4874 -191C4828 -136 4720 -162 4720 -162C4720 -162 4667 -221 4667 -221C4667 -221 4636 -322 4636 -322C4636 -322 4606 -416 4661 -480C4716 -545 4715 -538 4783 -547C4851 -556 4885 -502 4885 -502C4885 -502 4907 -419 4907 -419C4907 -419 4909 -419 4911 -419H4909C4909 -419 4909 -419 4909 -419H4908C4908 -419 4908 -419 4908 -419H4907C4907 -419 4907 -419 4907 -419C4907 -419 4907 -419 4907 -419C4907 -419 4907 -419 4908 -419C4909 -419 4909 -419 4909 -419C4910 -419 4911 -419 4911 -419C4938 -419 5105 -417 5105 -417C5105 -417 5178 -584 5178 -584C5178 -584 5092 -463 5092 -463C5092 -463 5082 -559 5082 -559C5082 -559 5018 -642 5018 -642C5018 -642 4905 -688 4905 -688C4905 -688 4781 -712 4781 -712C4781 -712 4687 -708 4687 -708C4687 -708 4634 -685 4610 -675C4629 -721 4663 -804 4663 -804C4663 -804 4608 -721 4568 -662C4561 -653 4556 -647 4556 -647C4556 -647 4543 -629 4531 -613C4535 -630 4540 -649 4545 -669C4552 -694 4558 -713 4558 -713C4558 -713 4557 -710 4554 -706C4564 -743 4571 -773 4571 -773C4571 -773 4526 -666 4496 -595C4490 -585 4483 -573 4475 -559C4389 -413 4481 -387 4440 -387C4399 -387 4404 -557 4404 -557C4404 -557 4368 -466 4440 -253C4511 -39 4502 -140 4515 -97C4528 -54 4668 -3 4668 -3C4668 -3 4733 15 4880 -2ZM5103 -424C5103 -424 5103 -424 5103 -424ZM5102 -424C5102 -424 5102 -424 5102 -424ZM5102 -424C5102 -424 5101 -424 5101 -424ZM5088 -424H5087ZM5076 -423C5076 -423 5075 -423 5074 -423ZM5062 -423 5031 -422C5042 -423 5053 -423 5062 -423ZM5023 -422C5025 -422 5026 -422 5028 -422H5017ZM4964 -421H4966C4965 -421 4964 -421 4964 -421ZM4956 -420C4957 -420 4958 -420 4959 -420H4956C4954 -420 4952 -420 4950 -420ZM4949 -420C4948 -420 4946 -420 4944 -420ZM4942 -420C4940 -420 4938 -420 4936 -420ZM5898 -5C5898 -5 5886 -195 5886 -195C5886 -195 5876 -56 5876 -56C5876 -56 5767 -264 5767 -264C5767 -264 5832 -313 5832 -313C5832 -313 5875 -420 5875 -420C5875 -420 5859 -579 5859 -579C5859 -579 5663 -703 5663 -703C5663 -703 5291 -701 5291 -701C5291 -701 5241 -526 5241 -526L5297 -634C5297 -634 5292 -104 5292 -104C5292 -104 5313 -406 5313 -406C5313 -406 5499 -421 5499 -421C5499 -421 5497 -524 5497 -524C5497 -524 5676 -522 5676 -522C5676 -522 5706 -464 5706 -464C5706 -464 5672 -410 5672 -410C5672 -410 5343 -401 5343 -401C5343 -401 5293 -58 5293 -58C5293 -58 5242 -144 5242 -144C5242 -144 5284 -4 5284 -4C5284 -4 5493 -13 5493 -13C5493 -13 5497 -236 5497 -236C5497 -236 5604 -239 5604 -239C5604 -239 5674 -2 5674 -2C5674 -2 5898 -5 5898 -5ZM6477 -20C6477 -20 6353 -228 6353 -228C6353 -228 6302 -201 6302 -201C6302 -201 6271 -384 6271 -384C6271 -384 6221 -350 6221 -350C6221 -350 6237 -516 6237 -516C6237 -516 6182 -493 6182 -493C6182 -493 6204 -622 6204 -622C6204 -622 6220 -564 6220 -564C6220 -564 6296 -601 6296 -601C6296 -601 6266 -432 6266 -432C6266 -432 6325 -471 6325 -471C6325 -471 6333 -278 6333 -278C6333 -278 6391 -320 6391 -320C6391 -320 6525 -40 6525 -40C6525 -40 6589 -83 6589 -83C6589 -83 6654 -171 6654 -171C6654 -171 6686 -305 6686 -305C6686 -305 6689 -411 6689 -411C6689 -411 6653 -546 6653 -546C6653 -546 6570 -628 6570 -628C6570 -628 6488 -688 6488 -688C6488 -688 6352 -715 6352 -715C6352 -715 6180 -682 6180 -682C6180 -682 6051 -592 6051 -592C6051 -592 6000 -481 6000 -481C6000 -481 5976 -351 5976 -351C5976 -351 6009 -181 6009 -181C6009 -181 6112 -63 6112 -63C6112 -63 6195 -15 6195 -15C6195 -15 6280 -6 6280 -6C6280 -6 6379 -1 6379 -1C6379 -1 6477 -20 6477 -20Z"/></svg><svg class="dw tk" viewBox="19 -830 1363 860" aria-hidden="true" focusable="false"><path d="M583 -45C583 -45 679 -126 679 -126C679 -126 546 -245 546 -245C546 -245 695 -152 695 -152C695 -152 729 -219 729 -219C729 -219 748 -342 748 -342C748 -342 588 -358 588 -358C588 -358 742 -372 742 -372C742 -372 738 -444 738 -444C738 -444 717 -522 717 -522C717 -522 688 -579 688 -579C688 -579 562 -509 562 -509C562 -509 671 -597 671 -597C671 -597 648 -618 648 -618C648 -618 570 -675 570 -675C570 -675 475 -703 475 -703C475 -703 19 -705 19 -705C19 -705 109 -665 109 -665C109 -665 109 -399 109 -399C109 -399 315 -387 315 -387C315 -387 315 -537 315 -537C315 -537 446 -531 446 -531C446 -531 515 -475 515 -475C515 -475 536 -343 536 -343C536 -343 500 -216 500 -216C500 -216 450 -175 450 -175C450 -175 314 -167 314 -167C314 -167 313 -355 313 -355C313 -355 107 -375 107 -375C107 -375 111 -171 111 -171C111 -171 80 -171 80 -171C80 -171 78 -8 78 -8C78 -8 455 -6 455 -6C455 -6 583 -45 583 -45ZM1214 -131C1214 -131 1107 -7 1107 -7C1107 -7 1382 -4 1382 -4C1382 -4 1381 -172 1381 -172C1381 -172 1324 -240 1324 -240C1324 -240 1346 -169 1346 -169C1346 -169 1076 -168 1076 -168C1076 -168 1066 -354 1066 -354C1066 -354 1113 -285 1113 -285C1113 -285 1343 -284 1343 -284C1343 -284 1330 -477 1330 -477C1330 -477 1314 -430 1314 -430C1314 -430 1070 -432 1070 -432C1070 -432 1070 -541 1070 -541C1070 -541 1338 -544 1338 -544C1338 -544 1358 -510 1358 -510C1358 -510 1359 -705 1359 -705C1359 -705 817 -704 817 -704C817 -704 871 -685 871 -685C871 -685 872 -477 872 -477C872 -477 1009 -643 1009 -643C1009 -643 872 -442 872 -442C872 -442 868 -73 868 -73C868 -73 990 -401 990 -401C990 -401 867 -5 867 -5C867 -5 1074 -4 1074 -4C1074 -4 1214 -131 1214 -131Z"/></svg><svg class="dw tk" viewBox="19 -830 6459 860" aria-hidden="true" focusable="false"><path d="M440 -7C440 -7 545 -11 545 -11C545 -11 652 -90 652 -90C652 -90 777 -284 777 -284C777 -284 659 -296 659 -296C659 -296 628 -369 628 -369C628 -369 565 -416 565 -416C565 -416 479 -436 479 -436C479 -436 405 -447 405 -447C405 -447 328 -475 328 -475C328 -475 273 -494 273 -494C273 -494 363 -572 363 -572C363 -572 455 -591 455 -591C455 -591 515 -554 515 -554C515 -554 490 -490 490 -490C490 -490 728 -499 728 -499C728 -499 744 -695 744 -695C744 -695 693 -554 693 -554C693 -554 616 -647 616 -647C616 -647 474 -717 474 -717C474 -717 287 -709 287 -709C287 -709 146 -620 146 -620C146 -620 48 -493 48 -493C48 -493 135 -397 135 -397C135 -397 251 -325 251 -325C251 -325 374 -297 374 -297C374 -297 494 -267 494 -267C494 -267 518 -204 518 -204C518 -204 502 -154 502 -154C502 -154 432 -136 432 -136C432 -136 334 -148 334 -148C334 -148 275 -191 275 -191C275 -191 271 -248 271 -248C271 -248 19 -164 19 -164C19 -164 102 -181 102 -181C102 -181 112 -116 112 -116C112 -116 151 -62 151 -62C151 -62 203 -28 203 -28C203 -28 314 -6 314 -6C314 -6 440 -7 440 -7ZM1233 -131C1233 -131 1126 -7 1126 -7C1126 -7 1401 -4 1401 -4C1401 -4 1400 -172 1400 -172C1400 -172 1343 -240 1343 -240C1343 -240 1365 -169 1365 -169C1365 -169 1095 -168 1095 -168C1095 -168 1085 -354 1085 -354C1085 -354 1132 -285 1132 -285C1132 -285 1362 -284 1362 -284C1362 -284 1349 -477 1349 -477C1349 -477 1333 -430 1333 -430C1333 -430 1089 -432 1089 -432C1089 -432 1089 -541 1089 -541C1089 -541 1357 -544 1357 -544C1357 -544 1377 -510 1377 -510C1377 -510 1378 -705 1378 -705C1378 -705 836 -704 836 -704C836 -704 890 -685 890 -685C890 -685 891 -477 891 -477C891 -477 1028 -643 1028 -643C1028 -643 891 -442 891 -442C891 -442 887 -73 887 -73C887 -73 1009 -401 1009 -401C1009 -401 886 -5 886 -5C886 -5 1093 -4 1093 -4C1093 -4 1233 -131 1233 -131ZM2215 -269C2231 -269 2244 -269 2244 -269C2244 -269 2233 -296 2222 -324C2218 -335 2213 -345 2209 -356C2207 -361 2204 -365 2202 -369C2201 -372 2199 -375 2196 -378C2196 -378 2196 -378 2196 -378C2195 -378 2195 -379 2195 -379C2195 -379 2194 -379 2194 -380C2194 -380 2194 -380 2194 -380C2194 -380 2194 -380 2194 -380C2188 -385 2180 -390 2173 -393C2094 -393 1861 -394 1861 -394C1861 -394 1857 -297 1857 -297C1857 -297 1973 -344 1973 -344C1973 -344 1857 -266 1857 -266C1857 -266 1949 -274 1949 -274C1949 -274 1962 -214 1949 -185C1936 -157 1851 -92 1772 -181C1742 -214 1726 -240 1718 -262C1717 -263 1717 -264 1717 -265C1710 -277 1707 -292 1705 -306C1702 -323 1701 -340 1701 -357C1698 -374 1701 -396 1707 -418C1707 -420 1708 -422 1708 -425C1713 -449 1720 -474 1734 -495C1737 -501 1741 -506 1746 -510C1757 -522 1781 -537 1831 -545C1926 -561 1957 -487 1957 -487C1957 -487 1919 -469 1919 -469C1919 -469 2164 -467 2164 -467C2164 -467 2122 -562 2108 -601C2094 -640 2014 -677 2014 -677C2014 -677 1961 -682 1961 -682C1961 -682 2186 -708 2186 -708C2186 -708 1910 -711 1910 -711C1910 -711 1853 -703 1853 -703C1853 -703 2076 -797 2076 -797C2076 -797 1802 -710 1802 -710C1802 -710 1773 -700 1752 -692C1786 -724 1864 -797 1864 -797C1864 -797 1632 -651 1632 -651C1632 -651 1702 -760 1702 -760C1702 -760 1653 -739 1578 -610C1503 -482 1538 -539 1501 -449C1465 -359 1504 -236 1504 -236C1504 -236 1539 -166 1559 -124C1572 -109 1588 -98 1603 -85C1624 -67 1648 -53 1673 -42C1693 -32 1710 -20 1731 -13C1750 -7 1771 -4 1791 0C1797 0 1802 0 1808 1C1838 3 1869 4 1900 2C1940 -1 1978 -18 2016 -32C2016 -32 2016 -32 2016 -32C2126 -98 2112 -109 2141 -143C2174 -183 2174 -265 2174 -265C2174 -265 2206 -268 2210 -269C2212 -269 2214 -269 2215 -269V-268C2215 -268 2215 -268 2215 -269ZM2212 -279V-278C2212 -277 2213 -276 2213 -275ZM2214 -272C2214 -272 2214 -272 2214 -272ZM2748 -3C2748 -3 2827 -42 2827 -42C2827 -42 2879 -87 2879 -87C2879 -87 2967 -9 2967 -9C2967 -9 2906 -115 2906 -115C2906 -115 2931 -175 2931 -175C2931 -175 2942 -251 2942 -251C2942 -251 2942 -377 2942 -377C2942 -377 2941 -514 2941 -514C2941 -514 2944 -667 2944 -667C2944 -667 3018 -706 3018 -706C3018 -706 2940 -703 2940 -703C2940 -703 2738 -709 2738 -709C2738 -709 2737 -565 2737 -565C2737 -565 2852 -547 2852 -547C2852 -547 2737 -521 2737 -521C2737 -521 2734 -347 2734 -347C2734 -347 2728 -216 2728 -216C2728 -216 2673 -165 2673 -165C2673 -165 2592 -164 2592 -164C2592 -164 2538 -208 2538 -208C2538 -208 2526 -349 2526 -349C2526 -349 2526 -669 2526 -669C2526 -669 2612 -702 2612 -702C2612 -702 2320 -700 2320 -700C2320 -700 2325 -333 2325 -333C2325 -333 2332 -198 2332 -198C2332 -198 2363 -122 2363 -122C2363 -122 2430 -52 2430 -52C2430 -52 2532 -5 2532 -5C2532 -5 2612 8 2612 8C2612 8 2748 -3 2748 -3ZM3736 -5C3736 -5 3724 -195 3724 -195C3724 -195 3714 -56 3714 -56C3714 -56 3605 -264 3605 -264C3605 -264 3670 -313 3670 -313C3670 -313 3713 -420 3713 -420C3713 -420 3697 -579 3697 -579C3697 -579 3501 -703 3501 -703C3501 -703 3129 -701 3129 -701C3129 -701 3079 -526 3079 -526L3135 -634C3135 -634 3130 -104 3130 -104C3130 -104 3151 -406 3151 -406C3151 -406 3337 -421 3337 -421C3337 -421 3335 -524 3335 -524C3335 -524 3514 -522 3514 -522C3514 -522 3544 -464 3544 -464C3544 -464 3510 -410 3510 -410C3510 -410 3181 -401 3181 -401C3181 -401 3131 -58 3131 -58C3131 -58 3080 -144 3080 -144C3080 -144 3122 -4 3122 -4C3122 -4 3331 -13 3331 -13C3331 -13 3335 -236 3335 -236C3335 -236 3442 -239 3442 -239C3442 -239 3512 -2 3512 -2C3512 -2 3736 -5 3736 -5ZM4050 -17C4050 -17 4052 -506 4052 -506C4052 -506 3942 -513 3942 -513C3942 -513 4067 -584 4067 -584C4067 -584 4069 -814 4069 -814C4069 -814 3846 -682 3846 -682C3846 -682 3849 -3 3849 -3C3849 -3 4050 -17 4050 -17ZM4708 -45C4708 -45 4804 -126 4804 -126C4804 -126 4671 -245 4671 -245C4671 -245 4820 -152 4820 -152C4820 -152 4854 -219 4854 -219C4854 -219 4873 -342 4873 -342C4873 -342 4713 -358 4713 -358C4713 -358 4867 -372 4867 -372C4867 -372 4863 -444 4863 -444C4863 -444 4842 -522 4842 -522C4842 -522 4813 -579 4813 -579C4813 -579 4687 -509 4687 -509C4687 -509 4796 -597 4796 -597C4796 -597 4773 -618 4773 -618C4773 -618 4695 -675 4695 -675C4695 -675 4600 -703 4600 -703C4600 -703 4144 -705 4144 -705C4144 -705 4234 -665 4234 -665C4234 -665 4234 -399 4234 -399C4234 -399 4440 -387 4440 -387C4440 -387 4440 -537 4440 -537C4440 -537 4571 -531 4571 -531C4571 -531 4640 -475 4640 -475C4640 -475 4661 -343 4661 -343C4661 -343 4625 -216 4625 -216C4625 -216 4575 -175 4575 -175C4575 -175 4439 -167 4439 -167C4439 -167 4438 -355 4438 -355C4438 -355 4232 -375 4232 -375C4232 -375 4236 -171 4236 -171C4236 -171 4205 -171 4205 -171C4205 -171 4203 -8 4203 -8C4203 -8 4580 -6 4580 -6C4580 -6 4708 -45 4708 -45ZM5246 -139C5246 -139 5330 -146 5330 -146C5330 -146 5330 -286 5330 -286C5330 -286 5276 -286 5276 -286C5276 -286 5348 -537 5348 -537C5348 -537 5414 -288 5414 -288C5414 -288 5353 -283 5353 -283C5353 -283 5351 -148 5351 -148C5351 -148 5453 -140 5453 -140C5453 -140 5494 -3 5494 -3C5494 -3 5706 -5 5706 -5C5706 -5 5708 -210 5708 -210C5708 -210 5683 -56 5683 -56C5683 -56 5501 -634 5501 -634C5501 -634 5555 -544 5555 -544C5555 -544 5481 -703 5481 -703L5221 -707C5221 -707 5083 -575 5083 -575C5083 -575 5211 -670 5211 -670C5211 -670 5000 -43 5000 -43C5000 -43 4921 -3 4921 -3C4921 -3 5203 0 5203 0C5203 0 5246 -139 5246 -139ZM6313 -45C6313 -45 6409 -126 6409 -126C6409 -126 6276 -245 6276 -245C6276 -245 6425 -152 6425 -152C6425 -152 6459 -219 6459 -219C6459 -219 6478 -342 6478 -342C6478 -342 6318 -358 6318 -358C6318 -358 6472 -372 6472 -372C6472 -372 6468 -444 6468 -444C6468 -444 6447 -522 6447 -522C6447 -522 6418 -579 6418 -579C6418 -579 6292 -509 6292 -509C6292 -509 6401 -597 6401 -597C6401 -597 6378 -618 6378 -618C6378 -618 6300 -675 6300 -675C6300 -675 6205 -703 6205 -703C6205 -703 5749 -705 5749 -705C5749 -705 5839 -665 5839 -665C5839 -665 5839 -399 5839 -399C5839 -399 6045 -387 6045 -387C6045 -387 6045 -537 6045 -537C6045 -537 6176 -531 6176 -531C6176 -531 6245 -475 6245 -475C6245 -475 6266 -343 6266 -343C6266 -343 6230 -216 6230 -216C6230 -216 6180 -175 6180 -175C6180 -175 6044 -167 6044 -167C6044 -167 6043 -355 6043 -355C6043 -355 5837 -375 5837 -375C5837 -375 5841 -171 5841 -171C5841 -171 5810 -171 5810 -171C5810 -171 5808 -8 5808 -8C5808 -8 6185 -6 6185 -6C6185 -6 6313 -45 6313 -45Z"/></svg><span class="sr">SIMULACRO DE SEGURIDAD</span></span></h2>
+    <p class="ps-sub" data-i18n="ps_sub1">Stop what you are doing. This is practice, not a real alert.</p>
+    <p class="ps-q" id="psQuake"></p>
+    <p class="ps-sub" style="margin-top:-6px" data-i18n="ps_sub2">If you ever feel the ground shake where you are:</p>
+    <ol>
+      <li data-i18n-html="ps_li1"><b>DROP</b> where you are to your hands and knees.</li>
+      <li data-i18n-html="ps_li2"><b>COVER</b> your head and neck with your arms. Get under a sturdy desk or table if one is close.</li>
+      <li data-i18n-html="ps_li3"><b>HOLD ON</b> until the shaking stops.</li>
+    </ol>
+    <p class="ps-out" data-i18n="ps_out">Outside? Move away from buildings, power lines and anything overhead, but only if you can safely do so. Otherwise stay where you are.</p>
+    <p class="ps-src" data-i18n="ps_src">Steps from NIST and the Great ShakeOut.</p>
+    <button id="psClose" disabled>Hold on... 10</button>
+  </div>
+</div>
+
+<script>
+const tr=(en,es)=>window.KFL_LANG==="es"?es:en;
+const PICKS_ES={"titles": {"How AI Works": "Cómo funciona la IA", "Environmental Footprint": "Huella ambiental", "AI Helping the Planet": "La IA ayudando al planeta", "AI in Medicine": "La IA en la medicina", "Access and Disability": "Acceso y discapacidad", "Creative Play": "Juego creativo", "Harms, Rights and Your Voice": "Daños, derechos y su voz", "Education and Policy": "Educación y políticas"}, "d": {"AI for Oceans": "Entrene un modelo real de aprendizaje automático para separar peces de basura y aprenda sobre datos de entrenamiento y sesgos. Desde tercer grado.", "Quick, Draw!": "Dibuje en 20 segundos mientras una red neuronal intenta adivinar qué está dibujando.", "Teachable Machine": "Enséñele a una computadora a reconocer sus propias imágenes, sonidos o posturas. Sin programar.", "Day of AI (MIT RAISE)": "Currículo gratuito de alfabetización en IA de MIT RAISE, hecho para personas sin experiencia en tecnología.", "LLMs Explained Briefly": "Explicación animada y corta de 3Blue1Brown sobre los modelos grandes de lenguaje, hecha para el Computer History Museum.", "Transformer Explainer": "Escriba una oración y vea cómo un pequeño modelo de lenguaje predice la siguiente palabra, en vivo en su navegador. De Georgia Tech.", "Elements of AI": "Curso gratuito en línea de la Universidad de Helsinki y MinnaLearn. No requiere matemáticas ni programación.", "IEA: Energy and AI": "Datos de la Agencia Internacional de Energía sobre cuánta electricidad usan hoy los centros de datos y hacia dónde va.", "Google: Energy per Prompt": "La medición propia de Google de la energía, las emisiones y el agua de una consulta típica de texto a Gemini.", "AI Energy Score": "Calificaciones con estrellas que comparan la eficiencia energética de modelos de IA, dirigidas por Hugging Face y Salesforce.", "UNEP: AI's Environmental Problem": "El Programa de las Naciones Unidas para el Medio Ambiente sobre electricidad, agua, minería y desechos electrónicos, y lo que pueden hacer los gobiernos.", "Climate TRACE": "Satélites e IA que rastrean los gases de efecto invernadero de millones de fuentes, gratis y abierto.", "Google Flood Forecasting": "Pronósticos de inundaciones con IA que cubren a unos 2 mil millones de personas en más de 150 países.", "Rainforest Connection": "Dispositivos de escucha con energía solar e IA que oyen motosierras, motores y disparos en las selvas y alertan en tiempo real a quienes protegen el bosque.", "Climate Change AI": "Una organización global sin fines de lucro sobre aprendizaje automático para la acción climática, que deja claro que la IA no es una solución mágica.", "AlphaFold Database": "Acceso gratuito a más de 260 millones de estructuras de proteínas predichas. Sus creadores compartieron el Premio Nobel de Química 2024.", "FDA: AI-Enabled Medical Devices": "La lista pública de la FDA de dispositivos médicos autorizados que usan IA.", "MASAI Breast Screening Trial": "Estudio aleatorio de la Universidad de Lund con casi 106,000 mujeres: la detección apoyada por IA encontró 29% más cánceres, con un aumento de 1% en falsas alarmas.", "Stanford AI Index 2026": "El informe anual sobre la IA. Esta edición tiene su primer capítulo dedicado a la medicina.", "WHO: Generative AI in Health": "Las más de 40 recomendaciones de la Organización Mundial de la Salud para usar la IA generativa de forma segura en la atención médica.", "Be My Eyes": "App gratuita que conecta a personas ciegas o con baja visión con voluntarios y con descripciones de imágenes hechas por IA.", "Seeing AI": "App gratuita de Microsoft que narra textos, personas y objetos. iPhone y Android.", "Blob Opera": "Arrastre cuatro burbujas que cantan y una IA armoniza con usted. Entrenada con 16 horas de canto de cuatro cantantes de ópera reconocidos.", "AutoDraw": "Haga un garabato y el aprendizaje automático le sugiere dibujos terminados hechos por artistas reales.", "Silk": "Pinte arte generativo fluido y en espejo, con música. Sin IA, solo matemáticas y movimiento.", "Antlii Tools": "Herramientas generativas de tipografía, patrones y movimiento de Anatolii Babii en Kyiv, Ucrania. Versiones gratuitas para jugar. ¿Comparte su trabajo? Dé crédito a @antl.ii o antlii.work.", "Algorithmic Justice League": "El grupo de Joy Buolamwini que usa arte e investigación para exponer los sesgos de la IA. Usted puede compartir su propia historia de daño causado por la IA.", "AI Incident Database": "Un registro público de fallas reales de la IA, para que los errores no se repitan. Todos pueden enviar reportes.", "Common Sense Media AI Ratings": "Calificaciones independientes de riesgo de productos de IA para niños y adolescentes, de mínimo a inaceptable.", "The Glaze Project": "Glaze es una herramienta gratuita de la Universidad de Chicago que ayuda a los artistas a proteger su estilo de las copias de la IA.", "Copyright Alliance: AI": "Recursos, licencias y casos judiciales sobre IA de un grupo que defiende a los dueños de derechos de autor.", "Safe and Responsible AI in Ed Tech": "Guías y seminarios web de The Learning Agency para crear herramientas de aprendizaje con IA que protejan a los estudiantes.", "The 74: AI in Education": "Noticias de educación sin fines de lucro sobre la IA en las escuelas, gratis para leer.", "PreK-5 Responsible EdTech Use": "Un grupo de trabajo nacional dirigido por la organización sin fines de lucro InnovateEDU, que crea estándares para la tecnología y la IA en los salones de preescolar a quinto grado. Su guía para padres incluye preguntas para hacerle a la escuela, en inglés y en español."}, "f": {"Company self-reported, not independently verified": "Reportado por la propia empresa, no verificado de forma independiente", "Cites an older energy estimate. Compare with Google's newer figure": "Cita un cálculo de energía más antiguo. Compárelo con la cifra más nueva de Google", "The FDA says this list is not comprehensive": "La FDA dice que esta lista no está completa", "Desktop & iPad friendly": "Funciona bien en computadora y iPad", "They rated Claude, the AI that curated this list, minimal risk as an 18+ product. Decide for yourself": "Calificaron a Claude, la IA que seleccionó esta lista, como de riesgo mínimo para mayores de 18. Decida usted", "Perspective source": "Fuente con un punto de vista"}};
+/* ---------- DATA: Klee's Picks (33, checked Oct 16 2026) ---------- */
+const COLUMNS = [
+  [
+    { title:"How AI Works", picks:[
+      {n:"AI for Oceans", u:"https://code.org/oceans", a:["K","T"], d:"Train a real machine learning model to sort fish from trash, and learn about training data and bias. Grades 3 and up."},
+      {n:"Quick, Draw!", u:"https://quickdraw.withgoogle.com/", a:["K","T"], d:"Doodle in 20 seconds while a neural network tries to guess what you are drawing."},
+      {n:"Teachable Machine", u:"https://teachablemachine.withgoogle.com/", a:["K","T"], d:"Train a computer to recognize your own images, sounds or poses. No coding."},
+      {n:"Day of AI (MIT RAISE)", u:"https://dayofai.org/", a:["K","T","P"], d:"Free AI literacy curriculum from MIT RAISE, built for people with no tech background."},
+      {n:"LLMs Explained Briefly", u:"https://3blue1brown.substack.com/p/large-language-models-explained-briefly", a:["T","A"], d:"3Blue1Brown's short animated explainer of large language models, made for the Computer History Museum."},
+      {n:"Transformer Explainer", u:"https://poloclub.github.io/transformer-explainer/", a:["T","A"], d:"Type a sentence and watch a small language model predict the next word, live in your browser. From Georgia Tech."},
+      {n:"Elements of AI", u:"https://www.elementsofai.com/", a:["T","A"], d:"Free online course from the University of Helsinki and MinnaLearn. No math or programming required."}
+    ]},
+    { title:"Environmental Footprint", picks:[
+      {n:"IEA: Energy and AI", u:"https://www.iea.org/reports/energy-and-ai", a:["A"], d:"The International Energy Agency's data on how much electricity data centres use now and where it is headed."},
+      {n:"Google: Energy per Prompt", u:"https://cloud.google.com/blog/products/infrastructure/measuring-the-environmental-impact-of-ai-inference", a:["A"], d:"Google's own measurement of energy, emissions and water for a typical Gemini text prompt.", f:"Company self-reported, not independently verified"},
+      {n:"AI Energy Score", u:"https://huggingface.github.io/AIEnergyScore/", a:["T","A"], d:"Star ratings comparing the energy efficiency of AI models, led by Hugging Face and Salesforce."},
+      {n:"UNEP: AI's Environmental Problem", u:"https://www.unep.org/news-and-stories/story/ai-has-environmental-problem-heres-what-world-can-do-about", a:["T","A"], d:"The UN Environment Programme on electricity, water, mining and e-waste, plus what governments can do.", f:"Cites an older energy estimate. Compare with Google's newer figure"}
+    ]}
+  ],
+  [
+    { title:"AI Helping the Planet", picks:[
+      {n:"Climate TRACE", u:"https://climatetrace.org/", a:["T","A"], d:"Satellites and AI tracking greenhouse gas emissions from millions of sources, free and open."},
+      {n:"Google Flood Forecasting", u:"https://sites.research.google/gr/floodforecasting/", a:["T","A"], d:"AI flood forecasts covering about 2 billion people in more than 150 countries."},
+      {n:"Rainforest Connection", u:"https://rfcx.org/", a:["K","T"], d:"Solar-powered listening devices and AI that hear chainsaws, engines and gunshots in rainforests and alert the people protecting the forest in real time."},
+      {n:"Climate Change AI", u:"https://www.climatechange.ai/", a:["A"], d:"A global nonprofit on machine learning for climate action, clear that AI is no silver bullet."}
+    ]},
+    { title:"AI in Medicine", picks:[
+      {n:"AlphaFold Database", u:"https://alphafold.ebi.ac.uk/", a:["T","A"], d:"Free access to over 260 million predicted protein structures. Its creators shared the 2024 Nobel Prize in Chemistry."},
+      {n:"FDA: AI-Enabled Medical Devices", u:"https://www.fda.gov/medical-devices/artificial-intelligence-enabled-medical-devices/list-artificial-intelligence-enabled-medical-devices", a:["A"], d:"The FDA's public list of authorized medical devices that use AI.", f:"The FDA says this list is not comprehensive"},
+      {n:"MASAI Breast Screening Trial", u:"https://www.ai.lu.se/article/ai-supported-breast-cancer-screening-new-results-suggest-even-higher-accuracy", a:["A"], d:"Lund University's randomized trial of nearly 106,000 women: AI-supported screening found 29% more cancers, with a 1% rise in false alarms."},
+      {n:"Stanford AI Index 2026", u:"https://hai.stanford.edu/ai-index/2026-ai-index-report", a:["A"], d:"The yearly report card on AI. This edition has its first standalone chapter on medicine."},
+      {n:"WHO: Generative AI in Health", u:"https://www.who.int/news/item/18-01-2024-who-releases-ai-ethics-and-governance-guidance-for-large-multi-modal-models", a:["A"], d:"The World Health Organization's 40+ recommendations for using generative AI safely in health care."}
+    ]},
+    { title:"Access and Disability", picks:[
+      {n:"Be My Eyes", u:"https://www.bemyeyes.com/", a:["K","T","A"], d:"Free app connecting blind and low-vision people with volunteers and AI image descriptions."},
+      {n:"Seeing AI", u:"https://www.seeingai.com/", a:["K","T","A"], d:"Microsoft's free app that narrates text, people and objects. iPhone and Android."}
+    ]}
+  ],
+  [
+    { title:"Creative Play", picks:[
+      {n:"Blob Opera", u:"https://artsandculture.google.com/experiment/blob-opera/AAHWrq360NcGbw", a:["K","T","A"], d:"Drag four singing blobs and an AI harmonizes with you. Trained on 16 hours of singing by four credited opera singers."},
+      {n:"AutoDraw", u:"https://www.autodraw.com/", a:["K","T"], d:"Scribble something and machine learning suggests finished drawings made by real artists."},
+      {n:"Silk", u:"http://weavesilk.com/", a:["K","T","A"], d:"Paint flowing, mirrored generative art with music. No AI, just math and motion."},
+      {n:"Antlii Tools", u:"https://antlii.work/Index", a:["T","A"], d:"Generative type, pattern and motion tools by Anatolii Babii in Kyiv, Ukraine. Free versions to play with. Share your work? Credit @antl.ii or antlii.work.", f:"Desktop & iPad friendly"}
+    ]},
+    { title:"Harms, Rights and Your Voice", picks:[
+      {n:"Algorithmic Justice League", u:"https://www.ajl.org/", a:["T","A"], d:"Joy Buolamwini's group using art and research to expose bias in AI. You can share your own story of AI harm."},
+      {n:"AI Incident Database", u:"https://incidentdatabase.ai/about/", a:["T","A"], d:"A public record of real-world AI failures, so mistakes are not repeated. Everyone is invited to submit reports."},
+      {n:"Common Sense Media AI Ratings", u:"https://www.commonsensemedia.org/ai-ratings", a:["P"], d:"Independent risk ratings of AI products for kids and teens, from minimal to unacceptable.", f:"They rated Claude, the AI that curated this list, minimal risk as an 18+ product. Decide for yourself"},
+      {n:"The Glaze Project", u:"https://glaze.cs.uchicago.edu/", a:["T","A"], d:"Glaze is a free University of Chicago tool that helps artists protect their art style from AI copying."},
+      {n:"Copyright Alliance: AI", u:"https://copyrightalliance.org/artificial-intelligence-copyright/", a:["T","A"], d:"AI resources, licensing and court cases from a group that advocates for copyright holders.", f:"Perspective source"}
+    ]},
+    { title:"Education and Policy", picks:[
+      {n:"Safe and Responsible AI in Ed Tech", u:"https://the-learning-agency.com/guides-resources/resources-for-safe-and-responsible-ai-in-ed-tech/", a:["P"], d:"The Learning Agency's guidelines and webinars for building AI learning tools that protect students."},
+      {n:"The 74: AI in Education", u:"https://www.the74million.org/tag/artificial-intelligence/", a:["P"], d:"Nonprofit education news on AI in schools, free to read.", f:"Perspective source"},
+      {n:"PreK-5 Responsible EdTech Use", u:"https://www.responsibletechuse.org", a:["P"], d:"A national task force led by the nonprofit InnovateEDU, setting standards for technology and AI in PreK to 5th grade classrooms. Its parent guide lists questions to ask your school, in English and Spanish.", f:"Perspective source"}
+    ]}
+  ]
+];
+
+/* ---------- Render picks ---------- */
+(function render(){
+  const root = document.getElementById("cols");
+  let count = 0;
+  COLUMNS.forEach(col=>{
+    const c = document.createElement("div"); c.className="col";
+    col.forEach(sec=>{
+      const s = document.createElement("section");
+      s.dataset.key = sec.title; const h = document.createElement("h3"); h.dataset.en = sec.title; h.dataset.es = PICKS_ES.titles[sec.title]||sec.title; h.textContent = sec.title; s.appendChild(h);
+      const ol = document.createElement("ol");
+      sec.picks.forEach(p=>{
+        count++;
+        const li = document.createElement("li");
+        const a = document.createElement("a");
+        a.className="pick"; a.href=p.u; a.target="_blank"; a.rel="noopener";
+        const row = document.createElement("div"); row.className="row";
+        const name = document.createElement("span"); name.className="n";
+        const num = document.createElement("span"); num.className="num"; num.textContent = String(count).padStart(2,"0");
+        name.appendChild(num); name.appendChild(document.createTextNode(p.n));
+        const ages = document.createElement("span"); ages.className="ages";
+        p.a.forEach(t=>{const g=document.createElement("span"); g.className="age "+t; g.textContent=t; ages.appendChild(g);});
+        row.appendChild(name); row.appendChild(ages); a.appendChild(row);
+        const d = document.createElement("p"); d.className="d"; d.dataset.en=p.d; d.dataset.es=PICKS_ES.d[p.n]||p.d; d.textContent=p.d; a.appendChild(d);
+        if(p.f){const f=document.createElement("span"); f.className="flag"; f.dataset.en=p.f; f.dataset.es=PICKS_ES.f[p.f]||p.f; f.textContent=p.f; a.appendChild(f);}
+        li.appendChild(a); ol.appendChild(li);
+      });
+      s.appendChild(ol); c.appendChild(s);
+    });
+    root.appendChild(c);
+  });
+  window.__pickCount = count;
+})();
+
+/* ---------- NYC clock ---------- */
+const TZ = "America/New_York";
+const NYC = {lat:40.7128, lon:-74.0060};
+let fmtTime = new Intl.DateTimeFormat("en-US",{timeZone:TZ,hour:"numeric",minute:"2-digit",second:"2-digit"});
+let fmtHM = new Intl.DateTimeFormat("en-US",{timeZone:TZ,hour:"numeric",minute:"2-digit"});
+let fmtDate = new Intl.DateTimeFormat("en-US",{timeZone:TZ,weekday:"long",month:"long",day:"numeric",year:"numeric"});
+const fmtDay = new Intl.DateTimeFormat("en-CA",{timeZone:TZ,year:"numeric",month:"2-digit",day:"2-digit"});
+
+/* ---------- Sun position (standard low-precision solar formulas) ---------- */
+const rad = d=>d*Math.PI/180, deg = r=>r*180/Math.PI;
+function sunAltitude(ms, lat, lon){
+  const n = ms/86400000 + 2440587.5 - 2451545.0;
+  const L = (280.460 + 0.9856474*n) % 360;
+  const g = rad((357.528 + 0.9856003*n) % 360);
+  const lam = rad(L + 1.915*Math.sin(g) + 0.020*Math.sin(2*g));
+  const eps = rad(23.439 - 0.0000004*n);
+  const ra = Math.atan2(Math.cos(eps)*Math.sin(lam), Math.cos(lam));
+  const dec = Math.asin(Math.sin(eps)*Math.sin(lam));
+  const gmst = ((18.697374558 + 24.06570982441908*n) % 24 + 24) % 24;
+  const ha = rad(gmst*15 + lon) - ra;
+  return deg(Math.asin(Math.sin(rad(lat))*Math.sin(dec) + Math.cos(rad(lat))*Math.cos(dec)*Math.cos(ha)));
+}
+let sunCache = {day:null, rise:null, set:null};
+function sunTimes(now){
+  const day = fmtDay.format(now);
+  if(sunCache.day === day) return sunCache;
+  // scan +/- 18 hours around now in 1 minute steps, keep events on today's NYC date
+  let rise=null, set=null, prev=sunAltitude(now.getTime()-18*3600e3, NYC.lat, NYC.lon);
+  for(let t=now.getTime()-18*3600e3+60e3; t<=now.getTime()+18*3600e3; t+=60e3){
+    const a = sunAltitude(t, NYC.lat, NYC.lon);
+    if(fmtDay.format(new Date(t))===day){
+      if(prev < -0.833 && a >= -0.833) rise = new Date(t);
+      if(prev >= -0.833 && a < -0.833) set = new Date(t);
+    }
+    prev = a;
+  }
+  sunCache = {day, rise, set};
+  return sunCache;
+}
+/* sky palette by sun altitude: night, twilight, golden, day. Kept dark enough for white text. */
+const SKY = [
+  {alt:-18, top:[8,7,30],   bot:[22,14,64]},
+  {alt:-8,  top:[24,14,70], bot:[92,36,110]},
+  {alt:0,   top:[46,24,96], bot:[178,74,92]},
+  {alt:8,   top:[30,52,120],bot:[150,88,70]},
+  {alt:25,  top:[18,58,120],bot:[22,96,130]},
+  {alt:60,  top:[14,60,128],bot:[20,104,140]}
+];
+function mix(a,b,t){return a.map((v,i)=>Math.round(v+(b[i]-v)*t));}
+function skyFor(alt){
+  if(alt<=SKY[0].alt) return SKY[0];
+  for(let i=1;i<SKY.length;i++){
+    if(alt<=SKY[i].alt){const a=SKY[i-1],b=SKY[i],t=(alt-a.alt)/(b.alt-a.alt);return {top:mix(a.top,b.top,t),bot:mix(a.bot,b.bot,t)};}
+  }
+  return SKY[SKY.length-1];
+}
+const rgb = c=>`rgb(${c[0]},${c[1]},${c[2]})`;
+
+const t0 = Date.now();
+// Ground speed of NYC due to Earth's rotation: 2*pi*R_eq / sidereal day * cos(latitude)
+const SPIN_KMS = (2*Math.PI*6378.137/86164.0905) * Math.cos(rad(NYC.lat)); // about 0.3525 km per second
+
+function tick(){
+  const now = new Date();
+  document.getElementById("clock").textContent = fmtTime.format(now);
+  document.getElementById("date").textContent = fmtDate.format(now);
+  const alt = sunAltitude(now.getTime(), NYC.lat, NYC.lon);
+  const st = sunTimes(now);
+  const rs = st.rise ? fmtHM.format(st.rise) : tr("none","ninguna");
+  const ss = st.set ? fmtHM.format(st.set) : tr("none","ninguna");
+  document.getElementById("sunline").textContent = tr(`Up ${rs} · Down ${ss}`, `Sale ${rs} · Se pone ${ss}`);
+  if(!document.body.classList.contains("sky-playing")) document.getElementById("sunstate").textContent = alt >= 0
+    ? tr(`The sun is ${alt.toFixed(1)}° above the horizon`, `El sol está ${alt.toFixed(1)}° sobre el horizonte`)
+    : tr(`The sun is ${Math.abs(alt).toFixed(1)}° below the horizon`, `El sol está ${Math.abs(alt).toFixed(1)}° bajo el horizonte`);
+  const sky = skyFor(alt);
+  document.documentElement.style.setProperty("--sky-top", rgb(sky.top));
+  document.documentElement.style.setProperty("--sky-bot", rgb(sky.bot));
+  const km = (Date.now()-t0)/1000*SPIN_KMS;
+  document.getElementById("spin").textContent = km < 100 ? `${km.toFixed(1)} km` : `${Math.round(km).toLocaleString("en-US")} km`;
+}
+tick(); setInterval(tick, 1000);
+
+/* ---------- Live temperature (Open-Meteo, no key). Tile stays hidden on failure. ---------- */
+(async function temp(){
+  try{
+    const r = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${NYC.lat}&longitude=${NYC.lon}&current=temperature_2m&temperature_unit=fahrenheit&timezone=America%2FNew_York`);
+    if(!r.ok) return;
+    const j = await r.json();
+    const t = j && j.current && j.current.temperature_2m;
+    if(typeof t !== "number") return;
+    const c = (t-32)*5/9;
+    document.getElementById("temp").textContent = `${Math.round(t)}°F · ${Math.round(c)}°C`;
+    document.getElementById("tempTile").hidden = false;
+  }catch(e){}
+})();
+
+/* ---------- Tremor meter: real USGS quakes ---------- */
+const seis = document.getElementById("seis");
+let quakes = [], current = null, audio = null, soundOn = false, pulse = 0;
+/* ---------- Thermal views (USGS data, drawn locally; no extra files) ---------- */
+const LAND={"w": 240, "h": 120, "start": 0, "runs": [1051, 1, 1, 10, 196, 18, 2, 19, 1, 4, 1, 2, 3, 2, 48, 1, 136, 8, 1, 8, 2, 34, 24, 2, 1, 1, 4, 1, 9, 2, 2, 1, 1, 2, 22, 4, 106, 2, 1, 1, 2, 7, 1, 5, 3, 33, 22, 6, 53, 3, 90, 3, 19, 3, 1, 1, 7, 34, 22, 2, 56, 2, 92, 4, 1, 3, 3, 2, 4, 2, 4, 1, 15, 26, 52, 4, 19, 14, 14, 6, 61, 3, 1, 1, 41, 23, 51, 2, 19, 15, 1, 1, 82, 4, 1, 4, 2, 2, 3, 4, 1, 1, 1, 2, 1, 3, 2, 1, 14, 19, 2, 1, 50, 2, 9, 2, 6, 32, 34, 2, 13, 1, 26, 8, 6, 2, 3, 12, 12, 18, 1, 1, 51, 1, 8, 3, 1, 1, 2, 34, 2, 13, 18, 1, 11, 15, 6, 4, 2, 1, 3, 11, 1, 1, 1, 2, 5, 1, 2, 1, 2, 6, 8, 2, 1, 18, 28, 10, 23, 3, 1, 58, 5, 6, 2, 2, 7, 35, 1, 1, 1, 1, 1, 1, 4, 2, 1, 4, 2, 2, 4, 1, 1, 4, 11, 13, 32, 15, 3, 2, 3, 1, 2, 8, 1, 3, 1, 76, 6, 53, 6, 8, 6, 12, 32, 13, 1, 4, 3, 18, 1, 71, 3, 2, 4, 53, 6, 7, 2, 1, 7, 8, 12, 6, 17, 6, 3, 6, 4, 93, 13, 45, 1, 1, 2, 2, 1, 2, 4, 6, 9, 7, 13, 2, 18, 8, 1, 104, 11, 48, 6, 1, 3, 3, 3, 2, 11, 5, 32, 8, 2, 103, 14, 10, 1, 35, 11, 6, 16, 1, 33, 8, 2, 90, 5, 5, 18, 5, 10, 30, 11, 6, 2, 2, 45, 9, 4, 79, 2, 1, 3, 2, 4, 2, 26, 1, 1, 1, 11, 29, 11, 10, 37, 1, 11, 3, 1, 1, 3, 77, 12, 4, 24, 1, 16, 1, 1, 29, 6, 1, 1, 10, 37, 2, 7, 2, 2, 2, 3, 78, 12, 5, 21, 1, 20, 1, 1, 32, 2, 14, 33, 2, 2, 1, 7, 2, 5, 77, 14, 4, 46, 31, 2, 12, 1, 3, 30, 3, 1, 3, 4, 90, 10, 3, 48, 31, 1, 15, 31, 1, 3, 4, 2, 91, 1, 1, 8, 1, 50, 41, 2, 2, 36, 2, 3, 93, 1, 1, 7, 1, 53, 37, 1, 2, 4, 3, 35, 94, 64, 40, 7, 1, 33, 95, 64, 41, 1, 1, 39, 21, 2, 1, 2, 67, 65, 37, 2, 1, 42, 9, 2, 9, 7, 65, 3, 2, 61, 36, 41, 8, 5, 2, 3, 7, 9, 60, 5, 3, 61, 34, 43, 7, 8, 2, 2, 6, 2, 4, 2, 59, 71, 34, 43, 6, 13, 2, 2, 63, 1, 1, 1, 2, 8, 2, 63, 32, 44, 6, 10, 1, 3, 2, 2, 61, 4, 3, 7, 1, 65, 30, 47, 2, 4, 1, 1, 3, 12, 1, 1, 60, 3, 2, 5, 3, 65, 30, 47, 2, 1, 8, 9, 2, 4, 1, 1, 56, 4, 2, 2, 6, 67, 26, 48, 12, 17, 56, 6, 1, 1, 3, 71, 24, 48, 16, 3, 2, 8, 58, 6, 1, 75, 1, 1, 21, 47, 19, 1, 68, 82, 14, 2, 2, 4, 1, 47, 39, 2, 47, 82, 2, 1, 9, 10, 1, 45, 31, 2, 9, 2, 45, 85, 1, 1, 8, 10, 2, 43, 33, 1, 9, 5, 42, 85, 1, 2, 7, 55, 33, 2, 9, 2, 2, 7, 34, 90, 6, 54, 35, 2, 13, 7, 32, 2, 1, 89, 5, 12, 1, 41, 36, 1, 14, 6, 14, 1, 13, 96, 5, 5, 2, 6, 3, 38, 36, 2, 12, 9, 10, 4, 9, 100, 5, 3, 3, 10, 2, 35, 36, 2, 11, 11, 7, 6, 8, 2, 2, 99, 8, 48, 37, 2, 9, 12, 6, 8, 8, 9, 2, 93, 1, 2, 6, 45, 37, 2, 7, 14, 5, 11, 7, 8, 1, 98, 6, 44, 39, 1, 4, 17, 3, 12, 8, 7, 1, 101, 2, 45, 41, 20, 3, 13, 7, 110, 1, 7, 1, 1, 1, 35, 40, 3, 2, 17, 2, 12, 1, 3, 4, 8, 3, 100, 1, 5, 2, 1, 6, 32, 43, 17, 3, 16, 1, 114, 1, 2, 12, 31, 42, 18, 1, 1, 1, 12, 1, 15, 2, 104, 13, 31, 41, 20, 2, 12, 1, 15, 1, 104, 17, 29, 5, 5, 28, 31, 2, 2, 2, 8, 3, 109, 17, 40, 26, 32, 2, 1, 2, 7, 3, 109, 18, 41, 23, 35, 2, 1, 1, 5, 5, 6, 1, 101, 20, 39, 23, 37, 2, 1, 1, 2, 6, 2, 3, 103, 23, 37, 22, 39, 2, 4, 5, 7, 1, 2, 1, 1, 1, 95, 24, 36, 21, 39, 4, 3, 5, 1, 2, 7, 1, 2, 2, 93, 28, 33, 20, 41, 3, 5, 2, 3, 1, 2, 1, 3, 8, 90, 30, 32, 18, 43, 2, 21, 5, 90, 30, 31, 18, 44, 2, 17, 1, 2, 6, 89, 30, 32, 17, 48, 3, 1, 1, 3, 1, 9, 4, 1, 2, 89, 28, 33, 17, 53, 1, 2, 1, 15, 3, 5, 1, 81, 27, 34, 18, 60, 1, 101, 26, 34, 18, 60, 4, 4, 1, 93, 25, 34, 19, 5, 1, 51, 1, 1, 5, 3, 2, 94, 24, 34, 19, 4, 3, 49, 8, 3, 3, 95, 22, 34, 17, 4, 4, 48, 12, 1, 3, 96, 20, 35, 16, 5, 4, 48, 17, 95, 20, 36, 14, 7, 2, 6, 1, 40, 20, 94, 20, 36, 15, 5, 3, 45, 23, 10, 1, 82, 17, 40, 14, 5, 3, 44, 25, 92, 15, 42, 13, 6, 2, 45, 26, 91, 14, 43, 12, 53, 27, 91, 15, 42, 12, 54, 26, 90, 15, 44, 10, 56, 25, 90, 14, 46, 8, 57, 25, 90, 13, 47, 7, 58, 8, 4, 13, 90, 12, 48, 6, 59, 5, 8, 1, 1, 9, 91, 10, 130, 8, 15, 1, 75, 11, 131, 7, 16, 1, 74, 10, 133, 2, 1, 1, 18, 3, 72, 8, 157, 2, 73, 6, 139, 3, 17, 1, 74, 7, 139, 2, 15, 2, 6, 1, 68, 5, 156, 2, 76, 5, 156, 3, 76, 6, 234, 5, 235, 4, 236, 4, 6, 1, 231, 2, 240, 3, 1443, 1, 236, 2, 235, 1, 1, 1, 75, 6, 22, 12, 1, 4, 5, 3, 2, 7, 102, 1, 71, 19, 6, 45, 94, 6, 52, 1, 11, 3, 1, 20, 3, 58, 84, 8, 34, 1, 1, 1, 4, 46, 2, 64, 61, 1, 21, 5, 31, 122, 44, 3, 3, 1, 1, 1, 6, 27, 31, 120, 34, 53, 27, 124, 27, 3, 5, 46, 29, 131, 27, 48, 2, 2, 6, 1, 12, 3, 6, 133, 31, 49, 15, 7, 9, 126, 32, 59, 15, 136, 26, 64, 3, 151, 8, 8, 8, 944]}; const MASK=new Uint8Array(LAND.w*LAND.h);{let v=LAND.start,i=0;for(const r of LAND.runs){MASK.fill(v,i,i+r);i+=r;v=1-v;}}
+const HEAT=[[0,[11,10,42]],[.18,[43,26,110]],[.38,[107,63,184]],[.58,[214,63,160]],[.74,[255,143,207]],[.88,[255,209,102]],[1,[255,251,230]]];
+function heat(v){v=Math.max(0,Math.min(1,v));for(let i=1;i<HEAT.length;i++){if(v<=HEAT[i][0]){const a=HEAT[i-1],b=HEAT[i],t=(v-a[0])/(b[0]-a[0]);return a[1].map((c,k)=>Math.round(c+(b[1][k]-c)*t));}}return HEAT[HEAT.length-1][1];}
+const VIEWS=[
+ {t:"Thermal Earth",te:"Tierra térmica",be:"Todo el planeta como una cámara de calor. Cada sismo real de las últimas 24 horas brilla en su lugar real; los más grandes y recientes arden más. NYC está marcada para que vea qué tan lejos están.",b:"The whole planet as a heat camera. Every real quake from the last 24 hours glows at its real spot; bigger and newer quakes burn hotter. NYC is marked so you can see how far away they are."},
+ {t:"Thermal spectrogram",te:"Espectrograma térmico",be:"Cómo los científicos ven el temblor como calor: el tiempo corre de izquierda a derecha, el tono del temblor de abajo hacia arriba, y un color más caliente significa más energía. Se ve la onda P, luego la onda S más caliente y luego las largas ondas de superficie.",b:"How scientists see shaking as heat: time runs left to right, pitch of the shaking runs bottom to top, and hotter color means more energy. You can see the P wave, then the hotter S wave, then the long low surface waves."},
+ {t:"24-hour heat grid",te:"Cuadrícula de calor de 24 horas",be:"Las últimas 24 horas como una cuadrícula térmica: una fila por hora, una celda por minuto. Las celdas se calientan en el minuto exacto en que ocurren sismos reales, según su magnitud.",b:"The last 24 hours as a thermal grid: one row per hour, one cell per minute. Cells heat up at the exact minutes real quakes hit, sized by magnitude."}];
+const TV=[...document.querySelectorAll("#seiswrap canvas.tv")]; let view=0, earthImg=null, specFor=null, specImg=null;
+function showView(i){view=i;document.querySelectorAll("#seiswrap .float").forEach(f=>f.remove());TV.forEach((c,k)=>c.classList.toggle("on",k===i));document.querySelectorAll("#dots .dot").forEach((d,k)=>d.classList.toggle("on",k===i));
+  document.getElementById("vt").textContent=tr(VIEWS[i].t,VIEWS[i].te);document.getElementById("vb").textContent=tr(VIEWS[i].b,VIEWS[i].be);sizeCanvas();gridDrawnAt=0;if(i===2)drawGrid();if(i===0&&current)floatLabel(current);}
+document.getElementById("seiswrap").addEventListener("click",()=>showView((view+1)%3));
+document.getElementById("seiswrap").addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();showView((view+1)%3);}});
+document.querySelectorAll("#dots .dot").forEach((d,k)=>d.addEventListener("click",()=>showView(k)));
+function sizeCanvas(){const dpr=Math.min(window.devicePixelRatio||1,2);TV.forEach(c=>{if(!c.clientWidth)return;c.width=Math.round(c.clientWidth*dpr);c.height=Math.round(c.clientHeight*dpr);c.getContext("2d").setTransform(dpr,0,0,dpr,0,0);});}
+window.addEventListener("resize", sizeCanvas);
+function bar(x,X,Y,W,H,l1,l2){x.font="11px system-ui,sans-serif";x.textBaseline="middle";x.fillStyle="#e9e4ff";const w1=x.measureText(l1).width;x.fillText(l1,X,Y+H/2);const bx=X+w1+6;
+  const g=x.createLinearGradient(bx,0,bx+W,0);for(let i=0;i<=10;i++)g.addColorStop(i/10,"rgb("+heat(i/10)+")");x.fillStyle=g;x.fillRect(bx,Y,W,H);x.fillStyle="#e9e4ff";x.fillText(l2,bx+W+6,Y+H/2);x.textBaseline="alphabetic";}
+function tag(x,text,X,Y,W){x.font="700 12px system-ui,sans-serif";const w=x.measureText(text).width+12;let lx=X+10;if(lx+w>W-4)lx=X-10-w;x.fillStyle="rgba(11,10,42,.78)";x.fillRect(lx,Y-20,w,18);x.fillStyle="#fff";x.fillText(text,lx+6,Y-7);}
+function buildEarth(){const GW=480,GH=240,o=document.createElement("canvas");o.width=GW;o.height=GH;const x=o.getContext("2d"),img=x.createImageData(GW,GH),now=Date.now();
+  const pts=quakes.map(f=>{const c=f.geometry.coordinates;return {X:(c[0]+180)/360*GW,Y:(90-c[1])/180*GH,m:Math.max(0,f.properties.mag),age:Math.min(1,(now-f.properties.time)/864e5)};});
+  for(let py=0;py<GH;py++)for(let px=0;px<GW;px++){let v=0;for(const p of pts){const s=1+p.m*1.15,dx=px-p.X,dy=py-p.Y,d2=dx*dx+dy*dy;if(d2>s*s*16)continue;v+=(0.06+p.m/7*0.94)*(1-0.45*p.age)*Math.exp(-d2/(2*s*s));}
+    const land=MASK[Math.min(LAND.h-1,Math.floor(py/GH*LAND.h))*LAND.w+Math.min(LAND.w-1,Math.floor(px/GW*LAND.w))];
+    const col=heat(Math.min(1,(land?0.16:0.03)+v)),i=(py*GW+px)*4;img.data[i]=col[0];img.data[i+1]=col[1];img.data[i+2]=col[2];img.data[i+3]=255;}
+  x.putImageData(img,0,0);earthImg=o;}
+function drawEarth(){const c=seis,x=c.getContext("2d"),W=c.clientWidth,H=c.clientHeight;if(!earthImg)return;const MH=H-28;
+  x.imageSmoothingEnabled=true;x.drawImage(earthImg,0,0,W,MH);x.fillStyle="#0b0a2a";x.fillRect(0,MH,W,28);
+  const P=(lo,la)=>[(lo+180)/360*W,(90-la)/180*MH];const ny=P(NYC.lon,NYC.lat);x.strokeStyle="#fff";x.lineWidth=2;x.beginPath();x.arc(ny[0],ny[1],5,0,7);x.stroke();x.fillStyle="#fff";x.font="700 11px system-ui,sans-serif";x.fillText("NYC",ny[0]+8,ny[1]+4);
+  if(current){const cc=current.geometry.coordinates,q=P(cc[0],cc[1]),r=6+((pulse%60)/60)*18;x.strokeStyle="rgba(255,255,255,"+(1-(pulse%60)/60).toFixed(2)+")";x.lineWidth=2;x.beginPath();x.arc(q[0],q[1],r,0,7);x.stroke();
+    }
+  bar(x,8,MH+11,Math.min(120,W*0.3),6,tr("cold","frío"),tr("hot","caliente"));x.fillStyle="#e9e4ff";x.font="11px system-ui,sans-serif";const s2=tr("USGS · last 24 hours","USGS · últimas 24 horas");x.fillText(s2,W-x.measureText(s2).width-8,MH+16);}
+function buildSpec(q){const GW=300,GH=120,o=document.createElement("canvas");o.width=GW;o.height=GH;const x=o.getContext("2d"),img=x.createImageData(GW,GH),m=Math.max(0,q.properties.mag);let seed=Math.floor(q.properties.time%100000);const rnd=()=>{seed=(seed*1664525+1013904223)%4294967296;return seed/4294967296;};
+  for(let py=0;py<GH;py++){const fr=Math.pow(10,1-2*py/GH);for(let px=0;px<GW;px++){const t=px/GW*120;let e=0.05+rnd()*0.05;
+    if(t>20)e+=0.45*Math.exp(-(t-20)/14)*Math.exp(-Math.pow(Math.log10(fr/4),2)/0.12);
+    if(t>40)e+=0.9*Math.exp(-(t-40)/20)*Math.exp(-Math.pow(Math.log10(fr/1.6),2)/0.10);
+    if(t>64)e+=0.75*Math.exp(-(t-64)/40)*Math.exp(-Math.pow(Math.log10(fr/0.3),2)/0.07);
+    e*=0.45+m/9;const col=heat(Math.min(1,e)),i=(py*GW+px)*4;img.data[i]=col[0];img.data[i+1]=col[1];img.data[i+2]=col[2];img.data[i+3]=255;}}
+  x.putImageData(img,0,0);specImg=o;specFor=q;}
+function drawSpec(){const c=document.getElementById("spec"),x=c.getContext("2d"),W=c.clientWidth,H=c.clientHeight;if(!current)return;if(specFor!==current)buildSpec(current);
+  const L=44,R=W-8,T=24,B=H-38;x.fillStyle="#0b0a2a";x.fillRect(0,0,W,H);x.imageSmoothingEnabled=true;x.drawImage(specImg,L,T,R-L,B-T);x.strokeStyle="#e9e4ff";x.lineWidth=1;x.strokeRect(L,T,R-L,B-T);
+  x.fillStyle="#fff";x.font="700 12px system-ui,sans-serif";x.fillText("M "+current.properties.mag.toFixed(1)+" · "+current.properties.place,L,16);
+  x.fillStyle="#e9e4ff";x.font="11px system-ui,sans-serif";for(let s=0;s<=120;s+=W<500?40:20){const lb=s+"s",lw=x.measureText(lb).width;x.fillText(lb,Math.min(L+(R-L)*s/120-8,R-lw),B+13);}
+  [[10,"10 Hz"],[1,"1 Hz"],[0.1,"0.1 Hz"]].forEach(([fq,l])=>x.fillText(l,4,T+(B-T)*(1-Math.log10(fq*10)/2)+4));
+  x.fillStyle="#fff";x.font="700 11px system-ui,sans-serif";[[20,"P"],[40,"S"],[64,tr("Surface","Superficie")]].forEach(([t,l])=>x.fillText(l,L+(R-L)*t/120+3,T+13));
+  bar(x,L,H-9,Math.min(110,W*0.28),5,tr("quiet","tranquilo"),tr("strong shaking","temblor fuerte"));}
+function drawGrid(){const c=document.getElementById("grid"),x=c.getContext("2d"),W=c.clientWidth,H=c.clientHeight,now=Date.now();
+  const L=W<500?38:50,R=W-6,T=20,B=H-34,rows=24,cw=(R-L)/60,rh=(B-T)/rows,start=now-24*3600e3;x.fillStyle="#0b0a2a";x.fillRect(0,0,W,H);
+  const fh=new Intl.DateTimeFormat(tr("en-US","es-US"),{timeZone:"America/New_York",hour:"numeric"});
+  for(let r=0;r<rows;r++){const t0=start+r*3600e3;if(r%(rh<10?3:1)===0){x.fillStyle="#e9e4ff";x.font="10px system-ui,sans-serif";x.fillText(fh.format(new Date(t0)),2,T+rh*r+rh*0.8);}
+    for(let k=0;k<60;k++){const tm=t0+k*60e3;let e=0.04;for(const f of quakes){const dt=(tm-f.properties.time)/60e3;if(dt>=-0.5&&dt<8)e+=(0.06+Math.max(0,f.properties.mag)/6*0.9)*Math.exp(-Math.max(0,dt)/2.2);}
+      x.fillStyle="rgb("+heat(Math.min(1,e))+")";x.fillRect(L+k*cw+0.4,T+r*rh+0.4,Math.max(0.5,cw-0.8),Math.max(0.5,rh-0.8));}}
+  x.fillStyle="#e9e4ff";x.font="10px system-ui,sans-serif";for(let mm=0;mm<=60;mm+=W<500?20:10){const lb=mm+" min",lw=x.measureText(lb).width;x.fillText(lb,Math.min(L+mm*cw-12,R-lw),B+12);}
+  x.fillStyle="#fff";x.font="700 12px system-ui,sans-serif";x.fillText(tr("USGS · last 24 hours · NYC time","USGS · últimas 24 horas · hora de NYC"),L,14);bar(x,L,H-8,Math.min(110,W*0.28),5,tr("quiet","tranquilo"),tr("big quake","sismo grande"));}
+let gridDrawnAt=0;
+function draw(){pulse++;if(view===0)drawEarth();else if(view===1)drawSpec();else if(Date.now()-gridDrawnAt>60000||pulse%30===0){drawGrid();gridDrawnAt=Date.now();}requestAnimationFrame(draw);}
+
+function ago(ms){
+  const m = Math.round((Date.now()-ms)/60000);
+  if(m < 60) return tr(`${m} min ago`, `hace ${m} min`);
+  const h = Math.floor(m/60);
+  return tr(`${h} hr ago`, `hace ${h} h`);
+}
+function milesFromNYC(q){
+  const c = q.geometry && q.geometry.coordinates; if(!c) return null;
+  const R = 3958.8, la1 = rad(NYC.lat), la2 = rad(c[1]), dla = la2-la1, dlo = rad(c[0]-NYC.lon);
+  const h = Math.sin(dla/2)**2 + Math.cos(la1)*Math.cos(la2)*Math.sin(dlo/2)**2;
+  return Math.round(2*R*Math.asin(Math.sqrt(h)));
+}
+function shortPlace(p){ const i = p.lastIndexOf(" of "); return i>-1 ? p.slice(i+4) : p; }
+function floatLabel(q){
+  if(view!==0) return;
+  const wrap = document.getElementById("seiswrap");
+  const el = document.createElement("span");
+  el.className = "float";
+  el.textContent = `M ${q.properties.mag.toFixed(1)} · ${shortPlace(q.properties.place)}`;
+  const cc = q.geometry && q.geometry.coordinates;
+  if(view===0 && cc){ el.style.left = ((cc[0]+180)/360*100) + "%"; el.style.top = ((90-cc[1])/180*86) + "%"; }
+  else { el.style.left = (4 + Math.random()*52) + "%"; el.style.top = (6 + Math.random()*62) + "%"; }
+  wrap.appendChild(el);
+  const maxLeft = wrap.clientWidth - el.offsetWidth - 6;
+  if(el.offsetLeft > maxLeft) el.style.left = Math.max(6, maxLeft) + "px";
+  setTimeout(()=>el.remove(), 6200);
+}
+
+/* PRACTICE SAFETY: button anytime, plus one automatic run per visit for M5+ */
+const ALL_CLEAR_HTML = '<span class="dtitle " role="img" aria-label="ALL CLEAR"><svg class="dw tk" viewBox="10 -830 1956 860" aria-hidden="true" focusable="false"><path d="M335 -139C335 -139 419 -146 419 -146C419 -146 419 -286 419 -286C419 -286 365 -286 365 -286C365 -286 437 -537 437 -537C437 -537 503 -288 503 -288C503 -288 442 -283 442 -283C442 -283 440 -148 440 -148C440 -148 542 -140 542 -140C542 -140 583 -3 583 -3C583 -3 795 -5 795 -5C795 -5 797 -210 797 -210C797 -210 772 -56 772 -56C772 -56 590 -634 590 -634C590 -634 644 -544 644 -544C644 -544 570 -703 570 -703L310 -707C310 -707 172 -575 172 -575C172 -575 300 -670 300 -670C300 -670 89 -43 89 -43C89 -43 10 -3 10 -3C10 -3 292 0 292 0C292 0 335 -139 335 -139ZM1378 1C1378 1 1377 -30 1377 -47C1377 -63 1374 -286 1374 -286C1374 -286 1350 -162 1350 -162C1350 -162 1127 -164 1127 -164C1127 -164 1002 -68 1002 -68C1002 -68 1102 -163 1102 -163C1102 -163 1101 -328 1101 -328C1101 -328 1038 -341 1038 -341C1038 -341 1100 -349 1100 -349C1100 -349 975 -363 975 -363C975 -363 1100 -374 1100 -374C1100 -374 937 -383 937 -383C937 -383 1101 -394 1101 -394C1101 -394 1106 -673 1106 -673C1106 -673 1215 -700 1215 -700C1215 -700 895 -707 895 -707C895 -707 867 -620 867 -620C867 -620 897 -678 897 -678C897 -678 894 -292 894 -292C894 -292 1013 -279 1013 -279C1013 -279 894 -272 894 -272C894 -272 898 1 898 1C898 1 1378 1 1378 1ZM1966 1C1966 1 1965 -30 1965 -47C1965 -63 1962 -286 1962 -286C1962 -286 1938 -162 1938 -162C1938 -162 1715 -164 1715 -164C1715 -164 1590 -68 1590 -68C1590 -68 1690 -163 1690 -163C1690 -163 1689 -328 1689 -328C1689 -328 1626 -341 1626 -341C1626 -341 1688 -349 1688 -349C1688 -349 1563 -363 1563 -363C1563 -363 1688 -374 1688 -374C1688 -374 1525 -383 1525 -383C1525 -383 1689 -394 1689 -394C1689 -394 1694 -673 1694 -673C1694 -673 1803 -700 1803 -700C1803 -700 1483 -707 1483 -707C1483 -707 1455 -620 1455 -620C1455 -620 1485 -678 1485 -678C1485 -678 1482 -292 1482 -292C1482 -292 1601 -279 1601 -279C1601 -279 1482 -272 1482 -272C1482 -272 1486 1 1486 1C1486 1 1966 1 1966 1Z"/></svg><svg class="dw tk" viewBox="35 -830 3555 860" aria-hidden="true" focusable="false"><path d="M520 -2C666 -20 660 -113 690 -113C720 -113 743 -279 743 -279C743 -279 545 -274 545 -274C545 -274 560 -245 514 -191C468 -136 360 -162 360 -162C360 -162 307 -221 307 -221C307 -221 276 -322 276 -322C276 -322 246 -416 301 -480C356 -545 355 -538 423 -547C491 -556 525 -502 525 -502C525 -502 547 -419 547 -419C547 -419 549 -419 551 -419H549C549 -419 549 -419 549 -419H548C548 -419 548 -419 548 -419H547C547 -419 547 -419 547 -419C547 -419 547 -419 547 -419C547 -419 547 -419 548 -419C549 -419 549 -419 549 -419C550 -419 551 -419 551 -419C578 -419 745 -417 745 -417C745 -417 818 -584 818 -584C818 -584 732 -463 732 -463C732 -463 722 -559 722 -559C722 -559 658 -642 658 -642C658 -642 545 -688 545 -688C545 -688 421 -712 421 -712C421 -712 327 -708 327 -708C327 -708 274 -685 250 -675C269 -721 303 -804 303 -804C303 -804 248 -721 208 -662C201 -653 196 -647 196 -647C196 -647 183 -629 171 -613C175 -630 180 -649 185 -669C192 -694 198 -713 198 -713C198 -713 197 -710 194 -706C204 -743 211 -773 211 -773C211 -773 166 -666 136 -595C130 -585 123 -573 115 -559C29 -413 121 -387 80 -387C39 -387 44 -557 44 -557C44 -557 8 -466 80 -253C151 -39 142 -140 155 -97C168 -54 308 -3 308 -3C308 -3 373 15 520 -2ZM743 -424C743 -424 743 -424 743 -424ZM742 -424C742 -424 742 -424 742 -424ZM742 -424C742 -424 741 -424 741 -424ZM728 -424H727ZM716 -423C716 -423 715 -423 714 -423ZM702 -423 671 -422C682 -423 693 -423 702 -423ZM663 -422C665 -422 666 -422 668 -422H657ZM604 -421H606C605 -421 604 -421 604 -421ZM596 -420C597 -420 598 -420 599 -420H596C594 -420 592 -420 590 -420ZM589 -420C588 -420 586 -420 584 -420ZM582 -420C580 -420 578 -420 576 -420ZM1398 1C1398 1 1397 -30 1397 -47C1397 -63 1394 -286 1394 -286C1394 -286 1370 -162 1370 -162C1370 -162 1147 -164 1147 -164C1147 -164 1022 -68 1022 -68C1022 -68 1122 -163 1122 -163C1122 -163 1121 -328 1121 -328C1121 -328 1058 -341 1058 -341C1058 -341 1120 -349 1120 -349C1120 -349 995 -363 995 -363C995 -363 1120 -374 1120 -374C1120 -374 957 -383 957 -383C957 -383 1121 -394 1121 -394C1121 -394 1126 -673 1126 -673C1126 -673 1235 -700 1235 -700C1235 -700 915 -707 915 -707C915 -707 887 -620 887 -620C887 -620 917 -678 917 -678C917 -678 914 -292 914 -292C914 -292 1033 -279 1033 -279C1033 -279 914 -272 914 -272C914 -272 918 1 918 1C918 1 1398 1 1398 1ZM1855 -131C1855 -131 1748 -7 1748 -7C1748 -7 2023 -4 2023 -4C2023 -4 2022 -172 2022 -172C2022 -172 1965 -240 1965 -240C1965 -240 1987 -169 1987 -169C1987 -169 1717 -168 1717 -168C1717 -168 1707 -354 1707 -354C1707 -354 1754 -285 1754 -285C1754 -285 1984 -284 1984 -284C1984 -284 1971 -477 1971 -477C1971 -477 1955 -430 1955 -430C1955 -430 1711 -432 1711 -432C1711 -432 1711 -541 1711 -541C1711 -541 1979 -544 1979 -544C1979 -544 1999 -510 1999 -510C1999 -510 2000 -705 2000 -705C2000 -705 1458 -704 1458 -704C1458 -704 1512 -685 1512 -685C1512 -685 1513 -477 1513 -477C1513 -477 1650 -643 1650 -643C1650 -643 1513 -442 1513 -442C1513 -442 1509 -73 1509 -73C1509 -73 1631 -401 1631 -401C1631 -401 1508 -5 1508 -5C1508 -5 1715 -4 1715 -4C1715 -4 1855 -131 1855 -131ZM2407 -139C2407 -139 2491 -146 2491 -146C2491 -146 2491 -286 2491 -286C2491 -286 2437 -286 2437 -286C2437 -286 2509 -537 2509 -537C2509 -537 2575 -288 2575 -288C2575 -288 2514 -283 2514 -283C2514 -283 2512 -148 2512 -148C2512 -148 2614 -140 2614 -140C2614 -140 2655 -3 2655 -3C2655 -3 2867 -5 2867 -5C2867 -5 2869 -210 2869 -210C2869 -210 2844 -56 2844 -56C2844 -56 2662 -634 2662 -634C2662 -634 2716 -544 2716 -544C2716 -544 2642 -703 2642 -703L2382 -707C2382 -707 2244 -575 2244 -575C2244 -575 2372 -670 2372 -670C2372 -670 2161 -43 2161 -43C2161 -43 2082 -3 2082 -3C2082 -3 2364 0 2364 0C2364 0 2407 -139 2407 -139ZM3590 -5C3590 -5 3578 -195 3578 -195C3578 -195 3568 -56 3568 -56C3568 -56 3459 -264 3459 -264C3459 -264 3524 -313 3524 -313C3524 -313 3567 -420 3567 -420C3567 -420 3551 -579 3551 -579C3551 -579 3355 -703 3355 -703C3355 -703 2983 -701 2983 -701C2983 -701 2933 -526 2933 -526L2989 -634C2989 -634 2984 -104 2984 -104C2984 -104 3005 -406 3005 -406C3005 -406 3191 -421 3191 -421C3191 -421 3189 -524 3189 -524C3189 -524 3368 -522 3368 -522C3368 -522 3398 -464 3398 -464C3398 -464 3364 -410 3364 -410C3364 -410 3035 -401 3035 -401C3035 -401 2985 -58 2985 -58C2985 -58 2934 -144 2934 -144C2934 -144 2976 -4 2976 -4C2976 -4 3185 -13 3185 -13C3185 -13 3189 -236 3189 -236C3189 -236 3296 -239 3296 -239C3296 -239 3366 -2 3366 -2C3366 -2 3590 -5 3590 -5Z"/></svg><span class="sr">ALL CLEAR</span></span>';
+/* Signup: same Google Apps Script the play survey (kfl_survey.html) posts to */
+const LIST_URL = "https://script.google.com/macros/s/AKfycbxdnAdAz1u1HfIgVMDGFdegU5uznmfmeCjVHa9k6C9678qyR7jZ0T-TGambPc0o6Ops/exec";
+document.getElementById("joinForm").addEventListener("submit", e=>{
+  e.preventDefault();
+  const name = document.getElementById("jName").value.trim();
+  const email = document.getElementById("jEmail").value.trim();
+  const msg = document.getElementById("jMsg"), btn = document.getElementById("jBtn");
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ msg.textContent = tr("Please check your email address.","Revise su correo electrónico."); return; }
+  btn.disabled = true; btn.textContent = tr("Sending...","Enviando...");
+  const data = {source:"ARTOOLZ signup", firstName:name, email, timestamp:new Date().toISOString()};
+  fetch(LIST_URL, {method:"POST", mode:"no-cors", headers:{"Content-Type":"application/json"}, body:JSON.stringify(data)})
+    .then(()=>{ msg.textContent = tr(`Thanks${name ? ", " + name : ""}! You're on the list.`, `¡Gracias${name ? ", " + name : ""}! Ya está en la lista.`); e.target.reset(); btn.textContent = tr("Signed up","Inscrito"); })
+    .catch(()=>{ msg.textContent = tr("That didn't go through. Email us at kaijufruitcode@gmail.com instead.","No se pudo enviar. Escríbanos a kaijufruitcode@gmail.com."); btn.disabled = false; btn.textContent = tr("Sign me up","Inscríbame"); });
+});
+
+const ALL_CLEAR_ES = "<span class=\"dtitle \" role=\"img\" aria-label=\"TODO BIEN\"><svg class=\"dw tk\" viewBox=\"17 -830 3110 860\" aria-hidden=\"true\" focusable=\"false\"><path d=\"M460 -277C460 -277 341 -298 341 -298C341 -298 471 -331 471 -331C471 -331 470 -538 470 -538C470 -538 650 -547 650 -547C650 -547 794 -786 794 -786C794 -786 654 -702 654 -702C654 -702 97 -703 97 -703C97 -703 17 -510 17 -510C17 -510 84 -418 84 -418C84 -418 69 -501 69 -501C69 -501 94 -550 94 -550C94 -550 275 -547 275 -547C275 -547 264 -329 264 -329C264 -329 265 -92 265 -92C265 -92 316 -76 316 -76C316 -76 171 -8 171 -8C171 -8 260 -11 260 -11C260 -11 475 -6 475 -6C475 -6 460 -277 460 -277ZM1341 -20C1341 -20 1217 -228 1217 -228C1217 -228 1166 -201 1166 -201C1166 -201 1135 -384 1135 -384C1135 -384 1085 -350 1085 -350C1085 -350 1101 -516 1101 -516C1101 -516 1046 -493 1046 -493C1046 -493 1068 -622 1068 -622C1068 -622 1084 -564 1084 -564C1084 -564 1160 -601 1160 -601C1160 -601 1130 -432 1130 -432C1130 -432 1189 -471 1189 -471C1189 -471 1197 -278 1197 -278C1197 -278 1255 -320 1255 -320C1255 -320 1389 -40 1389 -40C1389 -40 1453 -83 1453 -83C1453 -83 1518 -171 1518 -171C1518 -171 1550 -305 1550 -305C1550 -305 1553 -411 1553 -411C1553 -411 1517 -546 1517 -546C1517 -546 1434 -628 1434 -628C1434 -628 1352 -688 1352 -688C1352 -688 1216 -715 1216 -715C1216 -715 1044 -682 1044 -682C1044 -682 915 -592 915 -592C915 -592 864 -481 864 -481C864 -481 840 -351 840 -351C840 -351 873 -181 873 -181C873 -181 976 -63 976 -63C976 -63 1059 -15 1059 -15C1059 -15 1144 -6 1144 -6C1144 -6 1243 -1 1243 -1C1243 -1 1341 -20 1341 -20ZM2175 -45C2175 -45 2271 -126 2271 -126C2271 -126 2138 -245 2138 -245C2138 -245 2287 -152 2287 -152C2287 -152 2321 -219 2321 -219C2321 -219 2340 -342 2340 -342C2340 -342 2180 -358 2180 -358C2180 -358 2334 -372 2334 -372C2334 -372 2330 -444 2330 -444C2330 -444 2309 -522 2309 -522C2309 -522 2280 -579 2280 -579C2280 -579 2154 -509 2154 -509C2154 -509 2263 -597 2263 -597C2263 -597 2240 -618 2240 -618C2240 -618 2162 -675 2162 -675C2162 -675 2067 -703 2067 -703C2067 -703 1611 -705 1611 -705C1611 -705 1701 -665 1701 -665C1701 -665 1701 -399 1701 -399C1701 -399 1907 -387 1907 -387C1907 -387 1907 -537 1907 -537C1907 -537 2038 -531 2038 -531C2038 -531 2107 -475 2107 -475C2107 -475 2128 -343 2128 -343C2128 -343 2092 -216 2092 -216C2092 -216 2042 -175 2042 -175C2042 -175 1906 -167 1906 -167C1906 -167 1905 -355 1905 -355C1905 -355 1699 -375 1699 -375C1699 -375 1703 -171 1703 -171C1703 -171 1672 -171 1672 -171C1672 -171 1670 -8 1670 -8C1670 -8 2047 -6 2047 -6C2047 -6 2175 -45 2175 -45ZM2915 -20C2915 -20 2791 -228 2791 -228C2791 -228 2740 -201 2740 -201C2740 -201 2709 -384 2709 -384C2709 -384 2659 -350 2659 -350C2659 -350 2675 -516 2675 -516C2675 -516 2620 -493 2620 -493C2620 -493 2642 -622 2642 -622C2642 -622 2658 -564 2658 -564C2658 -564 2734 -601 2734 -601C2734 -601 2704 -432 2704 -432C2704 -432 2763 -471 2763 -471C2763 -471 2771 -278 2771 -278C2771 -278 2829 -320 2829 -320C2829 -320 2963 -40 2963 -40C2963 -40 3027 -83 3027 -83C3027 -83 3092 -171 3092 -171C3092 -171 3124 -305 3124 -305C3124 -305 3127 -411 3127 -411C3127 -411 3091 -546 3091 -546C3091 -546 3008 -628 3008 -628C3008 -628 2926 -688 2926 -688C2926 -688 2790 -715 2790 -715C2790 -715 2618 -682 2618 -682C2618 -682 2489 -592 2489 -592C2489 -592 2438 -481 2438 -481C2438 -481 2414 -351 2414 -351C2414 -351 2447 -181 2447 -181C2447 -181 2550 -63 2550 -63C2550 -63 2633 -15 2633 -15C2633 -15 2718 -6 2718 -6C2718 -6 2817 -1 2817 -1C2817 -1 2915 -20 2915 -20Z\"/></svg><svg class=\"dw tk\" viewBox=\"28 -830 2474 860\" aria-hidden=\"true\" focusable=\"false\"><path d=\"M490 -5C490 -5 491 -5 492 -6C502 -4 512 -5 522 -7C555 -12 587 -27 615 -46C633 -59 651 -74 664 -93C667 -97 673 -105 675 -113C681 -126 686 -140 689 -155C690 -156 690 -156 690 -157C695 -180 697 -204 695 -227C695 -232 692 -242 689 -253C688 -256 687 -259 686 -262C683 -271 681 -279 679 -282C675 -289 669 -295 663 -300C649 -314 630 -331 630 -331C630 -331 579 -356 579 -356C579 -356 538 -363 522 -366C554 -373 585 -385 610 -406C617 -412 623 -418 628 -426C633 -430 637 -434 637 -434C637 -434 659 -470 659 -470C659 -470 668 -514 668 -514C668 -514 668 -559 668 -559C668 -559 652 -612 652 -612C652 -612 623 -656 623 -656C623 -656 585 -681 585 -681C585 -681 543 -697 543 -697C543 -697 483 -705 483 -705C483 -705 455 -705 455 -705C455 -705 96 -703 96 -703C96 -703 97 -702 97 -702C75 -703 28 -705 28 -705C28 -705 95 -679 95 -679C95 -679 97 -649 99 -628C99 -627 99 -625 99 -623C99 -622 98 -621 98 -620C98 -581 98 -538 98 -538C98 -538 233 -509 233 -509C233 -509 96 -507 96 -507C96 -507 96 -387 97 -269C97 -265 97 -260 97 -256C97 -248 97 -240 97 -232C92 -222 78 -198 78 -198C78 -198 86 -205 98 -216L99 -203C86 -192 79 -186 79 -186C79 -186 90 -189 99 -192V-191C98 -191 98 -190 97 -189C98 -106 98 -39 98 -39C98 -39 50 -171 50 -171C50 -171 90 -1 90 -1C90 -1 490 -5 490 -5ZM301 -523C301 -523 302 -524 302 -524C302 -532 301 -544 300 -552C300 -556 300 -559 300 -562C304 -562 369 -561 399 -561C420 -554 441 -543 455 -526C461 -520 465 -513 467 -505C468 -498 468 -490 469 -483C467 -476 464 -468 459 -462C448 -448 432 -438 416 -431C416 -431 415 -431 415 -431C414 -431 413 -430 413 -430L304 -426C303 -438 302 -483 301 -523ZM309 -283C313 -284 316 -284 319 -284C326 -284 332 -284 338 -285C365 -285 397 -285 423 -285C424 -283 426 -282 429 -281C437 -280 445 -278 451 -274C460 -268 467 -261 473 -252C489 -228 491 -191 474 -168C464 -160 452 -151 452 -150H451C449 -149 434 -144 421 -140C380 -139 336 -139 311 -139C310 -186 310 -251 309 -283ZM1010 -17C1010 -17 1012 -506 1012 -506C1012 -506 902 -513 902 -513C902 -513 1027 -584 1027 -584C1027 -584 1029 -814 1029 -814C1029 -814 806 -682 806 -682C806 -682 809 -3 809 -3C809 -3 1010 -17 1010 -17ZM1513 -131C1513 -131 1406 -7 1406 -7C1406 -7 1681 -4 1681 -4C1681 -4 1680 -172 1680 -172C1680 -172 1623 -240 1623 -240C1623 -240 1645 -169 1645 -169C1645 -169 1375 -168 1375 -168C1375 -168 1365 -354 1365 -354C1365 -354 1412 -285 1412 -285C1412 -285 1642 -284 1642 -284C1642 -284 1629 -477 1629 -477C1629 -477 1613 -430 1613 -430C1613 -430 1369 -432 1369 -432C1369 -432 1369 -541 1369 -541C1369 -541 1637 -544 1637 -544C1637 -544 1657 -510 1657 -510C1657 -510 1658 -705 1658 -705C1658 -705 1116 -704 1116 -704C1116 -704 1170 -685 1170 -685C1170 -685 1171 -477 1171 -477C1171 -477 1308 -643 1308 -643C1308 -643 1171 -442 1171 -442C1171 -442 1167 -73 1167 -73C1167 -73 1289 -401 1289 -401C1289 -401 1166 -5 1166 -5C1166 -5 1373 -4 1373 -4C1373 -4 1513 -131 1513 -131ZM2502 -183C2502 -183 2443 -58 2443 -58C2443 -58 2455 -700 2455 -700C2455 -700 2167 -707 2167 -707C2167 -707 2251 -676 2251 -676C2251 -676 2246 -357 2246 -357C2246 -357 2098 -547 2098 -547C2098 -547 1893 -466 1893 -466C1893 -466 2075 -577 2075 -577C2075 -577 2004 -570 1938 -563L2025 -586C2048 -588 2066 -589 2066 -589C2066 -589 1992 -700 1992 -700C1992 -700 1979 -699 1959 -699C1984 -700 2001 -700 2001 -700C2001 -700 1758 -702 1758 -702C1758 -702 1821 -656 1821 -656C1821 -656 1826 -595 1829 -553C1828 -553 1828 -553 1828 -553C1827 -412 1825 -196 1825 -196C1825 -196 1945 -171 1945 -171C1945 -171 1826 -153 1826 -153C1826 -153 1827 -47 1827 -47C1827 -47 1787 -143 1787 -143C1787 -143 1830 -10 1830 -10C1830 -10 2030 -7 2030 -7C2030 -7 2034 -376 2034 -376C2034 -376 2150 -209 2150 -209C2150 -209 2392 -333 2392 -333C2392 -333 2166 -184 2166 -184C2166 -184 2244 -64 2244 -64C2244 -64 2246 -11 2246 -11C2246 -11 2450 -3 2450 -3C2450 -3 2502 -183 2502 -183ZM1828 -553C1828 -553 1828 -557 1828 -557C1827 -556 1827 -554 1826 -553C1826 -553 1828 -553 1828 -553Z\"/></svg><span class=\"sr\">TODO BIEN</span></span>";
+function qcountText(){const n=quakes.length,t=n.toLocaleString("en-US");return tr(`${t} earthquake${n===1?"":"s"} recorded worldwide in the past 24 hours.`, `${t} ${n===1?"sismo registrado":"sismos registrados"} en el mundo en las últimas 24 horas.`);}
+document.addEventListener("kfl-lang",()=>{const loc=tr("en-US","es-US");
+  fmtTime=new Intl.DateTimeFormat(loc,{timeZone:TZ,hour:"numeric",minute:"2-digit",second:"2-digit"});fmtHM=new Intl.DateTimeFormat(loc,{timeZone:TZ,hour:"numeric",minute:"2-digit"});fmtDate=new Intl.DateTimeFormat(loc,{timeZone:TZ,weekday:"long",month:"long",day:"numeric",year:"numeric"});
+  tick(); if(quakes.length){document.getElementById("qcount").textContent=qcountText();document.getElementById("vt").textContent=tr(VIEWS[view].t,VIEWS[view].te);document.getElementById("vb").textContent=tr(VIEWS[view].b,VIEWS[view].be);gridDrawnAt=0;}
+  const fb=document.getElementById("feel"); fb.textContent = soundOn ? tr("Sound on · tap to stop","Sonido encendido · toque para parar") : tr("Tap to feel the Earth","Toque para sentir la Tierra");
+  const pb=document.getElementById("playsky"); if(pb && !playing) pb.textContent=tr("Play today's sky","Ver el cielo de hoy");});
+let psOpen = false, autoDone = false, psTimer = null;
+function practiceSafety(q){
+  if(psOpen || !q) return;
+  psOpen = true;
+  const p = q.properties, mi = milesFromNYC(q);
+  document.getElementById("psQuake").textContent =
+    tr(`Real quake: M ${p.mag.toFixed(1)}, ${p.place}${mi!=null ? `, about ${mi.toLocaleString("en-US")} miles from NYC` : ""}.`, `Sismo real: M ${p.mag.toFixed(1)}, ${p.place}${mi!=null ? `, a unas ${mi.toLocaleString("en-US")} millas de NYC` : ""}.`);
+  document.getElementById("ps").hidden = false;
+  document.body.classList.add("shaking","ps-open");
+  if(soundOn) rumble(Math.max(0, Math.min(7, p.mag)));
+  const btn = document.getElementById("psClose");
+  let left = 10;
+  btn.disabled = true; btn.classList.remove("clear"); btn.textContent = tr(`Hold on... ${left}`, `Espere... ${left}`);
+  psTimer = setInterval(()=>{
+    left--;
+    if(left <= 0){
+      clearInterval(psTimer);
+      document.body.classList.remove("shaking");
+      btn.disabled = false; btn.innerHTML = tr(ALL_CLEAR_HTML, ALL_CLEAR_ES); btn.classList.add("clear");
+      btn.focus();
+    } else btn.textContent = tr(`Hold on... ${left}`, `Espere... ${left}`);
+  }, 1000);
+}
+document.getElementById("psClose").addEventListener("click", ()=>{
+  document.getElementById("ps").hidden = true;
+  document.body.classList.remove("shaking","ps-open");
+  psOpen = false;
+});
+document.getElementById("practice").addEventListener("click", ()=> practiceSafety(current));
+
+function pickQuake(){
+  if(!quakes.length) return;
+  let q; do { q = quakes[Math.floor(Math.random()*quakes.length)]; } while(quakes.length>1 && q===current);
+  current = q;
+  floatLabel(q);
+  const p = q.properties, depth = q.geometry && q.geometry.coordinates ? q.geometry.coordinates[2] : null;
+  const el = document.getElementById("quake");
+  el.textContent = "";
+  const a = document.createElement("a");
+  a.href = p.url; a.target="_blank"; a.rel="noopener";
+  a.textContent = `M ${p.mag.toFixed(1)} · ${p.place}`;
+  el.appendChild(a);
+  el.appendChild(document.createTextNode(` · ${depth!=null ? depth.toFixed(1)+tr(" km deep · "," km de profundidad · ") : ""}${ago(p.time)}`));
+  const m = Math.max(0, Math.min(7, p.mag));
+  pulse = 0;
+  if(soundOn) rumble(m);
+}
+function rumble(m){
+  if(!audio) return;
+  const now = audio.currentTime, dur = 1.2 + m*0.45;
+  const peak = Math.min(0.85, 0.12 + m*0.11);
+  const out = audio.createGain();
+  out.gain.setValueAtTime(0.0001, now);
+  out.gain.exponentialRampToValueAtTime(peak, now+0.08);
+  out.gain.exponentialRampToValueAtTime(0.0001, now+dur);
+  out.connect(audio.destination);
+  const o = audio.createOscillator();
+  o.type = "sine";
+  o.frequency.setValueAtTime(44 - m*2, now);
+  o.frequency.exponentialRampToValueAtTime(28, now+dur);
+  o.connect(out); o.start(now); o.stop(now+dur+0.05);
+  // low filtered noise for the ground texture
+  const len = Math.floor(audio.sampleRate*dur), buf = audio.createBuffer(1, len, audio.sampleRate), ch = buf.getChannelData(0);
+  for(let i=0;i<len;i++) ch[i] = Math.random()*2-1;
+  const src = audio.createBufferSource(); src.buffer = buf;
+  const lp = audio.createBiquadFilter(); lp.type="lowpass"; lp.frequency.value = 90;
+  const ng = audio.createGain(); ng.gain.value = 0.6;
+  src.connect(lp); lp.connect(ng); ng.connect(out); src.start(now);
+}
+document.getElementById("feel").addEventListener("click", e=>{
+  soundOn = !soundOn;
+  e.currentTarget.setAttribute("aria-pressed", soundOn ? "true":"false");
+  e.currentTarget.textContent = soundOn ? tr("Sound on · tap to stop","Sonido encendido · toque para parar") : tr("Tap to feel the Earth","Toque para sentir la Tierra");
+  if(soundOn){
+    try{
+      if(!audio) audio = new (window.AudioContext||window.webkitAudioContext)();
+      if(audio.state === "suspended") audio.resume();
+      if(current) rumble(Math.max(0, Math.min(7, current.properties.mag)));
+    }catch(err){ soundOn = false; }
+  }
+});
+
+(async function loadQuakes(){
+  try{
+    const r = await fetch("https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_day.geojson");
+    if(!r.ok) return;
+    const j = await r.json();
+    quakes = (j.features||[]).filter(f=>f && f.properties && typeof f.properties.mag==="number" && f.properties.type==="earthquake");
+    if(!quakes.length) return;
+    document.getElementById("tremor").hidden = false;
+    document.getElementById("jumpFeel").style.visibility = "visible";
+    document.getElementById("qcount").textContent = qcountText();
+    showView(0);
+    buildEarth();
+    pickQuake();
+    setInterval(pickQuake, 7000);
+    const big = quakes.filter(f=>f.properties.mag>=5).sort((a,b)=>b.properties.mag-a.properties.mag)[0];
+    const autoRun = ()=>{ if(autoDone) return; if(psOpen){ setTimeout(autoRun, 5000); return; } autoDone = true; practiceSafety(big); };
+    if(big) setTimeout(autoRun, 12000);
+    requestAnimationFrame(draw);
+  }catch(e){}
+})();
+</script>
+
+
+
+
+
+
+
+<script>
+/* ---------- LIGHT: window beam + 33 card windows, driven by the real NYC sun ---------- */
+const PAL={"How AI Works": {"kind": "juicy", "cards": [{"a": "#872ec3", "b": "#a62778", "solid": false, "ink": "#ffffff", "score": 6.54}, {"a": "#7f2bb8", "b": "#9e2571", "solid": false, "ink": "#ffffff", "score": 7.1}, {"a": "#7828ac", "b": "#7828ac", "solid": true, "ink": "#ffffff", "score": 7.78}, {"a": "#6f25a0", "b": "#892062", "solid": false, "ink": "#ffffff", "score": 8.58}, {"a": "#662292", "b": "#7d1d5a", "solid": false, "ink": "#ffffff", "score": 9.51}, {"a": "#5a1e82", "b": "#5a1e82", "solid": true, "ink": "#ffffff", "score": 10.81}, {"a": "#4e1a70", "b": "#601745", "solid": false, "ink": "#ffffff", "score": 12.31}]}, "Environmental Footprint": {"kind": "pastel", "cards": [{"a": "#a4ffd1", "b": "#bcff8b", "solid": false, "ink": "#2b0f4f", "score": 13.87}, {"a": "#36ff9b", "b": "#36ff9b", "solid": true, "ink": "#2b0f4f", "score": 12.41}, {"a": "#00f279", "b": "#64f000", "solid": false, "ink": "#2b0f4f", "score": 10.89}, {"a": "#00e271", "b": "#5ee000", "solid": false, "ink": "#2b0f4f", "score": 9.44}]}, "AI Helping the Planet": {"kind": "pastel", "cards": [{"a": "#8cfffb", "b": "#daefff", "solid": false, "ink": "#2b0f4f", "score": 13.84}, {"a": "#00faf1", "b": "#00faf1", "solid": true, "ink": "#2b0f4f", "score": 12.42}, {"a": "#00ece4", "b": "#a5d9ff", "solid": false, "ink": "#2b0f4f", "score": 10.88}, {"a": "#00dcd5", "b": "#86cdff", "solid": false, "ink": "#2b0f4f", "score": 9.49}]}, "AI in Medicine": {"kind": "juicy", "cards": [{"a": "#bc0566", "b": "#bc0566", "solid": true, "ink": "#ffffff", "score": 6.27}, {"a": "#b70564", "b": "#b70564", "solid": true, "ink": "#ffffff", "score": 6.52}, {"a": "#b8053c", "b": "#b8053c", "solid": true, "ink": "#ffffff", "score": 6.72}, {"a": "#b60513", "b": "#b60513", "solid": true, "ink": "#ffffff", "score": 6.95}, {"a": "#ac1c04", "b": "#ac1c04", "solid": true, "ink": "#ffffff", "score": 7.19}]}, "Access and Disability": {"kind": "pastel", "cards": [{"a": "#ffee82", "b": "#ffeac4", "solid": false, "ink": "#2b0f4f", "score": 13.87}, {"a": "#e3c500", "b": "#ffb93f", "solid": false, "ink": "#2b0f4f", "score": 9.54}]}, "Creative Play": {"kind": "pastel", "cards": [{"a": "#ffe4f7", "b": "#f4e8ff", "solid": false, "ink": "#2b0f4f", "score": 13.78}, {"a": "#ffd4f2", "b": "#ffd4f2", "solid": true, "ink": "#2b0f4f", "score": 12.42}, {"a": "#ffc0ec", "b": "#e6c8ff", "solid": false, "ink": "#2b0f4f", "score": 10.91}, {"a": "#ffaae6", "b": "#ddb6ff", "solid": false, "ink": "#2b0f4f", "score": 9.46}]}, "Harms, Rights and Your Voice": {"kind": "juicy", "cards": [{"a": "#4a6608", "b": "#4a6608", "solid": true, "ink": "#ffffff", "score": 6.57}, {"a": "#08670a", "b": "#08670a", "solid": true, "ink": "#ffffff", "score": 7.11}, {"a": "#085f47", "b": "#085f47", "solid": true, "ink": "#ffffff", "score": 7.67}, {"a": "#0b4f87", "b": "#0b4f87", "solid": true, "ink": "#ffffff", "score": 8.46}, {"a": "#3312db", "b": "#3312db", "solid": true, "ink": "#ffffff", "score": 9.33}]}, "Education and Policy": {"kind": "pastel", "cards": [{"a": "#ffe7da", "b": "#ffe6e5", "solid": false, "ink": "#2b0f4f", "score": 13.78}, {"a": "#ffb589", "b": "#ffb1ac", "solid": false, "ink": "#2b0f4f", "score": 9.45}, {"a": "#ffe0cc", "b": "#ffdcda", "solid": false, "ink": "#2b0f4f", "score": 12.85}]}};
+const BEAM=[[-18,[175,190,255],.48],[-6,[190,90,200],.55],[0,[255,120,60],.75],[8,[255,160,30],.74],[25,[255,175,25],.55],[60,[150,200,240],.45]];
+const lin=v=>{v/=255;return v<=.03928?v/12.92:Math.pow((v+.055)/1.055,2.4)};
+const lumY=c=>.2126*lin(c[0])+.7152*lin(c[1])+.0722*lin(c[2]);
+const hexRGB=h=>[1,3,5].map(i=>parseInt(h.slice(i,i+2),16));
+const toHsl=c=>{let [r,g,b]=c.map(v=>v/255);const mx=Math.max(r,g,b),mn=Math.min(r,g,b);let h=0,s=0,l=(mx+mn)/2;
+  if(mx!==mn){const d=mx-mn;s=l>.5?d/(2-mx-mn):d/(mx+mn);h=mx===r?(g-b)/d+(g<b?6:0):mx===g?(b-r)/d+2:(r-g)/d+4;h*=60;}return [h,s,l];};
+const fromHsl=(h,s,l)=>{h=((h%360)+360)%360;const k=n=>(n+h/30)%12,a2=s*Math.min(l,1-l),f=n=>l-a2*Math.max(-1,Math.min(k(n)-3,9-k(n),1));return [f(0),f(8),f(4)].map(v=>Math.round(v*255));};
+const CARDS=[];
+document.querySelectorAll("#cols section").forEach(sec=>{const p=PAL[sec.dataset.key];if(!p)return;
+  sec.querySelectorAll("a.pick").forEach((a,i)=>{const c=p.cards[i];a.classList.add(p.kind);a.style.background=c.solid?c.a:`linear-gradient(135deg,${c.a},${c.b})`;CARDS.push({a,kind:p.kind,base:hexRGB(c.a)});});});
+function beamFor(alt){let a=BEAM[0],b=BEAM[BEAM.length-1],t=0;
+  if(alt<=BEAM[0][0]){a=b=BEAM[0];}else{for(let i=1;i<BEAM.length;i++){if(alt<=BEAM[i][0]){a=BEAM[i-1];b=BEAM[i];t=(alt-a[0])/(b[0]-a[0]);break;}}}
+  return {c:a[1].map((v,k)=>Math.round(v+(b[1][k]-v)*t)),al:a[2]+(b[2]-a[2])*t,ang:alt<=0?14:Math.min(68,14+alt*1.15)};}
+function cardBeam(base,kind,sun){ // same hue family as the card, leaned toward the sun, saturated; never black or opposites
+  const [bh,bs]=toHsl(base),[sh]=toHsl(sun);let dh=((sh-bh+540)%360)-180;dh=Math.max(-28,Math.min(28,dh*0.35));
+  const hue=bh+dh,sat=Math.max(bs,.9);const solve=tY=>{let lo=0,hi=1;for(let k=0;k<30;k++){const m=(lo+hi)/2;if(lumY(fromHsl(hue,sat,m))<tY)lo=m;else hi=m;}return fromHsl(hue,sat,(lo+hi)/2);};
+  return kind==="juicy"?solve(Math.min(0.108,lumY(base)*1.45+0.012)):solve(Math.min(0.93,lumY(base)+0.12));}
+let lastAlt=null;
+function setLight(alt){const b=beamFor(alt),r=document.documentElement.style;
+  r.setProperty("--bc",b.c.join(","));r.setProperty("--ba",b.al.toFixed(2));r.setProperty("--ang",b.ang.toFixed(2));
+  if(lastAlt===null||Math.abs(alt-lastAlt)>0.2){CARDS.forEach(o=>{const st=cardBeam(o.base,o.kind,b.c);o.a.style.setProperty("--st",`rgb(${st})`);o.a.dataset.stY=lumY(st).toFixed(3);});lastAlt=alt;}}
+function sizeCards(){CARDS.forEach(o=>{const r=o.a.getBoundingClientRect();o.a.style.setProperty("--cm",Math.max(r.width,r.height)+"px");});}
+let playing=false;
+const liveLight=()=>{ if(!playing) setLight(sunAltitude(Date.now(),NYC.lat,NYC.lon)); };
+liveLight(); setInterval(liveLight,30000); sizeCards(); addEventListener("resize",()=>requestAnimationFrame(sizeCards));
+/* Play today's sky: today's real NYC sun, midnight to midnight, in 20 seconds */
+(function(){const host=document.getElementById("sunline").parentElement;const btn=document.createElement("button");btn.className="playsky";btn.id="playsky";btn.textContent=tr("Play today's sky","Ver el cielo de hoy");host.appendChild(btn);
+  const state=document.getElementById("sunstate");
+  btn.addEventListener("click",()=>{if(playing)return;playing=true;btn.disabled=true;btn.textContent=tr("Playing today's sky...","Mostrando el cielo de hoy...");document.body.classList.add("sky-playing");
+    const parts=Object.fromEntries(new Intl.DateTimeFormat("en-US",{timeZone:"America/New_York",year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit",hourCycle:"h23"}).formatToParts(new Date()).map(p=>[p.type,p.value]));
+    const nowMs=Date.now();const startMs=nowMs-((+parts.hour)*60+(+parts.minute))*60000;const DUR=20000,t0=performance.now();
+    const fmt=new Intl.DateTimeFormat(tr("en-US","es-US"),{timeZone:"America/New_York",hour:"numeric",minute:"2-digit"});
+    function step(t){const k=Math.min(1,(t-t0)/DUR);const sim=startMs+k*86400000;setLight(sunAltitude(sim,NYC.lat,NYC.lon));state.textContent=tr("Today's sky at ","El cielo de hoy a las ")+fmt.format(new Date(sim));
+      if(k<1)requestAnimationFrame(step);else{playing=false;btn.disabled=false;btn.textContent=tr("Play today's sky","Ver el cielo de hoy");document.body.classList.remove("sky-playing");lastAlt=null;liveLight();}}
+    requestAnimationFrame(step);});})();
+</script>
+
+<script>
+/* Snap jumps: no smooth scrolling */
+document.querySelectorAll('a.jump').forEach(a=>a.addEventListener('click',e=>{const t=document.querySelector(a.getAttribute('href'));if(!t)return;e.preventDefault();if(t.hidden)return;t.scrollIntoView({behavior:'instant',block:'start'});}));
+/* Align the top of the KAIJU letters with the top of the INFOPILLZ capitals */
+function alignLogo(){const h=document.querySelector('.hdr h1'),img=document.getElementById('hlogo');if(!h||!img||!img.complete||!img.naturalHeight)return;
+ const probe=document.createElement('span');probe.style.cssText='display:inline-block;width:0;height:0;vertical-align:baseline';h.insertBefore(probe,h.firstChild);
+ const base=probe.getBoundingClientRect().top;probe.remove();const fs=parseFloat(getComputedStyle(h).fontSize);const capTop=base-0.715*fs;
+ const r=img.closest('.hdr-r').getBoundingClientRect();const lettersTop=0.1618*img.getBoundingClientRect().height;
+ const host=img.closest('.hdr-r');host.style.marginTop=Math.max(0,capTop-r.top+parseFloat(host.style.marginTop||0)-lettersTop)+'px';}
+const realign=()=>{const r=document.querySelector('.hdr-r');if(!r)return;r.style.marginTop='0px';alignLogo();};
+const hl=document.getElementById('hlogo'); if(hl){hl.addEventListener('load',realign); if(hl.complete) realign();} addEventListener('resize',realign);
+if(window.ResizeObserver){let rq=0;new ResizeObserver(()=>{if(!rq)rq=requestAnimationFrame(()=>{rq=0;realign();});}).observe(document.querySelector('.hdr-txt'));}
+if(document.fonts&&document.fonts.ready)document.fonts.ready.then(realign);
+</script>
+<p class="copyr" data-i18n="copyr">© 2026 Kaiju Fruit Labs. All rights reserved.</p>
+<script>
+/* ---- Language switch: English / Espanol. English is the page text; Spanish lives here. ---- */
+const I18N_ES = {"join_btn": "Únase a la lista", "d_play": "JUGAR", "d_play_s": "las apps", "d_partner": "COLABORAR", "d_partner_s": "trabaje con nosotros", "d_learn": "APRENDER", "d_learn_s": "IA responsable", "feel_jump": "Siente el planeta", "asub": "Herramientas de arte generativo y juego exploratorio<br>para viajeros del arte con curiosidad sensorial", "beta_h": "PRUEBAS BETA", "beta_p": "Todas estas apps siguen en beta. Úselas, póngalas a prueba y cuéntenos qué encuentra.", "noai": "<b>Sin IA por dentro.</b> Estas apps son códigos hechos a mano que usted usa directamente. Se disfrutan mejor en un iPad o una tableta.", "play": "Jugar", "who_h": "Quién está detrás", "who_p": "Artista, educador y padre de NYC/Bronx. Treinta años con raíces en la cultura del grafiti de Nueva York, la educación Hip Hop y el arte comunitario.", "pr1": "Creó un programa de educación Hip Hop en Nueva York en 1996", "pr2": "Inició un programa de producción musical digital con Carnegie Hall", "pr3": "Currículo de arte con IA generativa en la Charter High School for Law and Social Justice (2023 a 2025): 15 estudiantes publicados en la revista internacional de arte con IA CreAtIva", "pr4": "Talleres en la Biblioteca Pública de Nueva York", "pr5": "Cuatro años como artista residente en el Andrew Freedman Home, Bronx", "quote": "\"Para cada estudiante que lucha por sentirse cómodo en su propia piel y desea con todo el corazón sentir normalidad, pertenencia y amor, esto existe.\"", "work_h": "Trabaje con nosotros", "w1": "Escuelas y programas después de clases", "w2": "Museos, bibliotecas y centros de ciencia", "w3": "Centros comunitarios y laboratorios de arte", "w4": "Familias y grupos de educación en casa", "w5": "Artistas y artistas en vivo", "work_mail": "Talleres, instalaciones y colaboraciones: <a href=\"mailto:kaijufruitcode@gmail.com\">kaijufruitcode@gmail.com</a>", "vis_h": "La visión: Activ8 CellF", "vis_p": "Activ8 CellF es el ecosistema de aprendizaje creativo al que crecen estas herramientas: descubrimiento guiado por los intereses, donde cada sesión produce algo real que los estudiantes poseen, comparten y remezclan. La plataforma completa está en desarrollo.", "learn_tag": "IA responsable que necesita conocer", "fam_h": "Consejos de IA para familias", "fam_sub": "Del taller IA 101. Cada consejo está verificado con su fuente.", "g_home": "EN CASA", "g_kids": "NIÑOS DE 5 A 12", "g_teens": "ADOLESCENTES Y ESCUELA", "src": "Fuente", "t1a": "IA ya está en su teléfono.", "t1b": "Google muchas veces pone una respuesta escrita por IA arriba de los resultados. Google mismo dice que esas respuestas pueden tener errores, así que verifique lo más importante en más de un lugar.", "t2a": "Elijan una palabra secreta en familia.", "t2b": "Los estafadores pueden copiar una voz con IA. El FBI recomienda crear una palabra secreta con su familia. Si una llamada suena como un ser querido en apuros, cuelgue y llámele usted directamente.", "t3a": "Lo privado se queda privado.", "t3b": "No escriba su dirección, el nombre de la escuela ni datos de su familia en un chatbot, y piénselo dos veces antes de subir fotos de sus hijos.", "t4a": "IA es una herramienta, no un amigo.", "t4b": "Google les pide a los padres que ayuden a los niños a entender que IA no es una persona a quien contarle secretos.", "t5a": "La mayoría de las apps de IA no son para menores de 13 años.", "t5b": "La empresa de ChatGPT dice que no está diseñada para niños de 12 años o menos. Gemini solo se puede activar para un menor de 13 años si lo hace un padre o una madre, con Google Family Link.", "t6a": "Úsenla juntos y pregunten:", "t6b": "“¿Cómo sabemos que eso es verdad?”", "t7a": "Las apps de “compañía” con IA", "t7b": "(chatbots que actúan como amigo o pareja) no son para menores de 18 años, según Common Sense Media. En Nueva York, desde noviembre de 2025, estas apps deben recordarle al usuario que habla con una IA, no con una persona, y dirigirlo a ayuda en caso de crisis.", "t8a": "ChatGPT tiene controles para padres", "t8b": "de jóvenes de 13 a 17 años: vincule las cuentas, ponga horas sin uso y apague la creación de imágenes.", "t9a": "Pregunte en la escuela cuáles son sus reglas sobre IA.", "t9b": "Usar IA para aprender no es lo mismo que usarla para copiar.", "crisis": "Si alguien está en crisis: llame al <b>988</b> y marque 2, o envíe <b>AYUDA</b> por texto al <b>988</b>.", "copyr": "© 2026 Kaiju Fruit Labs. Todos los derechos reservados.", "m_home": "Inicio", "live_now": "NYC ahora mismo", "live_sun": "El sol real", "live_out": "Afuera en NYC", "live_om": "En vivo de Open-Meteo", "live_spin": "El giro de la Tierra", "live_spin_s": "NYC ha recorrido esta distancia alrededor del eje de la Tierra desde que abrió esta página", "lg_k": "Edades de 5 a 12", "lg_t": "Adolescentes", "lg_a": "Adultos", "lg_p": "Padres y educadores", "ps_btn": "Simulacro de seguridad", "feel_btn": "Toque para sentir la Tierra", "hint": "Toque la imagen para cambiar la vista", "usgs_src": "Datos de sismos: <a href=\"https://earthquake.usgs.gov/earthquakes/feed/v1.0/\" target=\"_blank\" rel=\"noopener\">USGS Earthquake Hazards Program</a>", "tremor_note": "Sismos reales del Servicio Geológico de EE. UU., escogidos al azar de las últimas 24 horas. Las vistas se dibujan con la hora, el lugar y la magnitud reales de cada sismo. Son dibujos, no ondas grabadas. El sonido es un retumbo grave, mejor con audífonos.", "disc_h": "Cómo se hizo esta lista", "disc1": "Klee's Picks fue seleccionada por Klee (Claude, una IA hecha por Anthropic) con SpazeCraft.", "disc2": "Nota de transparencia: Klee fue entrenada en parte con datos públicos de internet, así que la IA que seleccionó esta lista no cumple del todo con los estándares de datos de abajo. Trabajamos con las herramientas que existen hoy.", "disc3": "Las apps de ARTOOLZ no tienen IA en nada que usted toque o juegue. Activ8 CellF, el ecosistema en evolución donde vive esta lista, usa la IA como herramienta y compañera creativa, un espacio de prueba donde las ideas pueden crecer sin grandes presupuestos.", "disc4": "Defendemos los derechos de los artistas, los datos obtenidos de forma ética, el código abierto, la cultura del remix, Creative Commons y el dominio público.", "disc5": "Esta página está viva. Los rayos de luz siguen al sol real sobre la ciudad de Nueva York mientras sale, cruza el cielo y se pone, cambiando de color durante el día. Toque Ver el cielo de hoy para ver un día entero en 20 segundos.", "disc6": "INFOPILLZ es un documento vivo que cambia a medida que aprendemos. Cada enlace fue verificado el 16 de octubre de 2026.", "updates": "Lista beta, colaboraciones y novedades de talleres/eventos: <a href=\"mailto:kaijufruitcode@gmail.com\">kaijufruitcode@gmail.com</a>", "join_h": "Únase a la lista", "j_name": "Nombre", "j_email": "Correo", "j_ph_name": "Nombre", "j_btn": "Inscríbame", "ps_sub1": "Deténgase. Esto es una práctica, no una alerta real.", "ps_sub2": "Si alguna vez siente que la tierra tiembla donde está:", "ps_li1": "<b>AGÁCHESE</b> donde esté, sobre sus manos y rodillas.", "ps_li2": "<b>CÚBRASE</b> la cabeza y el cuello con los brazos. Métase debajo de un escritorio o una mesa firme si hay uno cerca.", "ps_li3": "<b>SUJÉTESE</b> hasta que pare el temblor.", "ps_out": "¿Afuera? Aléjese de edificios, cables eléctricos y todo lo que esté por encima, pero solo si puede hacerlo con seguridad. Si no, quédese donde está.", "ps_src": "Pasos de NIST y del Great ShakeOut.", "creed": "SENTIR · PAZ · PROTEGER · CRECER · HONRAR · SALUD", "legend_aria": "Guía de edades", "disc7": "No tomamos la postura de ninguna organización en particular. Compartimos estos enlaces como recursos útiles para la comunidad. Usted decide qué es lo mejor para usted y su familia."};
+const I18N_EN = {};
+document.querySelectorAll("[data-i18n],[data-i18n-html],[data-i18n-ph]").forEach(el=>{
+  if(el.dataset.i18n && !(el.dataset.i18n in I18N_EN)) I18N_EN[el.dataset.i18n]=el.textContent;
+  if(el.dataset.i18nHtml && !(el.dataset.i18nHtml in I18N_EN)) I18N_EN[el.dataset.i18nHtml]=el.innerHTML;
+  if(el.dataset.i18nPh && !(el.dataset.i18nPh in I18N_EN)) I18N_EN[el.dataset.i18nPh]=el.getAttribute("placeholder");});
+function setLang(l){
+  window.KFL_LANG = l; document.documentElement.lang = l;
+  const D = l==="es" ? I18N_ES : I18N_EN, pick=k=>D[k]!=null?D[k]:I18N_EN[k];
+  document.querySelectorAll("[data-i18n]").forEach(el=>{el.textContent=pick(el.dataset.i18n);});
+  document.querySelectorAll("[data-i18n-html]").forEach(el=>{el.innerHTML=pick(el.dataset.i18nHtml);});
+  document.querySelectorAll("[data-i18n-ph]").forEach(el=>{el.setAttribute("placeholder",pick(el.dataset.i18nPh));});
+  document.querySelectorAll("[data-en]").forEach(el=>{el.textContent = l==="es" ? (el.dataset.es||el.dataset.en) : el.dataset.en;});
+  const lg=document.querySelector(".legend"); if(lg) lg.setAttribute("aria-label", l==="es"?"Guía de edades":"Age guide");
+  document.querySelectorAll(".lang button").forEach(b=>b.setAttribute("aria-pressed", String(b.dataset.lang===l)));
+  try{ localStorage.setItem("kfl_lang", l); }catch(e){}
+  document.dispatchEvent(new CustomEvent("kfl-lang",{detail:l}));
+}
+document.querySelectorAll(".lang button").forEach(b=>b.addEventListener("click",()=>setLang(b.dataset.lang)));
+(function(){ let l=null; try{ l=localStorage.getItem("kfl_lang"); }catch(e){}
+  if(l!=="en" && l!=="es") l = (navigator.language||"").toLowerCase().startsWith("es") ? "es" : "en";
+  window.KFL_LANG = "en"; if(l==="es") setLang("es"); })();
+</script>
+</body>
+</html>
