@@ -3,4 +3,4 @@ These apps are proprietary. Please do not fork, copy, or reuse this code. See LI
 Instead, please feel free to join the public beta!
 play testing > https://spazecraft.github.io/kaijufruitlabs/artoolz-v1-3.html
 # KAIJU FRUIT LABS
-Landing Page for Kaiju Fruit Labs / Activ8 CellF / Gene Morphz Platform / Eco-system
+Landing Page for Kaiju Fruit Labs / Activ8 CellF / ARTOOLZ & INFOPILLZ Platform / Eco-system
