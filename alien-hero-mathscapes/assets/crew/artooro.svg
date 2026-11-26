@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -5 120 122">
+
+<path d="M44 34 C42 22 38 16 34 12" fill="none" stroke="#000" stroke-width="3" stroke-linecap="round"/>
+<path d="M60 32 C60 20 60 12 60 6" fill="none" stroke="#000" stroke-width="3" stroke-linecap="round"/>
+<path d="M76 34 C78 22 82 16 86 12" fill="none" stroke="#000" stroke-width="3" stroke-linecap="round"/>
+<circle cx="34" cy="12" r="8" fill="#FFD3EC" stroke="#000" stroke-width="3"/><circle cx="35" cy="12" r="3.6" fill="#21C6D9"/><circle cx="35" cy="12" r="1.8" fill="#140F2E"/>
+<circle cx="60" cy="8" r="9" fill="#FFD3EC" stroke="#000" stroke-width="3"/><circle cx="61" cy="8" r="4.2" fill="#21C6D9"/><circle cx="61" cy="8" r="2.1" fill="#140F2E"/>
+<circle cx="86" cy="12" r="8" fill="#FFD3EC" stroke="#000" stroke-width="3"/><circle cx="87" cy="12" r="3.6" fill="#21C6D9"/><circle cx="87" cy="12" r="1.8" fill="#140F2E"/>
+<path d="M26 66 L10 58 L14 74Z" fill="#7EF0C9" stroke="#000" stroke-width="2.8" stroke-linejoin="round"/>
+<path d="M94 66 L110 58 L106 74Z" fill="#7EF0C9" stroke="#000" stroke-width="2.8" stroke-linejoin="round"/>
+<path d="M28 42 L33 30 L40 40 L48 28 L55 39 L60 26 L65 39 L72 28 L80 40 L87 30 L92 42Z" fill="#FFE680" stroke="#000" stroke-width="3" stroke-linejoin="round"/>
+<path d="M24 76 C20 50 36 38 60 38 C84 38 100 50 96 78 C94 98 80 110 60 110 C40 110 26 98 24 76Z" fill="#B79CF2" stroke="#000" stroke-width="3.5"/>
+<ellipse cx="60" cy="95" rx="18" ry="10.5" fill="#FFF4DE" stroke="#000" stroke-width="3"/>
+<path d="M48 94 H72 M50 100 H70" stroke="#000" stroke-width="2" opacity=".35"/>
+<circle cx="48" cy="60" r="9" fill="#fff" stroke="#000" stroke-width="3"/><circle cx="49.5" cy="61" r="4.2" fill="#140F2E"/><circle cx="51" cy="58.5" r="1.5" fill="#fff"/>
+<circle cx="72" cy="60" r="9" fill="#fff" stroke="#000" stroke-width="3"/><circle cx="73.5" cy="61" r="4.2" fill="#140F2E"/><circle cx="75" cy="58.5" r="1.5" fill="#fff"/>
+<path d="M44 74 Q60 82 76 74" fill="none" stroke="#000" stroke-width="3" stroke-linecap="round"/>
+<path d="M50 75.5 L52 80 L54 76.5 M66 76.5 L68 80 L70 75.5" fill="#fff" stroke="#000" stroke-width="1.5" stroke-linejoin="round"/>
+<ellipse cx="38" cy="70" rx="5" ry="3" fill="#FF8FCF" opacity=".8"/><ellipse cx="82" cy="70" rx="5" ry="3" fill="#FF8FCF" opacity=".8"/>
+</svg>
